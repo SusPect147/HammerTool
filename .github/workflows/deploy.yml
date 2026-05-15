@@ -1,0 +1,57 @@
+# Industrial Deployment Workflow for HammerTool
+name: Deploy Static Content to Pages
+
+on:
+  # Trigger the deployment whenever changes are pushed to the main branch
+  push:
+    branches: ["main"]
+
+  # Allow manual triggering of the workflow from the GitHub Actions tab
+  workflow_dispatch:
+
+# Set the execution permissions required by the official deployment actions
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Prevent concurrent deployments, but do not cancel active in-progress runs
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout codebase
+        uses: actions/checkout@v4
+
+      - name: Configure Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Compile TypeScript Code Assets
+        run: npm run build
+
+      - name: Initialize Pages Configuration
+        uses: actions/configure-pages@v4
+
+      - name: Package & Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Deploy the entire root workspace (including generated /js folder)
+          path: '.'
+
+      - name: Execute Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

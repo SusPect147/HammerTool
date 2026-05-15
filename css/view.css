@@ -1,0 +1,395 @@
+/* в”Ђв”Ђ MAP VIEW PAGE в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */
+
+.map-view-container {
+    max-width: 900px;
+    margin: 3rem auto;
+    padding: 0 1.5rem 4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+}
+
+.map-details {
+    text-align: center;
+    width: 100%;
+}
+
+.map-details h1 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+.map-details p {
+    font-size: 0.95rem;
+    color: var(--text-color-secondary);
+    margin-bottom: 0.4rem;
+}
+
+#mapDetails {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 0.75rem;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+}
+
+#mapDetails span {
+    color: var(--text-color-secondary);
+    font-weight: 500;
+}
+
+.map-display {
+    width: 100%;
+    max-width: 900px;
+    height: 500px; /* Фиксированная высота для зоны просмотра */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at center, #161625 0%, #08080c 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 1rem;
+    overflow: hidden; /* Прячем скроллы, так как мы делаем бесконечный холст через Transform */
+    position: relative;
+    cursor: grab; /* Меняем курсор для перетаскивания */
+    user-select: none;
+}
+
+.map-display:active {
+    cursor: grabbing;
+}
+
+#mapImage {
+    display: block;
+    width: auto;
+    height: 100%;
+    max-width: none;
+    object-fit: contain;
+    pointer-events: none; /* Картинка не мешает ловить перетаскивание контейнером */
+    filter: drop-shadow(0 20px 50px rgba(0,0,0,0.6));
+    transition: transform 0.1s ease-out; /* Плавный зум */
+}
+
+.map-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+
+.action-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 1.4rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 600;
+    font-family: 'Inter', Arial, sans-serif;
+    cursor: pointer;
+    border: 1px solid var(--border-bright);
+    background-color: transparent;
+    color: var(--text-color);
+    transition: border-color 0.18s, background-color 0.18s, transform 0.18s;
+}
+
+.action-button:first-child {
+    background-color: #ffffff;
+    color: #000000;
+    border-color: #ffffff;
+}
+
+.action-button:first-child:hover {
+    background-color: #e8e8e8;
+}
+
+.action-button:hover {
+    border-color: #ffffff;
+    background-color: rgba(255,255,255,0.05);
+    transform: translateY(-1px);
+}
+
+/* в”Ђв”Ђ RESPONSIVE в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */
+@media (max-width: 768px) {
+    .map-view-container { margin: 2rem auto; }
+    .map-details h1 { font-size: 1.75rem; }
+    #mapDetails { flex-direction: column; gap: 0.3rem; }
+    .map-actions { flex-direction: column; width: 100%; align-items: stretch; }
+    .action-button { width: 100%; text-align: center; }
+    #mapImage { width: 80%; }
+}
+
+/* ==========================================
+   COMMENTS SECTION
+   ========================================== */
+.comments-section {
+    width: 100%;
+    max-width: 800px;
+    margin-top: 3rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 2rem;
+}
+
+.comments-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    color: #fff;
+    text-align: left;
+}
+
+.comment-form {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2.5rem;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+}
+
+.comment-form:focus-within {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+}
+
+.comment-textarea {
+    width: 100%;
+    min-height: 90px;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 1rem;
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    resize: vertical;
+    outline: none;
+    box-sizing: border-box;
+    margin-bottom: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.comment-textarea:focus {
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Sort Controls Styling */
+.comments-header-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.comments-title {
+    margin-bottom: 0 !important; /* Let wrapper handle spacing */
+}
+
+.sort-controls {
+    display: flex;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.sort-controls .sort-tab {
+    background: transparent !important;
+    border: none !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    padding: 6px 14px !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    border-radius: 6px !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-shadow: none !important;
+    text-transform: none !important;
+    min-width: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+}
+
+.sort-controls .sort-tab:hover:not(.active) {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.sort-controls .sort-tab.active {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #fff !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+
+
+.comment-form-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.comment-btn {
+    background: #fff;
+    color: #000;
+    border: none;
+    padding: 0.65rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 2px 8px rgba(255,255,255,0.05);
+}
+
+.comment-btn:hover:not(:disabled) {
+    background: #f0f0f5;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(255,255,255,0.1);
+}
+
+.comment-btn:active:not(:disabled) {
+    transform: translateY(0px);
+}
+
+.comment-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+
+.comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.comment-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 1rem;
+    position: relative;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.4rem;
+}
+
+.comment-user {
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.comment-user.admin {
+    color: #ffcc00;
+}
+
+.comment-user.admin::after {
+    content: '★';
+    font-size: 0.75rem;
+    margin-left: 4px;
+}
+
+.comment-date {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.comment-content {
+    font-size: 0.88rem;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.75);
+    white-space: pre-wrap;
+}
+
+.delete-comment-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 107, 107, 0.4);
+    cursor: pointer;
+    padding: 2px 6px;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    display: none; /* Hidden by default, toggled via JS */
+}
+
+.delete-comment-btn:hover {
+    color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.1);
+}
+
+
+/* Comment Voting Styles */
+.comment-footer {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 0.65rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.comment-voting-group {
+    display: flex;
+    gap: 0.4rem;
+    background: rgba(0, 0, 0, 0.1);
+    padding: 2px 4px;
+    border-radius: 6px;
+}
+
+.comment-vote-btn {
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 3px 6px;
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.comment-vote-btn:hover:not(:disabled) {
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.comment-vote-btn.like.active {
+    color: #4ade80;
+    background: rgba(74, 222, 128, 0.1);
+}
+
+.comment-vote-btn.dislike.active {
+    color: #f87171;
+    background: rgba(248, 113, 113, 0.1);
+}
+
+.comment-vote-btn svg {
+    pointer-events: none;
+}
+
+

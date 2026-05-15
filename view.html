@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>(function(){const t=localStorage.getItem('ht_app_theme');if(t&&t!=='space')document.documentElement.setAttribute('data-theme',t);})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HammerTool - Map View</title>
+    <meta name="description" content="View this Brawl Stars map on HammerTool.">
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="HammerTool - Map View">
+    <meta property="og:description" content="Check out this custom Brawl Stars map created with HammerTool.">
+    <meta property="og:image" content="https://suspect147.github.io/HammerTool/Resources/Additional/Icons/HammerTool.webp">
+    
+    <link rel="icon" href="./Resources/Additional/Icons/HammerTool.webp" type="image/x-icon">
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/view.css">
+</head>
+<body>
+    <div class="top-bar">
+        <a href="./index.html" class="logo">
+            <img src="./Resources/Additional/Icons/HammerTool.webp" alt="" class="logo-icon">
+            HammerTool
+        </a>
+        <div class="top-bar-right" id="navLinks">
+            <a href="./editor.html">Editor</a>
+            <a href="./explore.html">Explore</a>
+            <a href="./dashboard.html">Dashboard</a>
+            <a href="./custom-tiles.html">Custom Tiles</a>
+            <a href="./forum.html">Forum</a>
+            <!-- Auth Injected -->
+        </div>
+    </div>
+
+    <main class="map-view-container">
+        <div class="map-details">
+            <h1 style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 0.5rem;">
+                <span id="mapTitle">Map Title</span>
+            </h1>
+            <p id="mapInfo">Created by: <span id="mapAuthor">Author</span></p>
+            <div id="mapDetails">
+                <p>Gamemode: <span id="mapGamemode">Gem Grab</span></p>
+                <p>Environment: <span id="mapEnvironment">Desert</span></p>
+            </div>
+        </div>
+        <div class="map-display">
+            <img id="mapImage" />
+        </div>
+        <div class="map-actions">
+            <button id="pageLikeBtn" class="action-button" style="background-color: rgba(255, 62, 92, 0.1); border-color: rgba(255, 62, 92, 0.2); color: #ff3e5c; min-width: 80px;">
+                <svg style="width:16px; height:16px; margin-right:6px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"></path></svg>
+                <span id="pageLikeCount">0</span>
+            </button>
+            <a href="#" id="downloadMapBtn" class="action-button">Download Image</a>
+            <button id="shareMapBtn" class="action-button" style="background-color: rgba(255,255,255,0.1);">🔗 Share Link</button>
+            <button id="editMapBtn" class="action-button" style="display:none; background-color: rgba(59, 130, 246, 0.2); border-color: rgba(59, 130, 246, 0.4); color: #60a5fa;">Edit Map</button>
+            <button id="openMapBtn" class="action-button">Clone This Map</button>
+            <input type="image" id="deleteMapBtn" class="action-button" style="background-color: transparent; padding: 0.75rem; display:none" src="./Resources/Additional/Icons/Clear.png"/>
+        </div>
+
+        <!-- Map Comments Section -->
+        <section class="comments-section">
+            <div class="comments-header-wrapper">
+                <h2 class="comments-title">Comments</h2>
+                <div class="sort-controls" id="commentSortControls">
+                    <button class="sort-tab active" data-sort="newest">Newest</button>
+                    <button class="sort-tab" data-sort="likes">Top Liked</button>
+                </div>
+            </div>
+            
+            <!-- Add Comment Form -->
+            <div class="comment-form">
+                <div id="replyToIndicator" style="display:none; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.82rem; align-items: center; justify-content: space-between; border-left: 3px solid #fff;">
+                    <span style="opacity:0.8;">Replying to <strong id="replyAuthorName"></strong></span>
+                    <button id="cancelReplyBtn" style="background:none; border:none; color:#ff6b6b; font-size:0.8rem; font-weight:700; cursor:pointer; padding:2px 6px;">✕ Cancel</button>
+                </div>
+                <textarea id="commentInput" class="comment-textarea" placeholder="Share your thoughts on this map..."></textarea>
+                <div class="comment-form-footer">
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <label style="font-size:0.8rem; color:rgba(255,255,255,0.6); display:flex; align-items:center; gap:0.4rem; cursor:pointer;">
+                            <input type="checkbox" id="anonCommentCheck">
+                            Post Anonymously
+                        </label>
+                        <span id="commentCooldownText" style="display:none; color:#ff6b6b; font-size:0.75rem; font-weight:700;"></span>
+                    </div>
+                    <button id="submitCommentBtn" class="comment-btn">Post Comment</button>
+                </div>
+            </div>
+
+            <!-- Comments List -->
+            <div id="commentsList" class="comments-list">
+                <p style="opacity: 0.5; font-style: italic; font-size: 0.88rem; text-align: center;">Loading comments...</p>
+            </div>
+        </section>
+    </main>
+
+    <div class="tooltip-floating">
+        ?
+        <div class="tooltip-text">
+            This site is not affiliated with or endorsed by Supercell. Brawl Stars and all related assets belong to Supercell.
+        </div>
+    </div>
+
+    <script type="module" src="./js/core/auth-global.js?v=1.0.6"></script>
+    <script type="module" src="./js/pages/view.js"></script>
+</body>
+</html>

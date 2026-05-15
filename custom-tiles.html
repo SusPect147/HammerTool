@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>(function(){const t=localStorage.getItem('ht_app_theme');if(t&&t!=='space')document.documentElement.setAttribute('data-theme',t);})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HammerTool - Custom Tiles Studio</title>
+    <meta name="description" content="Customize Brawl Stars tiles and browse custom community tile packs on HammerTool.">
+    <link rel="icon" href="./Resources/Additional/Icons/HammerTool.webp" type="image/x-icon">
+    
+    <!-- Framework Styles -->
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/dashboard.css">
+    
+    <!-- Custom Tiles Core Styles -->
+    <link rel="stylesheet" href="./css/custom-tiles.css">
+
+    <!-- Image Cropper Utility -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+</head>
+<body>
+    <!-- Particle Vortex Animated Canvas (Blurred & Subtle) -->
+    <canvas id="vortexCanvas" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; pointer-events:none; filter:blur(15px); opacity:0.3;"></canvas>
+    
+    <!-- Navigation Top Bar -->
+    <div class="top-bar">
+        <a href="./index.html" class="logo">
+            <img src="./Resources/Additional/Icons/HammerTool.webp" alt="" class="logo-icon">
+            HammerTool
+        </a>
+        <div class="top-bar-right" id="navLinks">
+            <a href="./editor.html">Editor</a>
+            <a href="./explore.html">Explore</a>
+            <a href="./dashboard.html">Dashboard</a>
+            <a href="./custom-tiles.html" class="active">Custom Tiles</a>
+            <a href="./forum.html">Forum</a>
+            <!-- Auth Injected -->
+        </div>
+    </div>
+
+    <main class="custom-tiles-container">
+        <!-- ACTIVE EQUIPPED THEME BANNER -->
+        <div class="equipped-theme-banner" id="equippedThemeBanner" style="display: none;">
+            <div class="banner-content">
+                <span class="banner-icon">🎨</span>
+                <div class="banner-text" id="equippedBannerText">Active Theme: <strong>Loading...</strong> | by <strong>Builder</strong></div>
+            </div>
+            <button class="unequip-btn" id="unequipThemeBtn">Unequip</button>
+        </div>
+        
+        <!-- Header Area -->
+        <header class="studio-header">
+            <div class="studio-title">
+                <h1>Custom Tiles Studio</h1>
+                <p>Reimagine the game visually. Override standard tiles with your own designs.</p>
+            </div>
+            <button id="openStudioBtn" class="create-pack-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Create Pack
+            </button>
+        </header>
+
+        <!-- Search & Filter Controls (Unified Layout) -->
+        <div class="filters-section" style="margin-bottom: 2rem;">
+            <div class="search-bar">
+                <input type="text" id="packSearch" placeholder="Search custom tile packs..." class="search-input">
+            </div>
+            
+            <div class="filter-controls">
+                <select id="packSortFilter" class="filter-select">
+                    <option value="likes">Most Liked</option>
+                    <option value="newest" selected>Newest First</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Category 1: My Creations -->
+        <section class="studio-section" id="myCreationsSection">
+            <div class="section-header">
+                <h2>My Creations</h2>
+                <span class="section-badge" id="myCountBadge">0</span>
+            </div>
+            <div class="tile-grid" id="myCreationsGrid">
+                <!-- Populated via custom-tiles.js -->
+                <div class="empty-placeholder">
+                    <div class="empty-placeholder-icon">🔒</div>
+                    <p>Please sign in via Discord to view your private packs.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Category 2: Tile Marketplace -->
+        <section class="studio-section">
+            <div class="section-header">
+                <h2>Tile Marketplace</h2>
+                <span class="section-badge" id="marketCountBadge">0</span>
+            </div>
+            <div class="tile-grid" id="marketGrid">
+                <!-- Populated via custom-tiles.js -->
+                <div style="grid-column: 1/-1; text-align:center; opacity: 0.6;">Loading custom packs...</div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==========================================
+         TILES STUDIO MODAL
+         ========================================== -->
+    <div class="modal-overlay" id="studioModal">
+        <div class="modal-container">
+            <div class="studio-loader" id="studioLoader">
+                <div class="spinner"></div>
+                <div class="loader-text" id="loaderText">Uploading textures...</div>
+            </div>
+
+            <header class="modal-header">
+                <h2>Tile Pack Studio</h2>
+                <button class="close-modal-btn" id="closeStudioBtn">&times;</button>
+            </header>
+
+            <div class="modal-body">
+                <div class="studio-input-group">
+                    <label for="packNameInput">Pack Name</label>
+                    <input type="text" id="packNameInput" class="studio-text-input" placeholder="e.g. Cyberpunk Grid, Neon Retro, Lava Cave..." maxlength="40">
+                </div>
+
+                <div class="studio-input-group">
+                    <label>Select standard tiles to customize</label>
+                    <p style="font-size: 0.75rem; opacity: 0.5; margin-bottom: 1rem;">
+                        Click any item to replace it with an image from your device (.png/.jpg, max 1MB).
+                    </p>
+                    
+                    <!-- Interactive Tile Settee -->
+                    <div class="studio-tile-grid" id="studioTileGrid">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <footer class="modal-footer">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-right: auto;">
+                    <input type="checkbox" id="packPublicCheck" checked style="cursor:pointer;">
+                    <label for="packPublicCheck" style="font-size: 0.8rem; cursor: pointer; user-select:none;">🌍 Public / Publish</label>
+                </div>
+                <button class="cancel-btn" id="cancelStudioBtn">Cancel</button>
+                <button class="save-pack-btn" id="savePackBtn">Save Pack</button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         PIXEL-PERFECT CROP MODAL
+         ========================================== -->
+    <div class="modal-overlay" id="cropModal" style="z-index: 2010;">
+        <div class="modal-container">
+            <header class="modal-header">
+                <h2>Pixel Perfect Crop</h2>
+                <button class="close-modal-btn" id="closeCropBtn">&times;</button>
+            </header>
+            
+            <div class="modal-body" style="background: #0a0a10; display: flex; align-items: center; justify-content: center;">
+                <div class="cropper-frame">
+                    <img id="croppingSource" style="max-width: 100%; display: block;">
+                </div>
+            </div>
+
+            <footer class="modal-footer" style="display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: space-between;">
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button class="cancel-btn" id="cropAspectBtn" style="padding: 0.7rem;">🔒 Ratio 1:1</button>
+                    <button class="cancel-btn" id="cropRotateBtn" style="padding: 0.7rem;">🔄 Rotate</button>
+                    <button class="cancel-btn" id="cropZoomInBtn" style="padding: 0.7rem;">➕</button>
+                    <button class="cancel-btn" id="cropZoomOutBtn" style="padding: 0.7rem;">➖</button>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="cancel-btn" id="cancelCropBtn">Cancel</button>
+                    <button class="save-pack-btn" id="applyCropBtn">Apply Crop</button>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         EQUIP THEME CONFIRMATION MODAL
+         ========================================== -->
+    <div class="modal-overlay" id="equipConfirmModal" style="z-index: 2020;">
+        <div class="modal-container" style="max-width: 600px; display: flex; flex-direction: column; max-height: 85vh;">
+            <header class="modal-header">
+                <h2 id="equipModalTitle">Theme Preview</h2>
+                <button class="close-modal-btn" id="closePreviewBtn" style="font-size: 1.5rem; color: rgba(255,255,255,0.4); background: none; border: none; cursor: pointer;">&times;</button>
+            </header>
+            <div class="modal-body" style="display: flex; flex-direction: column; gap: 1.5rem; padding: 1.5rem 2rem;">
+                <p style="opacity: 0.8; line-height: 1.6; font-size: 0.95rem; text-align: center; margin: 0;">
+                    <strong id="equipThemeNameDisplay" style="color: var(--accent, var(--neon-blue)); font-size: 1.2rem;"></strong> <br>
+                    <span style="font-size: 0.85rem; opacity: 0.7;">created by</span> <span id="equipThemeAuthorDisplay" style="font-weight: 700;"></span>
+                </p>
+                
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 600;">Customized Tiles</h4>
+                    <div id="previewTilesGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 0.75rem; max-height: 300px; overflow-y: auto; padding: 0.5rem; background: rgba(0,0,0,0.15); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                        <!-- Dynamic injection in JS -->
+                    </div>
+                </div>
+            </div>
+            <footer class="modal-footer" style="display: flex; gap: 1rem; background: rgba(0, 0, 0, 0.1); border-top: 1px solid rgba(255, 255, 255, 0.05); padding: 1.2rem 2rem;">
+                <button class="cancel-btn" id="cancelEquipBtn" style="flex: 1; padding: 0.8rem;">Close</button>
+                <button class="save-pack-btn" id="confirmEquipBtn" style="flex: 1; padding: 0.8rem;">Equip Theme</button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Invisible File Selector Widget -->
+    <input type="file" id="tileFileInput" accept="image/*" style="display: none;">
+
+    <!-- Generic Disclaimer Footer Tooltip -->
+    <div class="tooltip-floating">
+        ?
+        <div class="tooltip-text">
+            This site is not affiliated with or endorsed by Supercell. Brawl Stars and all related assets belong to Supercell.
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script type="module" src="./js/core/auth-global.js?v=1.0.6"></script>
+    <script type="module" src="./js/pages/custom-tiles.js"></script>
+
+    <!-- Fluid Vortex Background (Subtle) -->
+    <script type="module" src="./js/common/particle-vortex-ambient.js"></script>
+</body>
+</html>

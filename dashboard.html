@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>(function(){const t=localStorage.getItem('ht_app_theme');if(t&&t!=='space')document.documentElement.setAttribute('data-theme',t);})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HammerTool - My Maps</title>
+    <meta name="description" content="View and manage your saved Brawl Stars maps on HammerTool.">
+    <link rel="icon" href="./Resources/Additional/Icons/HammerTool.webp" type="image/x-icon">
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/dashboard.css">
+</head>
+<body>
+    <canvas id="vortexCanvas"></canvas>
+    
+    <div class="top-bar">
+        <a href="./index.html" class="logo">
+            <img src="./Resources/Additional/Icons/HammerTool.webp" alt="" class="logo-icon">
+            HammerTool
+        </a>
+        <div class="top-bar-right">
+            <a href="./editor.html">Editor</a>
+            <a href="./explore.html">Explore</a>
+            <a href="./dashboard.html" class="active">Dashboard</a>
+            <a href="./custom-tiles.html">Custom Tiles</a>
+            <a href="./forum.html">Forum</a>
+            <a href="#" style="opacity:0.4; cursor:default;">Contests <sup style="font-size:0.55rem; opacity:0.6;">soon</sup></a>
+        </div>
+    </div>
+
+    <main class="my-maps-container">
+        <div class="filters-section">
+            <div class="search-bar">
+                <input type="text" id="mapSearch" placeholder="Search maps by name..." class="search-input">
+            </div>
+            
+            <div class="filter-controls">
+                <select id="gamemodeFilter" class="filter-select">
+                    <option value="">All Gamemodes</option>
+                    <option value="Gem_Grab">Gem Grab</option>
+                    <option value="Showdown">Showdown</option>
+                    <option value="Heist">Heist</option>
+                    <option value="Bounty">Bounty</option>
+                    <option value="Brawl_Ball">Brawl Ball</option>
+                    <option value="Siege">Siege</option>
+                    <option value="Lone_Star">Lone Star</option>
+                    <option value="Takedown">Takedown</option>
+                    <option value="Snowtel_Thieves">Present Plunder</option>
+                    <option value="Hot_Zone">Hot Zone</option>
+                    <option value="Knockout">Knockout</option>
+                    <option value="Basket_Brawl">Basket Brawl</option>
+                    <option value="Hold_The_Trophy">Hold The Trophy</option>
+                    <option value="Volley_Brawl">Volley Brawl</option>
+                    <option value="Duels">Duels</option>
+                    <option value="Wipeout">Wipeout</option>
+                    <option value="Bot_Drop">Bot Drop</option>
+                    <option value="Hunters">Hunters</option>
+                    <option value="Trophy_Escape">Trophy Escape</option>
+                    <option value="Godzilla_City_Smash">Godzilla City Smash</option>
+                    <option value="Drumroll">Drumroll</option>
+                    <option value="Paint_Brawl">Paint Brawl</option>
+                    <option value="Cleaning_Duty">Cleaning Duty</option>
+                    <option value="Soul Collector">Soul Collector</option>
+                    <option value="Spirit_Wars">Spirit Wars</option>
+                    <option value="Hockey">Brawl Hockey</option>
+                    <option value="Treasure_Hunt">Treasure Hunt</option>
+                    <option value="Token_Run">Token Run</option>
+                    <option value="Samurai_Smash">Samurai Smash</option>
+                    <option value="Brawl_Arena">Brawl Arena</option>
+                    <option value="Dodgebrawl">Dodgebrawl</option>
+                    <option value="Subway_Run">Subway Run</option>
+                    <option value="Boss_Fight">Boss Fight</option>
+                    <option value="Super_City_Rampage">Super City Rampage</option>
+                    <option value="Oni_Hunt">Oni Hunt</option>
+                    <option value="Safe_Blast">Safe Blast</option>
+                    <option value="Love_Bombing">Love Bombing</option>
+                    <option value="Loaded_SD">Loaded Showdown</option>
+                    <option value="Brawl_Bosses">Brawl Bosses</option>
+                </select>
+
+                <select id="environmentFilter" class="filter-select">
+                    <option value="">All Environments</option>
+                    <option value="Desert">Desert</option>
+                    <option value="Wasteland">Wasteland</option>
+                    <option value="Mine">Mine</option>
+                    <option value="Oasis">Oasis</option>
+                    <option value="Grassy_Field">Grassy Field</option>
+                    <option value="Holiday">Holiday</option>
+                    <option value="City">City</option>
+                    <option value="Retropolis">Retropolis</option>
+                    <option value="Mortuary">Mortuary</option>
+                    <option value="Pirate_Ship">Pirate Ship</option>
+                    <option value="Arcade">Arcade</option>
+                    <option value="Stadium">Stadium</option>
+                    <option value="Bazaar">Bazaar</option>
+                    <option value="Super_City">Super City</option>
+                    <option value="Gift_Shop">Gift Shop</option>
+                    <option value="Bandstand">Bandstand</option>
+                    <option value="Snowtel">Snowtel</option>
+                    <option value="Scrapyard">Scrapyard</option>
+                    <option value="Starr_Force">Starr Force</option>
+                    <option value="Wild_West">Wild West</option>
+                    <option value="Water_Park">Water Park</option>
+                    <option value="Castle_Courtyard">Castle Courtyard</option>
+                    <option value="Brawlywood">Brawlywood</option>
+                    <option value="Fighting_Game">Fighting Game</option>
+                    <option value="Biodome">Biodome</option>
+                    <option value="Stunt_Show">Stunt Show</option>
+                    <option value="Deep_Sea">Deep Sea</option>
+                    <option value="Robot_Factory">Robot Factory</option>
+                    <option value="Ghost_Station">Ghost Station</option>
+                    <option value="Candyland">Candyland</option>
+                    <option value="The_Hub">The Hub</option>
+                    <option value="Rooftop">Rooftop</option>
+                    <option value="Rumble_Jungle">Rumble Jungle</option>
+                    <option value="Enchanted_Woods">Enchanted Woods</option>
+                    <option value="Ranger_Ranch">Ranger Ranch</option>
+                    <option value="Circus">Bizarre Circus</option>
+                    <option value="Coin_Factory">Coin Factory (Megapig)</option>
+                    <option value="Starr_Toon">Starr Toon</option>
+                    <option value="Ice_Island">Ice Island</option>
+                    <option value="Swamp_of_Love">Swamp of Love</option>
+                    <option value="Medieval_Manor">MadEvil Manor</option>
+                    <option value="Super_City_2">Kaiju Park</option>
+                    <option value="Spongebob">Bikini Bottom</option>
+                    <option value="Oddities_Shop">Oddities Shop</option>
+                    <option value="Skating_Bowl">Skatepark</option>
+                    <option value="Hockey">Ice Rink</option>
+                    <option value="Escape_Room">Pyramid Quest</option>
+                    <option value="Katana_Kingdom">Katana Kingdom</option>
+                    <option value="Tropical_Island">Tropical Island</option>
+                    <option value="Subway_Surfers">Subway Surfers</option>
+                    <option value="Stranger_Things">Stranger Things</option>
+                    <option value="Stranger_Things_Lair">Stranger Lair</option>
+                    <option value="Stranger_Things_Forest">Stranger Forest</option>
+                    <option value="Stranger_Things_Lab">Stranger Lab</option>
+                    <option value="Aquarium">Sea Monsters Aquarium</option>
+                    <option value="Z_UnderwaterTheme">Underwater Theme | By: Gabo</option>
+                    <option value="Z_SkyTheme">Sky Theme | By: Gabo</option>
+                    <option value="Z_JurassicTheme">Jurassic Theme | By: Gabo</option>
+                    <option value="Z_CasinoTheme">Casino Theme | By: Davurce</option>
+                    <option value="Z_BrawlClub">Brawl Club | By: Dedmos &amp; Hakku</option>
+                </select>
+
+                <select id="sizeFilter" class="filter-select">
+                    <option value="">All Sizes</option>
+                    <option value="regular">Regular</option>
+                    <option value="showdown">Showdown</option>
+                    <option value="arena">Brawl Arena</option>
+                    <option value="siege">Siege</option>
+                    <option value="volley">Volley Brawl</option>
+                    <option value="basket">Basket Brawl</option>
+                </select>
+
+                <select id="sortFilter" class="filter-select">
+                    <option value="">Sort By...</option>
+                    <option value="best_rating">Best Rating</option>
+                    <option value="most_votes">Most Votes</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="maps-grid" id="mapsGrid"></div>
+        <div class="load-more-container" id="loadMoreContainer"></div>
+    </main>
+
+    <div class="tooltip-floating">
+        ?
+        <div class="tooltip-text">
+            This site is not affiliated with or endorsed by Supercell. Brawl Stars and all related assets belong to Supercell.
+        </div>
+    </div>
+
+    <script type="module" src="./js/core/auth-global.js?v=1.0.6"></script>
+    <script type="module" src="./js/utils/canvas-drawer.js"></script>
+    <script type="module" src="./js/pages/dashboard.js"></script>
+
+    <!-- 3D Particle Vortex Canvas -->
+    <script>
+    (function() {
+        const canvas = document.getElementById('vortexCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        let W, H;
+        let mouseX = 0.5, mouseY = 0.5;
+        let frame = 0;
+        let viewZoom = 1.0;
+
+        const PARTICLE_COUNT  = 1200;
+        const GRID_TILE_COUNT = 40;
+        const VORTEX_CX_RATIO = 0.55;
+        const VORTEX_CY_RATIO = 0.48;
+
+        const particles  = [];
+        const gridTiles  = [];
+
+        function resize() {
+            W = canvas.width  = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+            initParticles();
+            initGridTiles();
+        }
+
+        function initParticles() {
+            particles.length = 0;
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                particles.push(createParticle());
+            }
+        }
+
+        function createParticle() {
+            const angle  = Math.random() * Math.PI * 2;
+            const radius = 20 + Math.random() * Math.max(W, H) * 0.6;
+            const z      = Math.random();
+            const speed  = 0.002 + Math.random() * 0.009;
+            const sizeRoll = Math.random();
+            let baseSize;
+            if (sizeRoll < 0.6)      baseSize = 0.2 + Math.random() * 0.5;
+            else if (sizeRoll < 0.85) baseSize = 0.5 + Math.random() * 1.0;
+            else if (sizeRoll < 0.95) baseSize = 1.0 + Math.random() * 1.2;
+            else                      baseSize = 1.5 + Math.random() * 1.5;
+
+            return {
+                angle, radius, z, speed, baseRadius: radius, size: baseSize,
+                alpha: 0.06 + z * 0.45, drift: Math.random() * Math.PI * 2,
+                driftAmp: 5 + Math.random() * 35, driftSpeed: 0.0004 + Math.random() * 0.002,
+                trail: [], maxTrail: Math.floor(1 + z * 5)
+            };
+        }
+
+        function initGridTiles() {
+            gridTiles.length = 0;
+            for (let i = 0; i < GRID_TILE_COUNT; i++) {
+                gridTiles.push(createGridTile());
+            }
+        }
+
+        function createGridTile() {
+            return {
+                x: Math.random() * W * 1.4 - W * 0.2, y: H + 50 + Math.random() * H,
+                size: 10 + Math.random() * 30, speed: 0.25 + Math.random() * 0.6,
+                alpha: 0.015 + Math.random() * 0.04, rotation: -35 + Math.random() * 10,
+                rotSpeed: (Math.random() - 0.5) * 0.1, drift: Math.random() * 0.3 + 0.1
+            };
+        }
+
+        function draw() {
+            frame++;
+            const time = frame * 16;
+            ctx.clearRect(0, 0, W, H);
+
+            const baseCx = W * VORTEX_CX_RATIO + (mouseX - 0.5) * 80;
+            const baseCy = H * VORTEX_CY_RATIO + (mouseY - 0.5) * 50;
+
+            ctx.save();
+            ctx.translate(baseCx, baseCy);
+            ctx.scale(viewZoom, viewZoom);
+            ctx.translate(-baseCx, -baseCy);
+
+            drawEpicenter(baseCx, baseCy, time);
+            drawGridTiles(time);
+            drawParticles(baseCx, baseCy, time);
+
+            ctx.restore();
+            requestAnimationFrame(draw);
+        }
+
+        function drawEpicenter(cx, cy, time) {
+            const pulse = Math.sin(time * 0.00015) * 0.3 + 0.7;
+            const pulse2 = Math.sin(time * 0.0003 + 1) * 0.2 + 0.8;
+
+            const g1 = ctx.createRadialGradient(cx, cy, 0, cx, cy, W * 0.5);
+            g1.addColorStop(0, `rgba(255,255,255,${0.04 * pulse})`);
+            g1.addColorStop(0.15, `rgba(230,235,255,${0.025 * pulse})`);
+            g1.addColorStop(0.4, `rgba(180,190,230,${0.01 * pulse})`);
+            g1.addColorStop(1, 'transparent');
+            ctx.fillStyle = g1;
+            ctx.fillRect(cx - W, cy - H, W * 2, H * 2);
+
+            const g2 = ctx.createRadialGradient(cx, cy, 0, cx, cy, 120);
+            g2.addColorStop(0, `rgba(255,255,255,${0.12 * pulse2})`);
+            g2.addColorStop(0.3, `rgba(255,255,255,${0.05 * pulse2})`);
+            g2.addColorStop(0.6, `rgba(220,225,255,${0.02 * pulse2})`);
+            g2.addColorStop(1, 'transparent');
+            ctx.fillStyle = g2;
+            ctx.fillRect(cx - 200, cy - 200, 400, 400);
+
+            const g3 = ctx.createRadialGradient(cx, cy, 0, cx, cy, 25);
+            g3.addColorStop(0, `rgba(255,255,255,${0.2 * pulse})`);
+            g3.addColorStop(0.5, `rgba(255,255,255,${0.05 * pulse})`);
+            g3.addColorStop(1, 'transparent');
+            ctx.fillStyle = g3;
+            ctx.fillRect(cx - 30, cy - 30, 60, 60);
+        }
+
+        function drawGridTiles(time) {
+            for (const tile of gridTiles) {
+                tile.y -= tile.speed; tile.x += tile.drift; tile.rotation += tile.rotSpeed;
+                if (tile.y < -80) {
+                    tile.y = H + 50 + Math.random() * 100; tile.x = Math.random() * W * 1.4 - W * 0.2;
+                    tile.alpha = 0.015 + Math.random() * 0.04;
+                }
+                ctx.save();
+                ctx.translate(tile.x, tile.y);
+                ctx.rotate((tile.rotation * Math.PI) / 180);
+                ctx.strokeStyle = `rgba(140, 150, 255, ${tile.alpha})`;
+                ctx.lineWidth = 0.5;
+                ctx.strokeRect(-tile.size / 2, -tile.size / 2, tile.size, tile.size);
+                if (tile.alpha > 0.03) {
+                    ctx.fillStyle = `rgba(140, 150, 255, ${tile.alpha * 0.3})`;
+                    ctx.fillRect(-tile.size / 2, -tile.size / 2, tile.size, tile.size);
+                }
+                ctx.restore();
+            }
+        }
+
+        function drawParticles(cx, cy, time) {
+            for (const p of particles) {
+                p.angle += p.speed * (0.7 + p.z * 0.6);
+                const breathe = Math.sin(time * p.driftSpeed + p.drift) * p.driftAmp;
+                const r = p.baseRadius + breathe;
+
+                p.baseRadius -= p.speed * 0.25;
+                if (p.baseRadius < 10) {
+                    p.baseRadius = 20 + Math.random() * Math.max(W, H) * 0.6;
+                    p.angle = Math.random() * Math.PI * 2; p.z = Math.random();
+                    const sizeRoll = Math.random();
+                    if (sizeRoll < 0.6) p.size = 0.2 + Math.random() * 0.5;
+                    else if (sizeRoll < 0.85) p.size = 0.5 + Math.random() * 1.0;
+                    else if (sizeRoll < 0.95) p.size = 1.0 + Math.random() * 1.2;
+                    else p.size = 1.5 + Math.random() * 1.5;
+                    p.alpha = 0.06 + p.z * 0.45; p.maxTrail = Math.floor(1 + p.z * 5); p.trail = [];
+                }
+
+                const perspective = 0.25 + p.z * 0.75;
+                const projX = cx + Math.cos(p.angle) * r * perspective;
+                const projY = cy + Math.sin(p.angle) * r * perspective * 0.6;
+                const depthScale = 0.25 + p.z * 0.75;
+                const drawSize = p.size * depthScale;
+                const drawAlpha = p.alpha * depthScale;
+
+                p.trail.unshift({ x: projX, y: projY });
+                if (p.trail.length > p.maxTrail) p.trail.pop();
+
+                for (let t = 1; t < p.trail.length; t++) {
+                    const tp = p.trail[t];
+                    const ta = drawAlpha * (1 - t / p.trail.length) * 0.4;
+                    const ts = drawSize * (1 - t / p.trail.length * 0.6);
+                    ctx.beginPath(); ctx.arc(tp.x, tp.y, ts, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255,255,255,${Math.max(0, ta)})`; ctx.fill();
+                }
+
+                ctx.beginPath(); ctx.arc(projX, projY, drawSize, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255,255,255,${drawAlpha})`; ctx.fill();
+
+                if (p.z > 0.75 && drawSize > 1.2) {
+                    ctx.beginPath(); ctx.arc(projX, projY, drawSize * 3, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255,255,255,${drawAlpha * 0.05})`; ctx.fill();
+                }
+            }
+        }
+
+        window.addEventListener('resize', resize);
+        document.addEventListener('mousemove', e => {
+            mouseX = e.clientX / window.innerWidth;
+            mouseY = e.clientY / window.innerHeight;
+        });
+
+        resize();
+        draw();
+    })();
+    </script>
+</html>
+

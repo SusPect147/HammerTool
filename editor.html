@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>(function(){const t=localStorage.getItem('ht_app_theme');if(t&&t!=='space')document.documentElement.setAttribute('data-theme',t);})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+    <title>HammerTool - Map Maker</title>
+    <meta name="description" content="Build and edit Brawl Stars maps with the HammerTool editor.">
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/editor.css">
+    <link rel="icon" href="./Resources/Additional/Icons/HammerTool.webp" type="image/x-icon">
+</head>
+<body>
+
+    <!-- Subtle background particles (same vortex, blurred + dimmed) -->
+    <canvas id="editorBg"></canvas>
+
+    <!-- Minimal top-bar matching index.html -->
+    <div class="top-bar">
+        <a href="./index.html" class="logo">
+            <img src="./Resources/Additional/Icons/HammerTool.webp" alt="" class="logo-icon">
+            HammerTool
+        </a>
+        <div class="top-bar-right">
+            <a href="./editor.html" class="active">Editor</a>
+            <a href="./explore.html">Explore</a>
+            <a href="./dashboard.html">Dashboard</a>
+            <a href="./custom-tiles.html">Custom Tiles</a>
+            <a href="./forum.html">Forum</a>
+            <a href="#" style="opacity:0.4; cursor:default;">Contests <sup style="font-size:0.55rem; opacity:0.6;">soon</sup></a>
+            
+            <!-- Desktop Collapse Action -->
+            <button id="hideTopBarBtn" class="topbar-collapse-btn" title="Скрыть верхнюю панель" style="background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.4); display:flex; align-items:center; justify-content:center; font-size:0.9rem; margin-left:1.25rem; padding:5px; border-radius:6px; transition: all 0.2s;">
+                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Restore Topbar Widget -->
+    <button id="showTopBarBtn" class="restore-topbar-btn" title="Показать панель">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+    </button>
+
+    <div class="editor-container">
+        <main class="content">
+            <section class="controls-bar">
+                <div class="mobile-panel-toggle" id="toggleSettingsBtn">
+                    <span>Map Settings</span>
+                    <svg class="chevron-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                <div class="controls-content">
+                    <div>
+                        <p>Map Name</p>
+                        <input type="text" value="Untitled Map" id="mapName" placeholder="Map Name">
+                    </div>
+                    <div class="select-inline">
+                        <label for="mapSize">Map Size</label>
+                        <select id="mapSize">
+                            <option value="regular">Regular</option>
+                            <option value="showdown">Showdown</option>
+                            <option style="color:blueviolet" value="arena">Brawl Arena</option>
+                            <option value="siege">Siege</option>
+                            <option value="volley">Volley Brawl</option>
+                            <option value="basket">Basket Brawl</option>
+                        </select>
+                    </div>
+                    <div class="select-inline">
+                        <label for="gamemode">Gamemode</label>
+                        <select id="gamemode">
+                            <option style="color:#7ab6ed" value="Gem_Grab">Gem Grab</option>
+                            <option style="color:#7ab6ed" value="Showdown">Showdown</option>
+                            <option style="color:#7ab6ed" value="Heist">Heist</option>
+                            <option style="color:#7ab6ed" value="Bounty">Bounty</option>
+                            <option style="color:#7ab6ed" value="Brawl_Ball">Brawl Ball</option>
+                            <option value="Siege">Siege</option>
+                            <option value="Lone_Star">Lone Star</option>
+                            <option value="Takedown">Takedown</option>
+                            <option value="Snowtel_Thieves">Trophy Thieves</option>
+                            <option style="color:#7ab6ed" value="Hot_Zone">Hot Zone</option>
+                            <option style="color:#7ab6ed" value="Knockout">Knockout</option>
+                            <option style="color:#7ab6ed" value="Basket_Brawl">Basket Brawl</option>
+                            <option value="Hold_The_Trophy">Hold The Trophy</option>
+                            <option style="color:#7ab6ed" value="Volley_Brawl">Volley Brawl</option>
+                            <option style="color:#7ab6ed" value="Duels">Duels</option>
+                            <option style="color:#7ab6ed" value="Wipeout">Wipeout</option>
+                            <!-- <option value="Payload">Payload</option> -->
+                            <option value="Bot_Drop">Bot Drop</option>
+                            <option value="Hunters">Hunters</option>
+                            <option value="Trophy_Escape">Trophy Escape</option>
+                            <option value="Godzilla_City_Smash">Godzilla City Smash</option>
+                            <option value="Drumroll">Drumroll</option>
+                            <option value="Paint_Brawl">Paint Brawl</option> 
+                            <option value="Cleaning_Duty">Cleaning Duty</option> 
+                            <option value="Soul Collector">Soul Collector</option>
+                            <option value="Spirit_Wars">Spirit Wars</option> 
+                            <option style="color:#7ab6ed" value="Hockey">Hockey Brawl</option>
+                            <!-- <option value="Special_Delivery">Special Delivery</option> -->
+                            <option style="color:#7ab6ed" value="Treasure_Hunt">Treasure Hunt</option>
+                            <option value="Token_Run">Token Run</option>
+                            <option value="Samurai_Smash">Samurai Smash</option>
+                            <option style="color:#7ab6ed" value="Brawl_Arena">Brawl Arena</option>
+                            <option style="color:#7ab6ed" value="Dodgebrawl">Dodgebrawl</option>
+                            <option value="Subway_Run">Subway Run</option>
+                            <option value="Safe_Blast">Safe Blast</option>
+                            <option value="Love_Bombing">Love Bombing</option>
+                            <option style="color:#7ab6ed" value="Loaded_SD">Loaded Showdown</option>
+                            <option style="color:#da1013" value="Boss_Fight">Boss Fight</option>
+                            <option style="color:#da1013" value="Super_City_Rampage">Super City Rampage</option>
+                            <option style="color:#da1013" value="Brawl_Bosses">Brawl Bosses</option>
+                        </select>
+                    </div>
+                    <div class="select-inline">
+                        <label for="environment">Environment</label>
+                        <select id="environment">
+                            <option style="color:#7ab6ed" value="Desert">Desert</option>
+                            <option style="color:#7ab6ed" value="Wasteland">Wasteland</option>
+                            <option style="color:#7ab6ed" value="Mine">Mine</option>
+                            <option value="Oasis">Oasis</option>
+                            <option style="color:#7ab6ed" value="Grassy_Field">Grassy Field</option>
+                            <option value="Holiday">Holiday</option>
+                            <option value="City">City</option>
+                            <option value="Retropolis">Retropolis</option>
+                            <option value="Beach">Beach</option>
+                            <option style="color:#7ab6ed" value="Mortuary">Mortuary</option>
+                            <option value="Pirate_Ship">Pirate Ship</option>
+                            <option style="color:#7ab6ed" value="Arcade">Arcade</option>
+                            <option style="color:#7ab6ed" value="Stadium">Stadium</option>
+                            <option value="Bazaar">Bazaar</option>
+                            <option value="Super_City">Super City</option>
+                            <option style="color:#7ab6ed" value="Gift_Shop">Gift Shop</option>
+                            <option style="color:#7ab6ed" value="Bandstand">Bandstand</option> 
+                            <option value="Snowtel">Snowtel</option>
+                            <option style="color:#7ab6ed" value="Scrapyard">Scrapyard</option>
+                            <option value="Starr_Force">Starr Force</option>
+                            <option value="Wild_West">Wild West</option>
+                            <option value="Water_Park">Water Park</option>
+                            <option value="Castle_Courtyard">Castle Courtyard</option>
+                            <option value="Brawlywood">Brawlywood</option> 
+                            <option value="Fighting_Game">Fighting Game</option>
+                            <option style="color:#7ab6ed" value="Biodome">Biodome</option>
+                            <option value="Stunt_Show">Stunt Show</option>
+                            <option value="Deep_Sea">Deep Sea</option>
+                            <option value="Robot_Factory">Robot Factory</option>
+                            <option value="Ghost_Station">Ghost Station</option>
+                            <option value="Candyland">Candyland</option>
+                            <option style="color:#7ab6ed" value="The_Hub">The Hub</option>
+                            <option style="color:#7ab6ed" value="Rooftop">Rooftop</option>
+                            <option value="Rumble_Jungle">Rumble Jungle</option> 
+                            <option value="Enchanted_Woods">Enchanted Woods</option>
+                            <option value="Ranger_Ranch">Ranger Ranch</option>
+                            <option value="Circus">Bizarre Circus</option>
+                            <option style="color:#7ab6ed" value="Coin_Factory">Coin Factory (Megapig)</option>
+                            <option style="color:#7ab6ed" value="Starr_Toon">Starr Toon</option>
+                            <option value="Ice_Island">Ice Island</option>
+                            <option value="Swamp_of_Love">Swamp of Love</option>
+                            <option style="color:#7ab6ed" value="Medieval_Manor">MadEvil Manor</option>
+                            <option value="Super_City_2">Kaiju Park</option> 
+                            <option value="Spongebob">Bikini Bottom</option>
+                            <option style="color:#7ab6ed" value="Oddities_Shop">Oddities Shop</option>
+                            <option value="Skating_Bowl">Skatepark</option>
+                            <option style="color:#7ab6ed" value="Hockey">Ice Rink</option>
+                            <option style="color:#7ab6ed" value="Escape_Room">Pyramid Quest</option>
+                            <option value="Katana_Kingdom">Katana Kingdom</option>
+                            <option style="color:#7ab6ed" value="Tropical_Island">Tropical Island</option>
+                            <option value="Subway_Surfers">Subway Surfers</option>
+                            <option value="Stranger_Things">Stranger Things</option>
+                            <option value="Stranger_Things_Lair">Stranger Lair</option>
+                            <option value="Stranger_Things_Forest">Stranger Forest</option>
+                            <option value="Stranger_Things_Lab">Stranger Lab</option>
+                            <option value="Aquarium">Sea Monsters Aquarium</option>
+                            <option style="color:#ff8ce6" value="Z_UnderwaterTheme">Underwater Theme | By: Gabo</option>
+                            <option style="color:#ff8ce6" value="Z_SkyTheme">Sky Theme | By: Gabo</option>
+                            <option style="color:#ff8ce6" value="Z_JurassicTheme">Jurassic Theme | By: Gabo</option>
+                            <option style="color:#ff8ce6" value="Z_CasinoTheme">Casino Theme | By: Davurce</option>
+                            <option style="color:#ff8ce6" value="Z_BrawlClub">Brawl Club | By: Dedmos & Hakku</option>
+                        </select>
+                    </div>
+                    <div class="opacity-control">
+                        <label>Opacity</label>
+                        <input type="range" id="panelOpacity" class="opacity-slider" min="0.2" max="1" step="0.05" value="0.8">
+                    </div>
+                </div>
+            </section>
+            <div class="center-panel">
+                <div class="left-panel">
+                    <section class="tiles-section draggable-panel" data-panel="tiles">
+                        <div class="panel-drag-handle"><span class="panel-title">Tiles</span></div>
+                        <div class="tiles-grid">
+                            <div id="tileSelector"></div>
+                        </div>
+                    </section>
+                </div>
+                <section class="map-wrapper">
+                    <!-- Zoom controls moved inside .map-editor for fixed positioning -->
+                    <div class="map-editor">
+                        <div class="map-container">
+                            <canvas draggable="false" id="mapCanvas"></canvas>
+                        </div>
+                    </div> 
+                </section>
+                <div class="right-panel">
+                    <section class="selections-section draggable-panel" data-panel="selections">
+                        <div class="panel-drag-handle"><span class="panel-title">Selection Options</span></div>
+                        <div class="selections-container">
+                                <label class="select-btn" title="Single (1)">
+                                    <input type="radio" name="selectionMode" id="singleBtn" value="single" checked>
+                                    <mob>Single</mob>
+                                    <img src="./Resources/Additional/Icons/Single.png" alt="Single">
+                                </label>
+                                <label class="select-btn" title="Line (2)">
+                                    <input type="radio" name="selectionMode" id="lineBtn" value="line">
+                                    <mob>Line</mob>
+                                    <img src="./Resources/Additional/Icons/Line.png" alt="Line">
+                                </label>
+                                <label class="select-btn" title="Rectangle (3)">
+                                    <input type="radio" name="selectionMode" id="rectangleBtn" value="rectangle">
+                                    <mob>Rectangle</mob>
+                                    <img src="./Resources/Additional/Icons/Rectangle.png" alt="Rectangle">
+                                </label>
+                                <label class="select-btn" title="Fill (4)">
+                                    <input type="radio" name="selectionMode" id="fillBtn" value="fill">
+                                    <mob>Fill</mob>
+                                    <img src="./Resources/Additional/Icons/Bucket.png" alt="Fill">
+                                </label>
+                                <label class="select-btn" title="Select (5)">
+                                    <input type="radio" name="selectionMode" id="selectBtn" value="select">
+                                    <mob>Select</mob>
+                                    <img src="./Resources/Additional/Icons/Select.png" alt="Select">
+                                </label>
+                            </div>
+                    </section>
+
+                    <section class="toolbar toolbar-horizontal draggable-panel" data-panel="toolbar">
+                        <div class="panel-drag-handle"><span class="panel-title">Tools</span></div>
+                        <pc><h5>Mirroring</h5></pc>
+                        <div class="toolbar-section">
+                            <label class="mirror-btn"><input type="checkbox" id="mirrorDiagonal">Diagonal</label>
+                            <label class="mirror-btn"><input type="checkbox" id="mirrorVertical">Vertical</label>
+                            <label class="mirror-btn"><input type="checkbox" id="mirrorHorizontal">Horizontal</label>
+                        </div>
+
+                        <div class="toolbar-divider"></div>
+
+                        <pc><h5>Tools</h5></pc>
+                        <div class="toolbar-section">
+                            <label class="icon-btn" title="Hand Tool (Pan)"><input type="checkbox" id="handToolBtn"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="display:block; margin:0 auto; stroke: rgba(255,255,255,0.85);"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v5m-4-1V5a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8M6 14v-2a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8c0 2.76 2.24 5 5 5h5.5c2.76 0 5-2.24 5-5v-3a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"></path></svg></label>
+                            <label class="icon-btn"><input type="checkbox" id="eraseBtn"><img src="./Resources/Additional/Icons/Erase.png" alt="Erase"></label>
+                            <button id="rotateBtn" class="icon-btn"><img src="./Resources/Additional/Icons/Rotate.png" alt="Rotate"></button>
+                            <button id="flipHorizontalBtn" class="icon-btn" title="Flip Horizontal"><img src="./Resources/Additional/Icons/FlipHorizontal.png" alt="Flip Horizontal"></button>
+                            <button id="flipVerticalBtn" class="icon-btn" title="Flip Vertical"><img src="./Resources/Additional/Icons/FlipVertical.png" alt="Flip Vertical"></button>
+                            <button id="undoBtn" class="icon-btn"><img src="./Resources/Additional/Icons/Undo.png" alt="Undo"></button>
+                            <button id="redoBtn" class="icon-btn"><img src="./Resources/Additional/Icons/Redo.png" alt="Redo"></button>
+                            <label class="icon-btn"><input type="checkbox" id="replaceBtn"><img src="./Resources/Additional/Icons/Replace.png" alt="Replace"></label>
+                            <label class="icon-btn"><input type="checkbox" id="errorsBtn"><img src="./Resources/Additional/Icons/Issues.png" alt="Errors"></label>
+                            <label class="icon-btn"><input type="checkbox" id="guidesBtn"><img src="./Resources/Additional/Icons/Grid.png" alt="Guides"></label>
+                        </div>
+
+
+                        <div id="lastDivider" style="display: none;" class="toolbar-divider"></div>
+
+                        <div class="toolbar-section" id="selectedAreaToolsDiv" style="display:none;">
+                            <pc><mob><h6 style="color:var(--primary-color)">Area Select Tools:</h6></mob></pc>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <section class="below-map">
+                <div class="save-export-buttons">
+                    <div class="visibility-toggle" style="display: flex; align-items: center; gap: 0.5rem; margin-right: 0.5rem;">
+                        <input type="checkbox" id="isPublicToggle" checked style="cursor:pointer;">
+                        <label for="isPublicToggle" style="color: #fff; font-size: 0.85rem; cursor: pointer; user-select: none;">🌍 Public</label>
+                    </div>
+                    <button id="saveBtn" class="text-btn" title="Save Map (Ctrl+S)">Save Map</button>
+                    <button id="exportBtn" class="text-btn" title="Export as PNG (Ctrl+E)">Download Map</button>
+                    <button id="clearBtn" class="text-btn" title="Clear Map (Ctrl+Del)">Clear Map</button>
+                </div>
+                <div class="map-link">
+                    <div class="link-container">
+                        <span>Link:</span>
+                        <a id="mapLink" class="map-link-text">./view.html</a>
+                        <button id="copyLinkBtn" class="copy-btn" title="Copy link to clipboard">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <button class="reset-panels-btn" id="resetPanelsBtn" title="Reset all panels to original positions">в†є Reset Layout</button>
+    <div class="tooltip-floating disclaimer-tooltip">
+        ?
+        <div class="tooltip-text">
+            This site is not affiliated with or endorsed by Supercell. Brawl Stars and all related assets belong to Supercell.
+        </div>
+    </div>
+    <div class="tooltip-floating shortcuts-tooltip">
+        <img src="./Resources/Additional/Icons/Key.png" alt="Keyboard Shortcuts">
+        <div class="tooltip-text shortcuts-text">
+            <h4>Keyboard Shortcuts</h4>
+            <ul>
+                <li><kbd>Ctrl/Shift</kbd> + <kbd>1</kbd> Diagonal</li>
+                <li><kbd>Ctrl/Shift</kbd> + <kbd>2</kbd> Vertical</li>
+                <li><kbd>Ctrl/Shift</kbd> + <kbd>3</kbd> Horizontal</li>
+                <li><kbd>1</kbd> Single Selection</li>
+                <li><kbd>2</kbd> Line Selection</li>
+                <li><kbd>3</kbd> Rectangle Selection</li>
+                <li><kbd>4</kbd> Fill Selection</li>
+                <li><kbd>R</kbd> Toggle Replace Mode</li>
+                <li><kbd>E</kbd> Toggle Erase Mode</li>
+                <li><kbd>M</kbd> Toggle Mirroring</li>
+                <li><kbd>N</kbd> Toggle Blue to Red Mirroring</li>
+                <li><kbd>Q</kbd> Toggle Error Check</li>
+                <li><kbd>Ctrl</kbd> + <kbd>Z</kbd> Undo</li>
+                <li><kbd>Ctrl</kbd> + <kbd>Y</kbd> Redo</li>
+                <li><kbd>Ctrl</kbd> + <kbd>Del</kbd> Clear Map</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Map Maker UI Interaction Engine & Background -->
+    <script type="module" src="./js/editor/editor-ui.js"></script>
+    <script type="module" src="./js/editor/editor-vortex.js"></script>
+
+    <script type="module" src="./js/core/auth-global.js?v=1.0.6"></script>
+    <script type="module" src="./js/editor/MapEditor.js?v=1.0.6"></script>
+</body>
+</html>
+

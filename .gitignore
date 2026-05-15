@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# TypeScript compiled output
+/js/
+
+# Development / System
+.DS_Store
+Thumbs.db
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary tools and analysis scratchpad
+/scratch/

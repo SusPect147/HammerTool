@@ -1,0 +1,799 @@
+/* ==========================================
+   CUSTOM TILES - Marketplace & Studio Styles
+   ========================================== */
+
+:root {
+    --neon-blue: #00d2ff;
+    --neon-purple: #8a2be2;
+    --neon-green: #39ff14;
+    --glass-border: rgba(255, 255, 255, 0.06);
+    --glass-bg: rgba(20, 20, 28, 0.45);
+    --glass-hover: rgba(25, 25, 35, 0.6);
+    --primary-color: #00d2ff;
+}
+
+.custom-tiles-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 2.5rem 8rem;
+    position: relative;
+    z-index: 2;
+}
+
+/* HEADER AREA */
+.studio-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    padding-bottom: 1.5rem;
+}
+
+.studio-title h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    background: linear-gradient(135deg, #ffffff 0%, #a0a0c5 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+}
+
+.studio-title p {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* CREATE BUTTON */
+.create-pack-btn {
+    background: linear-gradient(135deg, #ffffff 0%, #e0e0ff 100%);
+    color: #000;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow: 0 8px 24px rgba(255, 255, 255, 0.1);
+}
+
+.create-pack-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(255, 255, 255, 0.2);
+    background: #fff;
+}
+
+.create-pack-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 3;
+}
+
+/* SECTIONS */
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 3rem 0 1.5rem;
+}
+
+.section-header h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+}
+
+.section-badge {
+    background: rgba(255, 255, 255, 0.06);
+    padding: 0.2rem 0.6rem;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 600;
+}
+
+/* GRID LAYOUT */
+.tile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.5rem;
+}
+
+/* CARDS */
+.tile-pack-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    backdrop-filter: blur(15px);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    cursor: pointer; /* Indicate clickability to equip */
+}
+
+.tile-pack-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255,255,255,0.12);
+    background: var(--glass-hover);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03);
+}
+
+.tile-pack-card.active-equipped {
+    border-color: var(--neon-blue) !important;
+    box-shadow: 0 0 20px rgba(0, 210, 255, 0.25), 0 10px 30px rgba(0,0,0,0.4);
+}
+
+.tile-pack-card.active-equipped::after {
+    content: 'EQUIPPED';
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--neon-blue);
+    color: #000;
+    font-size: 0.6rem;
+    font-weight: 800;
+    padding: 0.25rem 0.6rem;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0, 210, 255, 0.3);
+}
+
+/* PREVIEW WITHIN CARD */
+.pack-preview-strip {
+    height: 110px;
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.preview-tile-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    padding: 6px;
+    object-fit: contain;
+    transition: transform 0.2s;
+}
+
+.tile-pack-card:hover .preview-tile-icon {
+    transform: scale(1.1);
+}
+
+/* CARD CONTENT */
+.pack-info {
+    padding: 1.2rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.pack-meta-top {
+    margin-bottom: 1rem;
+}
+
+.pack-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pack-author {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 500;
+}
+
+.pack-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+}
+
+/* LIKES ACTION */
+.pack-like-btn {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 0.4rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.6);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.pack-like-btn:hover {
+    background: rgba(255, 62, 92, 0.1);
+    border-color: rgba(255, 62, 92, 0.2);
+    color: #ff3e5c;
+}
+
+.pack-like-btn.liked {
+    background: rgba(255, 62, 92, 0.15);
+    border-color: rgba(255, 62, 92, 0.3);
+    color: #ff3e5c;
+}
+
+.pack-like-btn svg {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.2s;
+}
+
+.pack-like-btn:active svg {
+    transform: scale(1.3);
+}
+
+/* PRIVACY TOGGLE (Same layout as my-maps) */
+.privacy-toggle {
+    padding: 0.4rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    border: 1px solid transparent;
+}
+
+.privacy-toggle.pub {
+    background: rgba(50, 255, 100, 0.08);
+    border-color: rgba(50, 255, 100, 0.15);
+    color: #50ff85;
+}
+
+.privacy-toggle.priv {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255,255,255,0.6);
+}
+
+/* ==========================================
+   STUDIO MODAL WINDOW
+   ========================================== */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: color-mix(in srgb, var(--bg-primary) 85%, transparent);
+    backdrop-filter: blur(12px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-container {
+    background: var(--bg-elevated);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    width: 90%;
+    max-width: 700px;
+    max-height: 85vh;
+    border-radius: 24px;
+    box-shadow: 0 32px 64px rgba(0, 0, 0, 0.6);
+    transform: scale(0.95) translateY(20px);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.modal-overlay.active .modal-container {
+    transform: scale(1) translateY(0);
+}
+
+/* MODAL HEADER */
+.modal-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    color: #fff;
+    font-size: 1.3rem;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+}
+
+.close-modal-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    font-size: 1.5rem;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.close-modal-btn:hover {
+    color: #fff;
+}
+
+/* MODAL BODY */
+.modal-body {
+    padding: 2rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* STUDIO FORM */
+.studio-input-group {
+    margin-bottom: 2rem;
+}
+
+.studio-input-group label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.6rem;
+}
+
+.studio-text-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 0.8rem 1.2rem;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.studio-text-input:focus {
+    outline: none;
+    border-color: var(--neon-blue);
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.15);
+}
+
+/* TILE SELECTION GRID */
+.studio-tile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1rem;
+}
+
+.tile-edit-cell {
+    aspect-ratio: 1;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+}
+
+.tile-edit-cell:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+/* NEON MODIFIED GLOW */
+.tile-edit-cell.customized {
+    border-color: var(--neon-green);
+    background: rgba(57, 255, 20, 0.03);
+    box-shadow: inset 0 0 10px rgba(57, 255, 20, 0.05), 0 0 15px rgba(57, 255, 20, 0.1);
+}
+
+.tile-cell-img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    margin-bottom: 6px;
+}
+
+.tile-cell-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+.tile-edit-cell.customized .tile-cell-label {
+    color: var(--neon-green);
+}
+
+.customized-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--neon-green);
+    box-shadow: 0 0 6px var(--neon-green);
+}
+
+/* MODAL FOOTER */
+.modal-footer {
+    padding: 1.5rem 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.cancel-btn {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.6);
+    padding: 0.7rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancel-btn:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+}
+
+.save-pack-btn {
+    background: #fff;
+    color: #000;
+    border: none;
+    padding: 0.7rem 1.8rem;
+    border-radius: 10px;
+    font-weight: 750;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.save-pack-btn:hover {
+    background: #e0e0ee;
+    transform: scale(1.02);
+}
+
+.save-pack-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* LOADING SPINNER OVERLAY */
+.studio-loader {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, var(--bg-secondary) 80%, transparent);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 10;
+}
+
+.studio-loader.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.spinner {
+    width: 35px;
+    height: 35px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 1rem;
+}
+
+.loader-text {
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* EMPTY STATE */
+.empty-placeholder {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 5rem 1rem;
+    background: rgba(255, 255, 255, 0.01);
+    border: 1px dashed rgba(255, 255, 255, 0.05);
+    border-radius: 18px;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.empty-placeholder-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* RESPONSIVE HOOKS */
+@media (max-width: 768px) {
+    .studio-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+    }
+    
+    .custom-tiles-container {
+        padding: 1rem 1.5rem 6rem;
+    }
+    
+    .modal-container {
+        width: 95%;
+        max-height: 95vh;
+    }
+    
+    .modal-body {
+        padding: 1.2rem;
+    }
+}
+
+/* ==========================================
+   CROPPER RESPONSIVE CUSTOMIZATIONS
+   ========================================== */
+
+.cropper-frame {
+    background-image: 
+        linear-gradient(45deg, rgba(255,255,255,0.03) 25%, transparent 25%), 
+        linear-gradient(-45deg, rgba(255,255,255,0.03) 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.03) 75%), 
+        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.03) 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    border-radius: 12px;
+    border: 1px dashed rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Adjust cropper.js UI components to dark design */
+.cropper-view-box,
+.cropper-face {
+    border-radius: 4px;
+}
+.cropper-line, .cropper-point {
+    background-color: var(--neon-blue) !important;
+}
+.cropper-point.point-se {
+    width: 10px;
+    height: 10px;
+    opacity: 1;
+}
+.cropper-bg {
+    background-image: none !important;
+    background-color: #050508 !important;
+}
+
+@media (max-height: 700px) {
+    .cropper-frame {
+        max-height: 45vh !important;
+    }
+}
+
+/* ==========================================
+   FULLSCREEN CROP MODAL OVERRIDES
+   ========================================== */
+
+#cropModal .modal-container {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    border-radius: 0px !important;
+    border: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+#cropModal .modal-body {
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden !important;
+}
+
+#cropModal .cropper-frame {
+    flex: 1;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+    border: none !important;
+}
+
+/* ==========================================
+   EQUIPPED THEME BANNER & MODALS
+   ========================================== */
+
+.equipped-theme-banner {
+    background: color-mix(in srgb, var(--bg-secondary) 75%, transparent);
+    border: 1px solid rgba(0, 210, 255, 0.2);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    animation: slideInTheme 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), inset 0 0 20px rgba(0, 210, 255, 0.02);
+}
+
+.equipped-theme-banner .banner-content {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.equipped-theme-banner .banner-icon {
+    font-size: 1.3rem;
+}
+
+.equipped-theme-banner .banner-text {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.equipped-theme-banner .banner-text strong {
+    color: var(--neon-blue);
+    font-weight: 600;
+}
+
+.equipped-theme-banner .unequip-btn {
+    background: rgba(255, 75, 75, 0.12);
+    color: #ff5555;
+    border: 1px solid rgba(255, 75, 75, 0.3);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    letter-spacing: 0.03em;
+}
+
+.equipped-theme-banner .unequip-btn:hover {
+    background: #ff4b4b;
+    color: #fff;
+    border-color: #ff4b4b;
+    box-shadow: 0 0 20px rgba(255, 75, 75, 0.4);
+    transform: translateY(-1px);
+}
+
+@keyframes slideInTheme {
+    from {
+        opacity: 0;
+        transform: translateY(-25px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==========================================
+   💡 REACTIVE PIXEL-PERFECT GRID
+   ========================================== */
+
+.cropper-container::after {
+    content: '';
+    position: absolute;
+    left: var(--p-x, 0);
+    top: var(--p-y, 0);
+    width: var(--img-w, 0);
+    height: var(--img-h, 0);
+    pointer-events: none;
+    z-index: 1000; /* Paint overlay above canvas, modals, and select-box */
+    
+    /* Grid lines built using repeating linear gradients scaled to exactly 1 image pixel width */
+    background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.15) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+    
+    background-size: var(--p-w, 0) var(--p-h, 0);
+    opacity: 0;
+    transition: opacity 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Smooth Fade-in trigger when zoom threshold resolves (> 6 display pixels) */
+.cropper-container.show-pixel-grid::after {
+    opacity: 1;
+}
+
+/* Interactive Active Theme Stack Tag Chips */
+.theme-chip {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(0, 242, 254, 0.1);
+    border: 1px solid rgba(0, 242, 254, 0.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    margin: 2px 4px;
+    font-size: 0.85rem;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(4px);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.theme-chip:hover {
+    border-color: var(--neon-blue);
+    transform: translateY(-1px);
+}
+
+.theme-chip .chip-remove {
+    margin-left: 8px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.1rem;
+    font-weight: bold;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.theme-chip .chip-remove:hover {
+    color: #ff4b4b;
+}
+
+
+
+
+

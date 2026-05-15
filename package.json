@@ -1,0 +1,27 @@
+{
+  "name": "atlas-horizon-main",
+  "version": "1.0.0",
+  "description": "<div align=\"center\">\r   <img src=\"Resources/Additional/Icons/HammerTool.webp\" alt=\"HammerTool Logo\" width=\"120\"/>",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SusPect147/HammerTool.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/SusPect147/HammerTool/issues"
+  },
+  "homepage": "https://github.com/SusPect147/HammerTool#readme",
+  "devDependencies": {
+    "@types/node": "^25.8.0",
+    "typescript": "^6.0.3"
+  }
+}
