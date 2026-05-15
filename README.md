@@ -44,8 +44,12 @@
 ## 🙏 Credits & Attribution
 
 > [!NOTE]
-> **Asset Source:**
+> **Asset & Code Inspiration:**
 > Some of the visual assets used here—specifically the **PNG tile textures**—were sourced from **[atlas-horizon](https://github.com/She-Fairy/atlas-horizon)**, a project by **[She-Fairy](https://github.com/She-Fairy)**.
+>
+> Additionally, as a solo developer inspired by the elegant solutions in that project, **some code fragments** in HammerTool may bear resemblance to those in `atlas-horizon`. These similarities stem from creative inspiration and learning, not from direct copying.
+>
+> Big thanks to **She-Fairy** for creating such an inspiring project and contributing to the community! 🙌
 
 ## ⚖️ Legal Disclaimer
 
