@@ -41,12 +41,13 @@
 
 ---
 
-## 🙏 Acknowledgements & Asset Attribution
+## 🙏 Credits & Attribution
 
 > [!NOTE]
-> Certain visual assets used in this project, specifically **PNG tile textures** and related map resources, are derived from or inspired by the **[atlas-horizon](https://github.com/She-Fairy/atlas-horizon)** project by **She-Fairy**.
+> **Asset Source:**
+> This project is developed and maintained by a single creator. Some of the visual assets used here—specifically the **PNG tile textures**—were sourced from **[atlas-horizon](https://github.com/She-Fairy/atlas-horizon)**, a project by **[She-Fairy](https://github.com/She-Fairy)**.
 >
-> We extend our gratitude to the original authors for their contributions to the community. All rights to the original assets remain with their respective owners.
+> Big thanks to She-Fairy for creating these resources and sharing them with the community. All original rights belong to the respective author.
 
 ## ⚖️ Legal Disclaimer
 
