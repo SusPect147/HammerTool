@@ -1,6 +1,6 @@
 // @ts-nocheck
 export const InputMixin = {
-initializeEventListeners() {
+    initializeEventListeners() {
         // Tool buttons
         if (this.headless) return;
         const handToolBtn = document.getElementById('handToolBtn');
@@ -34,7 +34,7 @@ initializeEventListeners() {
                 this.selectionMode = e.target.value;
                 document.getElementById('selectedAreaToolsDiv').style.display = selectBtn.checked ? 'flex' : 'none';
                 document.getElementById('lastDivider').style.display = selectBtn.checked ? 'block' : 'none';
-                
+
                 if (this.selectionMode === 'select' && this.isErasing) {
                     this.toggleEraseMode(false);
                 }
@@ -85,18 +85,18 @@ initializeEventListeners() {
         // Undo/Redo buttons
         document.getElementById('undoBtn').addEventListener('click', () => this.undo());
         document.getElementById('redoBtn').addEventListener('click', () => this.redo());
-        
+
         // Replace button
         document.getElementById('replaceBtn').addEventListener('click', () => this.toggleReplaceMode());
-        
+
         // Rotate button
         document.getElementById('rotateBtn').addEventListener('click', () => this.rotateSelectedTiles());
 
         // Add keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-            
-           switch (e.code) {
+
+            switch (e.code) {
                 case 'Digit1':
                 case 'Numpad1':
                     if (e.shiftKey || e.ctrlKey || e.metaKey) {
@@ -129,7 +129,7 @@ initializeEventListeners() {
                     }
                     document.getElementById('rectangleBtn').click();
                     break;
-                    
+
                 case 'Digit4':
                 case 'Numpad4':
                     document.getElementById('fillBtn').click();
@@ -139,7 +139,7 @@ initializeEventListeners() {
                 case 'Numpad5':
                     document.getElementById('selectBtn').click();
                     break;
-                    
+
                 case 'KeyE':
                     this.toggleEraseMode();
                     break;
@@ -198,10 +198,10 @@ initializeEventListeners() {
                     break;
             }
         });
-        
 
 
-                // Canvas event listeners
+
+        // Canvas event listeners
         // Mouse events
         this.canvas.addEventListener('mousedown', this.handleMouseDown.bind(this));
         this.canvas.addEventListener('mousemove', this.handleMouseMove.bind(this));
@@ -209,7 +209,7 @@ initializeEventListeners() {
         this.canvas.addEventListener('mouseleave', this.handleMouseLeave.bind(this));
         this.canvas.addEventListener('contextmenu', this.handleRightClick.bind(this));
         this.canvas.addEventListener('dragstart', e => {
-          e.preventDefault();
+            e.preventDefault();
         });
 
         // в”Ђв”Ђ Smooth wheel zoom в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
@@ -229,7 +229,7 @@ initializeEventListeners() {
             // ── Touch Pinch Zoom (Mobile/Tablet) ───────────────────────
             let initialPinchDist = 0;
             let initialZoom = 1;
-            
+
             mapEditor.addEventListener('touchstart', (e) => {
                 if (e.touches.length === 2) {
                     e.preventDefault(); // Prevent default browser zoom/pinch
@@ -291,7 +291,7 @@ initializeEventListeners() {
             // Touch Start panning
             editorEl.addEventListener('touchstart', (e) => {
                 if (!this.viewPanActive || e.touches.length !== 1) return;
-                
+
                 isPanning = true;
                 panMoved = false;
                 lastPanX = e.touches[0].clientX;
@@ -302,13 +302,13 @@ initializeEventListeners() {
                 if (!isPanning) return;
                 const dx = e.clientX - lastPanX;
                 const dy = e.clientY - lastPanY;
-                
+
                 if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
                     panMoved = true;
                 }
                 if (panMoved) {
                     editorEl.scrollLeft -= dx;
-                    editorEl.scrollTop  -= dy;
+                    editorEl.scrollTop -= dy;
                     lastPanX = e.clientX;
                     lastPanY = e.clientY;
                 }
@@ -319,14 +319,14 @@ initializeEventListeners() {
                 if (!isPanning || e.touches.length !== 1) return;
                 const dx = e.touches[0].clientX - lastPanX;
                 const dy = e.touches[0].clientY - lastPanY;
-                
+
                 if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
                     panMoved = true;
                     e.preventDefault(); // Stop system rubber banding
                 }
                 if (panMoved) {
                     editorEl.scrollLeft -= dx;
-                    editorEl.scrollTop  -= dy;
+                    editorEl.scrollTop -= dy;
                     lastPanX = e.touches[0].clientX;
                     lastPanY = e.touches[0].clientY;
                 }
@@ -361,13 +361,13 @@ initializeEventListeners() {
         // Touch events
         this.canvas.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
         this.canvas.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
-        this.canvas.addEventListener('touchend', this.handleTouchEnd.bind(this), {passive: false });
+        this.canvas.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: false });
         this.canvas.addEventListener('touchcancel', this.handleTouchCancel.bind(this));
     },
 
-handleRightClick(event) {
+    handleRightClick(event) {
         event.preventDefault();
-        
+
         // Right-click is used for panning вЂ” don't do tile actions during pan
         // We only pick tile if not panning (panning is handled at editor level)
         const coords = this.getTileCoordinates(event);
@@ -386,12 +386,12 @@ handleRightClick(event) {
         if (btn) btn.classList.add('selected');
     },
 
-handleMouseDown(event) {
+    handleMouseDown(event) {
         if (this.viewPanActive) return; // Exit early, panning overrides drawing
         if (event.button !== 0) return;
         this.mouseDown = true;
         const coords = this.getTileCoordinates(event);
-        
+
         if (coords.x < 0 || coords.x >= this.mapWidth || coords.y < 0 || coords.y >= this.mapHeight) return;
 
         if (this.selectionMode === 'select' && this.activeToolBrushs.length > 0 && this.activeToolBrushs.some(t => t.x === coords.x && t.y === coords.y)) {
@@ -417,10 +417,10 @@ handleMouseDown(event) {
 
         if ((this.gamemode === 'Brawl_Ball' || this.gamemode === 'Hockey') && this.mapSize === this.mapSizes.regular) {
             const { x, y } = coords;
-            const atTop    = y < 4;
+            const atTop = y < 4;
             const atBottom = y >= this.mapHeight - 4;
-            const atLeft   = x < 7;
-            const atRight  = x >= this.mapWidth - 7;
+            const atLeft = x < 7;
+            const atRight = x >= this.mapWidth - 7;
             if ((atTop || atBottom) && (atLeft || atRight)) {
                 // cancel *all* drawing state
                 this.isDrawing = false;
@@ -438,7 +438,7 @@ handleMouseDown(event) {
         // Check if we can place the selected tile on the existing tile
         if (!this.isErasing && this.selectionMode !== 'fill' && this.selectionMode !== 'select') {
             const topmostTile = this.getTopmostTileAt(coords.x, coords.y);
-            
+
             if (topmostTile) {
                 // Check if we can place the selected tile on this existing tile
                 if (this.canPlaceTileOn(this.activeToolBrush.id, topmostTile.tileId)) {
@@ -452,7 +452,7 @@ handleMouseDown(event) {
         // Check if we're starting to drag an existing tile
         if (!this.isErasing && this.selectionMode !== 'fill' && this.selectionMode !== 'select') {
             const topmostTile = this.findTopmostTileAt(coords.x, coords.y);
-            
+
             if (topmostTile) {
                 this.isDragging = true;
                 this.draggedTileId = topmostTile.tileId;
@@ -460,11 +460,11 @@ handleMouseDown(event) {
                 this.dragStartX = topmostTile.x;
                 this.dragStartY = topmostTile.y;
                 this.saveState();
-                
+
                 // Get the tile definition to check if it's a 2x2 tile
                 const def = topmostTile.def;
                 const is2x2 = def && def.size === 2;
-                
+
                 // Store the negative IDs for size 2 tiles so they move together
                 this.draggedNegativeIds = null;
                 if (is2x2) {
@@ -474,62 +474,62 @@ handleMouseDown(event) {
                         bottomRight: this.tileGrid[topmostTile.layerIndex][topmostTile.y + 1][topmostTile.x + 1]
                     };
                 }
-                
+
                 // Remove tile from original position immediately using parent root coordinates
                 this.tileGrid[topmostTile.layerIndex][topmostTile.y][topmostTile.x] = 0;
-            
-            // If it's a 2x2 tile, also remove the other three tiles from the root
-            if (is2x2) {
-                if (topmostTile.x < this.mapWidth - 1) this.tileGrid[topmostTile.layerIndex][topmostTile.y][topmostTile.x + 1] = 0;
-                if (topmostTile.y < this.mapHeight - 1) this.tileGrid[topmostTile.layerIndex][topmostTile.y + 1][topmostTile.x] = 0;
-                if (topmostTile.x < this.mapWidth - 1 && topmostTile.y < this.mapHeight - 1) this.tileGrid[topmostTile.layerIndex][topmostTile.y + 1][topmostTile.x + 1] = 0;
-            }
-            
-            // Apply mirroring for removal
-            if (this.mirrorVertical) {
-                const mirrorY = this.mapHeight - 1 - topmostTile.y;
-                const mirrorTopmost = this.findTopmostTileAt(topmostTile.x, mirrorY);
-                const mirrorLayer = mirrorTopmost ? mirrorTopmost.layerIndex : topmostTile.layerIndex;
-                this.tileGrid[mirrorLayer][mirrorY][topmostTile.x] = 0;
-                
-                // If it's a 2x2 tile, also remove the other three tiles
+
+                // If it's a 2x2 tile, also remove the other three tiles from the root
                 if (is2x2) {
-                    this.tileGrid[mirrorLayer][mirrorY][topmostTile.x + 1] = 0;
-                    this.tileGrid[mirrorLayer][mirrorY - 1][topmostTile.x] = 0;
-                    this.tileGrid[mirrorLayer][mirrorY - 1][topmostTile.x + 1] = 0;
+                    if (topmostTile.x < this.mapWidth - 1) this.tileGrid[topmostTile.layerIndex][topmostTile.y][topmostTile.x + 1] = 0;
+                    if (topmostTile.y < this.mapHeight - 1) this.tileGrid[topmostTile.layerIndex][topmostTile.y + 1][topmostTile.x] = 0;
+                    if (topmostTile.x < this.mapWidth - 1 && topmostTile.y < this.mapHeight - 1) this.tileGrid[topmostTile.layerIndex][topmostTile.y + 1][topmostTile.x + 1] = 0;
                 }
-            }
-            if (this.mirrorHorizontal) {
-                const mirrorX = this.mapWidth - 1 - topmostTile.x;
-                const mirrorTopmost = this.findTopmostTileAt(mirrorX, topmostTile.y);
-                const mirrorLayer = mirrorTopmost ? mirrorTopmost.layerIndex : topmostTile.layerIndex;
-                this.tileGrid[mirrorLayer][topmostTile.y][mirrorX] = 0;
-                
-                // If it's a 2x2 tile, also remove the other three tiles
-                if (is2x2) {
-                    this.tileGrid[mirrorLayer][topmostTile.y][mirrorX - 1] = 0;
-                    this.tileGrid[mirrorLayer][topmostTile.y + 1][mirrorX] = 0;
-                    this.tileGrid[mirrorLayer][topmostTile.y + 1][mirrorX - 1] = 0;
+
+                // Apply mirroring for removal
+                if (this.mirrorVertical) {
+                    const mirrorY = this.mapHeight - 1 - topmostTile.y;
+                    const mirrorTopmost = this.findTopmostTileAt(topmostTile.x, mirrorY);
+                    const mirrorLayer = mirrorTopmost ? mirrorTopmost.layerIndex : topmostTile.layerIndex;
+                    this.tileGrid[mirrorLayer][mirrorY][topmostTile.x] = 0;
+
+                    // If it's a 2x2 tile, also remove the other three tiles
+                    if (is2x2) {
+                        this.tileGrid[mirrorLayer][mirrorY][topmostTile.x + 1] = 0;
+                        this.tileGrid[mirrorLayer][mirrorY - 1][topmostTile.x] = 0;
+                        this.tileGrid[mirrorLayer][mirrorY - 1][topmostTile.x + 1] = 0;
+                    }
                 }
-            }
-            if (this.mirrorDiagonal) {
-                const mirrorX = this.mapWidth - 1 - topmostTile.x;
-                const mirrorY = this.mapHeight - 1 - topmostTile.y;
-                const mirrorTopmost = this.findTopmostTileAt(mirrorX, mirrorY);
-                const mirrorLayer = mirrorTopmost ? mirrorTopmost.layerIndex : topmostTile.layerIndex;
-                this.tileGrid[mirrorLayer][mirrorY][mirrorX] = 0;
-                
-                // If it's a 2x2 tile, also remove the other three tiles
-                if (is2x2) {
-                    this.tileGrid[mirrorLayer][mirrorY][mirrorX - 1] = 0;
-                    this.tileGrid[mirrorLayer][mirrorY - 1][mirrorX] = 0;
-                    this.tileGrid[mirrorLayer][mirrorY - 1][mirrorX - 1] = 0;
+                if (this.mirrorHorizontal) {
+                    const mirrorX = this.mapWidth - 1 - topmostTile.x;
+                    const mirrorTopmost = this.findTopmostTileAt(mirrorX, topmostTile.y);
+                    const mirrorLayer = mirrorTopmost ? mirrorTopmost.layerIndex : topmostTile.layerIndex;
+                    this.tileGrid[mirrorLayer][topmostTile.y][mirrorX] = 0;
+
+                    // If it's a 2x2 tile, also remove the other three tiles
+                    if (is2x2) {
+                        this.tileGrid[mirrorLayer][topmostTile.y][mirrorX - 1] = 0;
+                        this.tileGrid[mirrorLayer][topmostTile.y + 1][mirrorX] = 0;
+                        this.tileGrid[mirrorLayer][topmostTile.y + 1][mirrorX - 1] = 0;
+                    }
                 }
-            }
-            
-            this.canvas.style.cursor = 'crosshair';
-            this.draw();
-            return;
+                if (this.mirrorDiagonal) {
+                    const mirrorX = this.mapWidth - 1 - topmostTile.x;
+                    const mirrorY = this.mapHeight - 1 - topmostTile.y;
+                    const mirrorTopmost = this.findTopmostTileAt(mirrorX, mirrorY);
+                    const mirrorLayer = mirrorTopmost ? mirrorTopmost.layerIndex : topmostTile.layerIndex;
+                    this.tileGrid[mirrorLayer][mirrorY][mirrorX] = 0;
+
+                    // If it's a 2x2 tile, also remove the other three tiles
+                    if (is2x2) {
+                        this.tileGrid[mirrorLayer][mirrorY][mirrorX - 1] = 0;
+                        this.tileGrid[mirrorLayer][mirrorY - 1][mirrorX] = 0;
+                        this.tileGrid[mirrorLayer][mirrorY - 1][mirrorX - 1] = 0;
+                    }
+                }
+
+                this.canvas.style.cursor = 'crosshair';
+                this.draw();
+                return;
             }
         }
 
@@ -538,22 +538,22 @@ handleMouseDown(event) {
         this.isDrawing = true;
         this.selectionStart = coords;
         this.selectionEnd = coords;
-        
+
         // Initialize hoveredTiles with the starting tile
         if (this.selectionMode === 'line') {
             this.hoveredTiles.clear();
             this.hoveredTiles.add(`${coords.x},${coords.y}`);
         }
-    
+
 
         this.draw();
         this.drawSelection();
     },
 
-handleMouseMove(event) {
+    handleMouseMove(event) {
         const coords = this.getTileCoordinates(event);
         if (coords.x < 0 || coords.x >= this.mapWidth || coords.y < 0 || coords.y >= this.mapHeight) return;
-        
+
         if (this.isSelectDragging) {
             const offsetX = coords.x - this.selectDragStart.x;
             const offsetY = coords.y - this.selectDragStart.y;
@@ -604,18 +604,18 @@ handleMouseMove(event) {
 
         if (this.isDrawing) {
             this.selectionEnd = coords;
-            
+
             // Add the current tile to hoveredTiles for line selection
             if (this.selectionMode === 'line') {
                 this.hoveredTiles.add(`${coords.x},${coords.y}`);
             }
-            
+
             this.draw();
             this.drawSelection();
         }
     },
 
-handleMouseUp(event) {
+    handleMouseUp(event) {
         this.mouseDown = false;
         if (this.isSelectDragging) {
             const offsetX = this.selectDragOffset.x;
@@ -632,13 +632,13 @@ handleMouseUp(event) {
                     const originalLayer = t.layer !== undefined ? t.layer : this.defaultTileLayer;
                     const wasDragging = this.isDragging;
                     const oldDraggedLayer = this.draggedTileLayer;
-                    
+
                     this.isDragging = true;
                     this.draggedTileLayer = originalLayer;
-                    
+
                     // placeTile will call eraseTile internally and handle mirroring
                     this.placeTile(newX, newY, t.id, false);
-                    
+
                     // Restore state
                     this.isDragging = wasDragging;
                     this.draggedTileLayer = oldDraggedLayer;
@@ -646,13 +646,13 @@ handleMouseUp(event) {
             }
             this.isSelectDragging = false;
             this.selectDragStart = null;
-            this.selectDragOffset = {x: 0, y: 0};
+            this.selectDragOffset = { x: 0, y: 0 };
             this.selectDragTiles = [];
             this.activeToolBrushs = [];
             this.draw();
             return;
         }
-        
+
         if (!this.isDragging && this.isDrawing) {
             const coords = this.getTileCoordinates(event);
             if (coords.x >= 0 && coords.x < this.mapWidth && coords.y >= 0 && coords.y < this.mapHeight) {
@@ -669,12 +669,12 @@ handleMouseUp(event) {
         } else if (this.isDragging) {
             const coords = this.getTileCoordinates(event);
             if (coords.x >= 0 && coords.x < this.mapWidth && coords.y >= 0 && coords.y < this.mapHeight) {
-				// Delegate to existing placement logic (handles validation, 2x2, mirroring, state)
-				this.placeTile(coords.x, coords.y, this.draggedTileId);
+                // Delegate to existing placement logic (handles validation, 2x2, mirroring, state)
+                this.placeTile(coords.x, coords.y, this.draggedTileId);
                 this.draw();
             }
         }
-        
+
         // Reset all states
         this.isDragging = false;
         this.isDrawing = false;
@@ -688,7 +688,7 @@ handleMouseUp(event) {
         this.draw();
     },
 
-handleMouseLeave() {
+    handleMouseLeave() {
         this.isDrawing = false;
         if (this.isDragging) {
             this.isDragging = false;
@@ -700,7 +700,7 @@ handleMouseLeave() {
         }
     },
 
-handleTouchStart(e) {
+    handleTouchStart(e) {
         if (this.viewPanActive) return; // Allow touch event to bubble up to editor panning handlers
         if (e.touches.length > 1) return; // Ignore multi-touch
         e.preventDefault();
@@ -715,7 +715,7 @@ handleTouchStart(e) {
         this.handleMouseDown(simulatedEvent);
     },
 
-handleTouchMove(e) {
+    handleTouchMove(e) {
         if (this.viewPanActive) return; // Allow touch to bubble for panning
         if (e.touches.length > 1) return;
         e.preventDefault();
@@ -729,7 +729,7 @@ handleTouchMove(e) {
         this.handleMouseMove(simulatedEvent);
     },
 
-handleTouchEnd(e) {
+    handleTouchEnd(e) {
         if (this.viewPanActive) return; // Allow touch end bubbling
         e.preventDefault && e.preventDefault();
 
@@ -750,11 +750,11 @@ handleTouchEnd(e) {
         this.handleMouseUp(simulatedEvent);
     },
 
-handleTouchCancel(e) {
+    handleTouchCancel(e) {
         this.handleMouseLeave();
     },
 
-initializeTileSelector() {
+    initializeTileSelector() {
         if (this.headless) return;
         const container = document.getElementById('tileSelector');
         container.innerHTML = '';
@@ -762,11 +762,11 @@ initializeTileSelector() {
         // Define the order of tiles
         const tileOrder = [
             'Wall', 'Wall2', 'Crate', 'Barrel', 'Cactus', 'Bush', 'Fence', 'Skull', 'Rope Fence', 'BFence', 'Water', 'Unbreakable', // Environment tiles
-			'Blue Spawn', 'Blue Respawn', 'Red Spawn', 'Red Respawn', 'Trio Spawn', 'Yellow Spawn', // Normal Spawns
-			'BossSpawn', 'KaijuBoss','GenericBoss', 'OniHunt', // Boss spawns
-            'Objective', 'Box', 'Box_Loaded', 'Powercube', 'Bumper', 'Bolt', 'TokenBlue', 'GodzillaCity1', 'GodzillaCity2', 'GodzillaCity3', 'GodzillaCity4', 'GodzillaExplosive', 'GodzillaSpawn', 'Escape', 'TokenRed', 'Boss Zone', 'Monster Zone', 'Bot_Zone', 'SubwayRun1', 'SubwayRun2', 'TreasurePad1','TreasurePad2', 'Amulet', 'Bomb', // Objectives
+            'Blue Spawn', 'Blue Respawn', 'Red Spawn', 'Red Respawn', 'Trio Spawn', 'Yellow Spawn', // Normal Spawns
+            'BossSpawn', 'KaijuBoss', 'GenericBoss', 'OniHunt', // Boss spawns
+            'Objective', 'Box', 'Box_Loaded', 'Powercube', 'Bumper', 'Bolt', 'TokenBlue', 'GodzillaCity1', 'GodzillaCity2', 'GodzillaCity3', 'GodzillaCity4', 'GodzillaExplosive', 'GodzillaSpawn', 'Escape', 'TokenRed', 'Boss Zone', 'Monster Zone', 'Bot_Zone', 'SubwayRun1', 'SubwayRun2', 'TreasurePad1', 'TreasurePad2', 'Amulet', 'Bomb', // Objectives
             'Track', 'Base Ike Blue', 'Base Ike Red', 'Small Ike Blue', 'Small Ike Red', // Brawl Arena
-            'TNT', /*'UnbreakableBrick',*/ 'Speed Tile','Slow Tile', 'Spikes', 'Heal Pad', 'Smoke', 'IceTile', 'SnowTile', 'Rails', 'RedTrain', 'GreenTrain', 'YellowTrain', // Special Tiles
+            'TNT', /*'UnbreakableBrick',*/ 'Speed Tile', 'Slow Tile', 'Spikes', 'Heal Pad', 'Smoke', 'IceTile', 'SnowTile', 'Rails', 'RedTrain', 'GreenTrain', 'YellowTrain', // Special Tiles
             'Jump R', 'Jump L', 'Jump T', 'Jump B', 'Jump BR', 'Jump TL', 'Jump BL', 'Jump TR', //Jump pads
             'Teleporter Blue', 'Teleporter Green', 'Teleporter Red', 'Teleporter Yellow' // Teleporters
         ];
@@ -775,19 +775,22 @@ initializeTileSelector() {
         tileOrder.forEach(tileName => {
             const tileEntry = Object.entries(this.tileDefinitions)
                 .find(([_, def]) => def.name === tileName);
-            
+
             if (!tileEntry) return;
             const [id, def] = tileEntry;
 
             if (id === '0' || id === '-1') return; // Skip empty and occupied tiles
-            if (def.showInGamemode && !def.showInGamemode.includes(this.gamemode)) return;
-            if (def.showInEnvironment && !def.showInEnvironment.includes(this.environment)) return;
+
+            if (def.showInGamemode && Array.isArray(def.showInGamemode) && !def.showInGamemode.includes(this.gamemode))
+                return;
+            if (def.showInEnvironment && Array.isArray(def.showInEnvironment) && !def.showInEnvironment.includes(this.environment))
+                return;
 
             const btn = document.createElement('button');
             btn.className = 'tile-btn';
             btn.title = def.name;
             btn.id = id;
-            
+
             if (def.img || def.getImg) {
                 const img = document.createElement('img');
                 img.parentEnvironment = this.environment; // Bound context for global theme filtering
@@ -826,23 +829,23 @@ initializeTileSelector() {
         document.getElementById('tileSelector').querySelector(`.tile-btn[id="1"]`).classList.add('selected');
     },
 
-getTileCoordinates(event) {
+    getTileCoordinates(event) {
         const rect = this.canvas.getBoundingClientRect();
         const scaleX = this.canvas.width / rect.width;
         const scaleY = this.canvas.height / rect.height;
-        
+
         // Calculate mouse position relative to canvas
         const mouseX = (event.clientX - rect.left) * scaleX;
         const mouseY = (event.clientY - rect.top) * scaleY;
-        
+
         // Subtract padding to get position relative to map
         const mapX = mouseX - this.canvasPadding;
         const mapY = mouseY - this.canvasPadding;
-        
+
         // Convert to tile coordinates
         const x = Math.floor(mapX / this.tileSize);
         const y = Math.floor(mapY / this.tileSize);
-        
+
         return { x, y };
     }
 };
