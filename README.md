@@ -45,9 +45,7 @@
 
 > [!NOTE]
 > **Asset Source:**
-> This project is developed and maintained by a single creator. Some of the visual assets used here—specifically the **PNG tile textures**—were sourced from **[atlas-horizon](https://github.com/She-Fairy/atlas-horizon)**, a project by **[She-Fairy](https://github.com/She-Fairy)**.
->
-> Big thanks to She-Fairy for creating these resources and sharing them with the community. All original rights belong to the respective author.
+> Some of the visual assets used here—specifically the **PNG tile textures**—were sourced from **[atlas-horizon](https://github.com/She-Fairy/atlas-horizon)**, a project by **[She-Fairy](https://github.com/She-Fairy)**.
 
 ## ⚖️ Legal Disclaimer
 
