@@ -39,33 +39,14 @@
   - **Supabase**: Authentication, PostgreSQL Database, Storage Buckets, and Realtime Client.
 - **Visuals**: HTML5 Canvas API for fluid particle vortex rendering; CropperJS for client-side image processing.
 
-## 🚀 Getting Started
-
-To run this project locally, follow these simple steps:
-
-### 1. Prerequisites
-Ensure you have [NodeJS](https://nodejs.org/) installed.
-
-### 2. Installation
-```bash
-# Install dependencies
-npm install
-```
-
-### 3. Building
-Compile the TypeScript source code into the distribution scripts:
-```bash
-# One-time build
-npm run build
-
-# Watch mode for active development
-npm run watch
-```
-
-### 4. Development
-Serve the workspace root folder using an HTTP server (e.g. Live Server extension or standard `npx http-server`) to load ES modules cleanly.
-
 ---
+
+## 🙏 Acknowledgements & Asset Attribution
+
+> [!NOTE]
+> Certain visual assets used in this project, specifically **PNG tile textures** and related map resources, are derived from or inspired by the **[atlas-horizon](https://github.com/She-Fairy/atlas-horizon)** project by **She-Fairy**.
+>
+> We extend our gratitude to the original authors for their contributions to the community. All rights to the original assets remain with their respective owners.
 
 ## ⚖️ Legal Disclaimer
 
@@ -77,3 +58,4 @@ Serve the workspace root folder using an HTTP server (e.g. Live Server extension
 <div align="center">
   Developed with ❤️ for the Brawl Craft Community.
 </div>
+
