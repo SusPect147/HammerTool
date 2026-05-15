@@ -44,12 +44,12 @@
 ## 🙏 Credits & Attribution
 
 > [!NOTE]
-> **Asset & Code Inspiration:**
-> Some of the visual assets used here—specifically the **PNG tile textures**—were sourced from **[atlas-horizon](https://github.com/She-Fairy/atlas-horizon)**, a project by **[She-Fairy](https://github.com/She-Fairy)**.
+> **Design & Code Inspiration:**
+> The core design and UX concepts of this map maker—specifically the **editor layout, tile handling logic, and UI flow**—were inspired by **[atlas-horizon](https://github.com/She-Fairy/atlas-horizon)**, a project by **[She-Fairy](https://github.com/She-Fairy)**. Some **PNG tile textures** were also sourced directly from that repository.
 >
-> Additionally, as a solo developer inspired by the elegant solutions in that project, **some code fragments** in HammerTool may bear resemblance to those in `atlas-horizon`. These similarities stem from creative inspiration and learning, not from direct copying.
+> Additionally, as a solo developer inspired by the elegant solutions in that project, **some code fragments** in HammerTool may bear resemblance to those in `atlas-horizon`. These similarities stem from creative inspiration, learning, and adaptation—not from direct copying. All original rights to the referenced design concepts, assets, and code belong to their respective author.
 >
-> Big thanks to **She-Fairy** for creating such an inspiring project and contributing to the community! 🙌
+> Big thanks to **She-Fairy** for creating such an inspiring project and pushing the boundaries of community tools! 🙌
 
 ## ⚖️ Legal Disclaimer
 
