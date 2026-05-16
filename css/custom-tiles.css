@@ -665,17 +665,19 @@
 /* GHOST LAYER (FIXED IN CENTER) */
 .ghost-layer-fixed {
     position: absolute;
-    width: 128px; /* Default tile size in workspace */
-    height: 128px;
+    width: 64px; /* Default tile size in workspace viewport */
+    height: 64px;
     z-index: 10;
     pointer-events: none;
     border: 2px solid var(--neon-blue);
     box-shadow: 0 0 40px rgba(0, 210, 255, 0.4), inset 0 0 10px rgba(0, 210, 255, 0.1);
     background: rgba(0, 210, 255, 0.08);
-    display: flex;
+    display: none; /* Hidden by default */
     align-items: center;
     justify-content: center;
-    /* overflow: hidden; REMOVED to show tall assets/hitboxes */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .ghost-layer-fixed img {
@@ -702,7 +704,7 @@
     position: absolute;
     inset: 0;
     z-index: 5;
-    pointer-events: auto;
+    pointer-events: none; /* Disabled by default, enabled via JS in Smart Mode */
     cursor: crosshair;
     background-image: 
         linear-gradient(to right, rgba(0, 210, 255, 0.4) 1px, transparent 1px),
