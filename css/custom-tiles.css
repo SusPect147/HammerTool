@@ -670,28 +670,31 @@
     z-index: 10;
     pointer-events: none;
     border: 2px solid var(--neon-blue);
-    box-shadow: 0 0 30px rgba(0, 210, 255, 0.3);
-    background: rgba(0, 210, 255, 0.05);
+    box-shadow: 0 0 40px rgba(0, 210, 255, 0.4), inset 0 0 10px rgba(0, 210, 255, 0.1);
+    background: rgba(0, 210, 255, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    /* overflow: hidden; REMOVED to show tall assets/hitboxes */
 }
 
 .ghost-layer-fixed img {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    opacity: 0.4;
+    opacity: 0.5;
     mix-blend-mode: screen;
+    filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.6));
 }
 
 .ghost-hitbox-v2 {
     position: absolute;
     border: 2px dashed #ff4b4b;
-    background: rgba(255, 75, 75, 0.1);
+    background: rgba(255, 75, 75, 0.2);
+    box-shadow: 0 0 15px rgba(255, 75, 75, 0.3);
     box-sizing: border-box;
     display: none;
+    z-index: 15; /* Above ghost image */
 }
 
 /* SLICING GRID */
@@ -702,10 +705,11 @@
     pointer-events: auto;
     cursor: crosshair;
     background-image: 
-        linear-gradient(to right, rgba(0, 210, 255, 0.2) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(0, 210, 255, 0.2) 1px, transparent 1px);
+        linear-gradient(to right, rgba(0, 210, 255, 0.4) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 210, 255, 0.4) 1px, transparent 1px);
     background-size: var(--grid-w, 32px) var(--grid-h, 32px);
     background-position: var(--grid-m, 0px) var(--grid-m, 0px);
+    outline: 1px solid rgba(0, 210, 255, 0.5);
 }
 
 /* VIEWPORT UI */

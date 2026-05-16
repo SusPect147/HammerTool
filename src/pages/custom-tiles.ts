@@ -739,9 +739,10 @@ function initStudioControls() {
 
     const updateTransforms = () => {
         if (!transformLayer) return;
-        transformLayer.style.transform = `translate(${transform.x}px, ${transform.y}px) rotate(${transform.rotation}deg) scale(${transform.scale})`;
+        // Use translate3d for hardware acceleration and smoother movement
+        transformLayer.style.transform = `translate3d(${transform.x}px, ${transform.y}px, 0) rotate(${transform.rotation}deg) scale(${transform.scale})`;
         
-        // Sync UI
+        // Sync UI Slider without triggering jumping
         if (zoomSlider) zoomSlider.value = transform.scale.toString();
         if (rotateSlider) rotateSlider.value = transform.rotation.toString();
         
@@ -766,8 +767,9 @@ function initStudioControls() {
         // Update Ghost Info
         const ghostHitbox = document.getElementById('ghostHitbox');
         const activeTile = CORE_TILES.find(t => t.id === selectedTileKey);
+        
         if (activeTile?.hitbox && ghostHitbox) {
-            ghostHitbox.style.display = 'block';
+            ghostHitbox.style.display = 'flex'; // Use flex for center text
             ghostHitbox.style.top = (activeTile.hitbox.y * 100) + '%';
             ghostHitbox.style.left = '0';
             ghostHitbox.style.width = '100%';
@@ -788,6 +790,7 @@ function initStudioControls() {
         const imgW = croppingSource.naturalWidth;
         const imgH = croppingSource.naturalHeight;
         
+        // Center the image and fit to view
         const scale = Math.min(wsRect.width / imgW, wsRect.height / imgH) * 0.8;
         transform.scale = scale;
         transform.x = 0;
@@ -797,20 +800,30 @@ function initStudioControls() {
 
     // Mouse / Touch Dragging
     if (workspace) {
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+
         workspace.onmousedown = (e) => {
             if (e.button !== 0 && e.button !== 2) return;
             isDragging = true;
-            startX = e.clientX - transform.x;
-            startY = e.clientY - transform.y;
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
             workspace.style.cursor = 'grabbing';
             e.preventDefault();
         };
 
         window.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
-            transform.x = e.clientX - startX;
-            transform.y = e.clientY - startY;
-            updateTransforms();
+            const dx = e.clientX - lastMouseX;
+            const dy = e.clientY - lastMouseY;
+            
+            transform.x += dx;
+            transform.y += dy;
+            
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
+            
+            requestAnimationFrame(updateTransforms);
         });
 
         window.addEventListener('mouseup', () => {
@@ -823,13 +836,15 @@ function initStudioControls() {
             const delta = e.deltaY > 0 ? 0.9 : 1.1;
             const newScale = Math.max(0.05, Math.min(20, transform.scale * delta));
             
-            // Zoom towards mouse position (relative to center)
+            // Adjust translation to keep mouse point anchored
             const rect = workspace.getBoundingClientRect();
             const mouseX = e.clientX - rect.left - rect.width / 2;
             const mouseY = e.clientY - rect.top - rect.height / 2;
             
-            transform.x -= (mouseX - transform.x) * (delta - 1);
-            transform.y -= (mouseY - transform.y) * (delta - 1);
+            // Math: Point P in world space = (Mouse - X) / Scale
+            // We want (Mouse - X_new) / Scale_new = (Mouse - X_old) / Scale_old
+            transform.x = mouseX - (mouseX - transform.x) * (newScale / transform.scale);
+            transform.y = mouseY - (mouseY - transform.y) * (newScale / transform.scale);
             transform.scale = newScale;
             
             updateTransforms();
@@ -873,7 +888,12 @@ function initStudioControls() {
 
     // UI Events
     zoomSlider?.addEventListener('input', () => {
-        transform.scale = parseFloat(zoomSlider.value);
+        const newScale = parseFloat(zoomSlider.value);
+        // Compensate translation to keep center stable during zoom
+        const delta = newScale / transform.scale;
+        transform.x *= delta;
+        transform.y *= delta;
+        transform.scale = newScale;
         updateTransforms();
     });
     rotateSlider?.addEventListener('input', () => {
@@ -903,11 +923,17 @@ function initStudioControls() {
             croppingSource.onload = () => {
                 cropModal?.classList.add('active');
                 
-                // Initialize Ghost
+                // Initialize Ghost (Always Desert version)
                 const ghostImg = document.getElementById('ghostImg') as HTMLImageElement;
                 const activeTile = CORE_TILES.find(t => t.id === selectedTileKey);
                 if (ghostImg && activeTile) {
-                    ghostImg.src = activeTile.src;
+                    // Force path to Desert if it's a theme-able resource
+                    let desertSrc = activeTile.src;
+                    if (desertSrc.includes('/Resources/') && !desertSrc.includes('/Desert/')) {
+                        // Attempt to map Global or other themes to Desert
+                        desertSrc = desertSrc.replace(/\/Resources\/[^/]+\//, '/Resources/Desert/');
+                    }
+                    ghostImg.src = desertSrc;
                 }
                 
                 resetTransform();

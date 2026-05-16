@@ -150,8 +150,15 @@ async saveMap() {
             alert(this.loadedMapId ? window.ht_translate('Map updated successfully in secure database!') : window.ht_translate('Map saved successfully to Supabase database!'));
         } catch (error) {
             console.error('[HammerTool] Error saving map:', error);
-            const detail = error.details || error.hint || '';
-            alert(`${window.ht_translate('Failed to save map:')} ${error.message}${detail ? ' (' + detail + ')' : ''}`);
+            let errorMessage = error.message || 'Unknown error';
+            let detail = error.details || error.hint || '';
+            
+            // Helpful hint for schema mismatch
+            if (error.code === '42703' || errorMessage.includes('theme_options')) {
+                detail += ' | HINT: Please add the "theme_options" JSONB column to your Supabase "maps" table.';
+            }
+
+            alert(`${window.ht_translate('Failed to save map:')} ${errorMessage}${detail ? '\n\nDetails: ' + detail : ''}`);
         }
     },
 
