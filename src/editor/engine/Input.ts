@@ -76,17 +76,28 @@ export const InputMixin = {
         if (mirrorDiagonal) mirrorDiagonal.addEventListener('change', (e) => this.mirrorDiagonal = e.target.checked);
 
         // Theme and Export setting listeners
+        const handleThemeToggle = () => {
+            const gallery = showThemeInGalleryToggle?.checked ?? true;
+            const download = showThemeInDownloadToggle?.checked ?? true;
+            // If EITHER is enabled, we show the theme in the editor for feedback
+            // Actually, usually users want to see it if they are working on it.
+            // But if they turn BOTH off, we should definitely bypass.
+            window.cp_bypassTheme = !gallery && !download;
+            
+            // Force cache purge and reload to show/hide theme in real-time
+            this.tileImages = {};
+            this.tileImagePaths = {};
+            this.goalImageCache = {};
+            this.loadTileImages();
+            this.loadEnvironmentBackgrounds();
+            this.draw();
+        };
+
         if (showThemeInDownloadToggle) {
-            showThemeInDownloadToggle.addEventListener('change', (e) => {
-                window.cp_bypassTheme = !e.target.checked;
-                // Force cache purge and reload to show/hide theme in real-time
-                this.tileImages = {};
-                this.tileImagePaths = {};
-                this.goalImageCache = {};
-                this.loadTileImages();
-                this.loadEnvironmentBackgrounds();
-                this.draw();
-            });
+            showThemeInDownloadToggle.addEventListener('change', handleThemeToggle);
+        }
+        if (showThemeInGalleryToggle) {
+            showThemeInGalleryToggle.addEventListener('change', handleThemeToggle);
         }
         // if (hideZoom) hideZoom.addEventListener('change', () => this.toggleHideZoom()); // Removed
 
