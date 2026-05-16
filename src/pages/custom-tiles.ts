@@ -683,93 +683,199 @@ function initStudioControls() {
     const gridOverlay = document.getElementById('slicingGridOverlay');
     const cropModeSelect = document.getElementById('cropModeSelect');
 
-    if (cropModeSelect) {
-        const switchMode = (mode: string) => {
-            if (!cropperInstance) return;
-            currentCropMode = mode;
-            
-            const ghostRef = document.getElementById('ghostReference');
-            if (ghostRef) {
-                ghostRef.style.visibility = (currentCropMode === 'ghost') ? 'visible' : 'hidden';
-            }
+    let isSnapping = false;
 
-            // Save current transform
-            const canvasData = cropperInstance.getCanvasData();
-            const containerData = cropperInstance.getContainerData();
-            const cropData = cropperInstance.getData();
+    const updateSlicingGrid = () => {
+        if (!cropperInstance || !gridOverlay) return;
+        
+        const cropperContainer = document.querySelector('.cropper-container');
+        if (cropperContainer && gridOverlay.parentElement !== cropperContainer) {
+            cropperContainer.appendChild(gridOverlay);
+        }
 
-            // Recreate cropper with new options (since v1.x doesn't support setOptions)
-            cropperInstance.destroy();
-            
-            const options: any = {
-                aspectRatio: NaN,
-                viewMode: 0,
-                background: false,
-                zoomable: true,
-                movable: true,
-                cropBoxMovable: (currentCropMode !== 'ghost'),
-                cropBoxResizable: (currentCropMode !== 'ghost'),
-                dragMode: (currentCropMode === 'manual') ? 'crop' : 'move',
-                guides: false,
-                center: false,
-                highlight: false,
-                ready() {
-                    updateSlicingGrid();
-                    initRightClickPan();
-                    
-                    // Restore state
-                    cropperInstance.setCanvasData(canvasData);
-                    if (currentCropMode === 'ghost') {
-                        // In ghost mode, center it
-                        const targetW = 128;
-                        const targetH = 128;
-                        const centerX = (containerData.width - targetW) / 2;
-                        const centerY = (containerData.height - targetH) / 2;
-                        cropperInstance.setCropBoxData({
-                            left: centerX,
-                            top: centerY,
-                            width: targetW,
-                            height: targetH
-                        });
-                    } else {
-                        cropperInstance.setData(cropData);
-                    }
-                },
-                zoom(event) {
-                    updateSlicingGrid();
-                    if (zoomSlider && event.detail.ratio) {
-                        zoomSlider.value = event.detail.ratio.toString();
-                    }
-                },
-                crop(event) {
-                    if (isSnapping || !cropperInstance) return;
-                    updateSlicingGrid();
-                    
-                    if (currentCropMode === 'ghost' || currentCropMode === 'smart' || !snapToGridCheck?.checked) return;
-                    
-                    const gw = parseInt(gridSizeWInput?.value || '32');
-                    const gh = parseInt(gridSizeHInput?.value || '32');
-                    const gm = parseInt(gridMarginInput?.value || '0');
-                    const gs = parseInt(gridSpacingInput?.value || '0');
-                    const d = event.detail;
-                    const tileX = Math.round((d.x - gm) / (gw + gs));
-                    const tileY = Math.round((d.y - gm) / (gh + gs));
-                    const rx = gm + tileX * (gw + gs);
-                    const ry = gm + tileY * (gh + gs);
-                    const rw = Math.round(d.width / gw) * gw;
-                    const rh = Math.round(d.height / gh) * gh;
+        const canvasData = cropperInstance.getCanvasData();
+        gridOverlay.style.width = canvasData.width + 'px';
+        gridOverlay.style.height = canvasData.height + 'px';
+        gridOverlay.style.left = canvasData.left + 'px';
+        gridOverlay.style.top = canvasData.top + 'px';
+    
+        const gw = parseInt(gridSizeWInput?.value || '32');
+        const gh = parseInt(gridSizeHInput?.value || '32');
+        const gm = parseInt(gridMarginInput?.value || '0');
+        const gs = parseInt(gridSpacingInput?.value || '0');
+        const scale = canvasData.width / canvasData.naturalWidth;
+        
+        gridOverlay.style.setProperty('--grid-w', (gw * scale) + 'px');
+        gridOverlay.style.setProperty('--grid-h', (gh * scale) + 'px');
+        gridOverlay.style.setProperty('--grid-m', (gm * scale) + 'px');
+        gridOverlay.style.setProperty('--grid-s', (gs * scale) + 'px');
+        gridOverlay.style.display = showGridCheck?.checked ? 'block' : 'none';
 
-                    if (Math.abs(d.x - rx) > 0.5 || Math.abs(d.y - ry) > 0.5 || Math.abs(d.width - rw) > 0.5 || Math.abs(d.height - rh) > 0.5) {
-                        isSnapping = true;
-                        cropperInstance.setData({ x: rx, y: ry, width: rw, height: rh });
-                        setTimeout(() => { isSnapping = false; }, 50);
-                    }
+        const ghostRef = document.getElementById('ghostReference');
+        const ghostImg = document.getElementById('ghostImg') as HTMLImageElement;
+        const ghostHitbox = document.getElementById('ghostHitbox');
+        const activeTile = CORE_TILES.find(t => t.id === selectedTileKey);
+
+        if (ghostRef && activeTile && cropperInstance) {
+            ghostRef.style.display = (currentCropMode === 'ghost') ? 'flex' : 'none';
+            if (ghostImg) {
+                const targetW = 128;
+                const targetH = 128;
+                ghostRef.style.width = targetW + 'px';
+                ghostRef.style.height = targetH + 'px';
+                
+                if (currentCropMode === 'ghost') {
+                    const containerData = cropperInstance.getContainerData();
+                    const centerX = (containerData.width - targetW) / 2;
+                    const centerY = (containerData.height - targetH) / 2;
+                    isSnapping = true;
+                    cropperInstance.setCropBoxData({
+                        left: centerX,
+                        top: centerY,
+                        width: targetW,
+                        height: targetH
+                    });
+                    setTimeout(() => { isSnapping = false; }, 50);
                 }
-            };
+            }
+            if (ghostImg) {
+                ghostImg.dataset.noTheme = 'true';
+                let desertSrc = activeTile.src;
+                if (desertSrc.includes('/Resources/') && !desertSrc.includes('/Desert/') && !desertSrc.includes('/Global/')) {
+                    desertSrc = desertSrc.replace(/\/Resources\/[^/]+\//, '/Resources/Desert/');
+                }
+                ghostImg.src = desertSrc;
+            }
+            if (activeTile.hitbox && ghostHitbox) {
+                ghostHitbox.style.display = 'block';
+                ghostHitbox.style.top = (activeTile.hitbox.y * 100) + '%';
+                ghostHitbox.style.left = '0';
+                ghostHitbox.style.width = '100%';
+                ghostHitbox.style.height = (activeTile.hitbox.h * 100) + '%';
+            } else if (ghostHitbox) {
+                ghostHitbox.style.display = 'none';
+            }
+        }
+    };
 
-            cropperInstance = new Cropper(croppingSource, options);
+    const initRightClickPan = () => {
+        const container = document.querySelector('.cropper-container') as HTMLElement;
+        if (!container || container.dataset.panInit === 'true') return;
+        
+        container.dataset.panInit = 'true';
+        let isRightDragging = false;
+        let lastX = 0, lastY = 0;
+        container.oncontextmenu = (e) => e.preventDefault();
+        container.addEventListener('mousedown', (e) => {
+            if (e.button === 2) {
+                isRightDragging = true;
+                lastX = e.clientX;
+                lastY = e.clientY;
+                container.style.cursor = 'grabbing';
+            }
+        }, true);
+        window.addEventListener('mousemove', (e) => {
+            if (isRightDragging && cropperInstance) {
+                const dx = e.clientX - lastX;
+                const dy = e.clientY - lastY;
+                if (!isNaN(dx) && !isNaN(dy)) {
+                    cropperInstance.move(dx, dy);
+                }
+                lastX = e.clientX;
+                lastY = e.clientY;
+            }
+        });
+        window.addEventListener('mouseup', () => {
+            if (isRightDragging) {
+                isRightDragging = false;
+                container.style.cursor = '';
+            }
+        });
+    };
+
+    const switchMode = (mode: string) => {
+        if (!cropperInstance) return;
+        currentCropMode = mode;
+        
+        const ghostRef = document.getElementById('ghostReference');
+        if (ghostRef) {
+            ghostRef.style.visibility = (currentCropMode === 'ghost') ? 'visible' : 'hidden';
+        }
+
+        const canvasData = cropperInstance.getCanvasData();
+        const containerData = cropperInstance.getContainerData();
+        const cropData = cropperInstance.getData();
+
+        cropperInstance.destroy();
+        
+        const options: any = {
+            aspectRatio: NaN,
+            viewMode: 0,
+            background: false,
+            zoomable: true,
+            movable: true,
+            cropBoxMovable: (currentCropMode !== 'ghost'),
+            cropBoxResizable: (currentCropMode !== 'ghost'),
+            dragMode: (currentCropMode === 'manual') ? 'crop' : 'move',
+            guides: false,
+            center: false,
+            highlight: false,
+            ready() {
+                updateSlicingGrid();
+                initRightClickPan();
+                
+                cropperInstance.setCanvasData(canvasData);
+                if (currentCropMode === 'ghost') {
+                    const targetW = 128;
+                    const targetH = 128;
+                    const centerX = (containerData.width - targetW) / 2;
+                    const centerY = (containerData.height - targetH) / 2;
+                    cropperInstance.setCropBoxData({
+                        left: centerX,
+                        top: centerY,
+                        width: targetW,
+                        height: targetH
+                    });
+                } else {
+                    cropperInstance.setData(cropData);
+                }
+            },
+            zoom(event: any) {
+                updateSlicingGrid();
+                if (zoomSlider && event.detail.ratio) {
+                    zoomSlider.value = event.detail.ratio.toString();
+                }
+            },
+            crop(event: any) {
+                if (isSnapping || !cropperInstance) return;
+                updateSlicingGrid();
+                
+                if (currentCropMode === 'ghost' || currentCropMode === 'smart' || !snapToGridCheck?.checked) return;
+                
+                const gw = parseInt(gridSizeWInput?.value || '32');
+                const gh = parseInt(gridSizeHInput?.value || '32');
+                const gm = parseInt(gridMarginInput?.value || '0');
+                const gs = parseInt(gridSpacingInput?.value || '0');
+                const d = event.detail;
+                const tileX = Math.round((d.x - gm) / (gw + gs));
+                const tileY = Math.round((d.y - gm) / (gh + gs));
+                const rx = gm + tileX * (gw + gs);
+                const ry = gm + tileY * (gh + gs);
+                const rw = Math.round(d.width / gw) * gw;
+                const rh = Math.round(d.height / gh) * gh;
+
+                if (Math.abs(d.x - rx) > 0.5 || Math.abs(d.y - ry) > 0.5 || Math.abs(d.width - rw) > 0.5 || Math.abs(d.height - rh) > 0.5) {
+                    isSnapping = true;
+                    cropperInstance.setData({ x: rx, y: ry, width: rw, height: rh });
+                    setTimeout(() => { isSnapping = false; }, 50);
+                }
+            }
         };
 
+        cropperInstance = new Cropper(croppingSource, options);
+    };
+
+    if (cropModeSelect) {
         cropModeSelect.addEventListener('click', (e) => {
             const btn = (e.target as HTMLElement).closest('.mode-btn-v2') as HTMLElement;
             if (!btn) return;
@@ -829,142 +935,69 @@ function initStudioControls() {
                 cropperInstance.destroy();
             }
 
-            let isSnapping = false;
-                const updateSlicingGrid = () => {
-                    if (!cropperInstance || !gridOverlay) return;
+            // @ts-ignore
+            cropperInstance = new Cropper(croppingSource, {
+                aspectRatio: NaN,
+                viewMode: 0,
+                background: false,
+                zoomable: true,
+                scalable: true,
+                movable: true,
+                zoomOnWheel: true,
+                wheelZoomRatio: 0.1,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: true,
+                guides: false,
+                center: false,
+                highlight: false,
+                responsive: true,
+                checkOrientation: true,
+                ready() {
+                    updateSlicingGrid();
+                    initRightClickPan();
                     
-                    // Ensure grid is inside the container for perfect alignment
-                    const cropperContainer = document.querySelector('.cropper-container');
-                    if (cropperContainer && gridOverlay.parentElement !== cropperContainer) {
-                        cropperContainer.appendChild(gridOverlay);
+                    if (currentCropMode === 'ghost') {
+                        cropperInstance.setDragMode('move');
+                        const canvasData = cropperInstance.getCanvasData();
+                        cropperInstance.setData({ x: 0, width: canvasData.naturalWidth });
+                    } else if (currentCropMode === 'manual') {
+                        cropperInstance.setDragMode('crop');
+                    } else if (currentCropMode === 'smart') {
+                        cropperInstance.setDragMode('move');
                     }
-
-                    const canvasData = cropperInstance.getCanvasData();
-                    gridOverlay.style.width = canvasData.width + 'px';
-                    gridOverlay.style.height = canvasData.height + 'px';
-                    gridOverlay.style.left = canvasData.left + 'px';
-                    gridOverlay.style.top = canvasData.top + 'px';
-                
-                const gw = parseInt(gridSizeWInput?.value || '32');
-                const gh = parseInt(gridSizeHInput?.value || '32');
-                const gm = parseInt(gridMarginInput?.value || '0');
-                const gs = parseInt(gridSpacingInput?.value || '0');
-                const scale = canvasData.width / canvasData.naturalWidth;
-                
-                gridOverlay.style.setProperty('--grid-w', (gw * scale) + 'px');
-                gridOverlay.style.setProperty('--grid-h', (gh * scale) + 'px');
-                gridOverlay.style.setProperty('--grid-m', (gm * scale) + 'px');
-                gridOverlay.style.setProperty('--grid-s', (gs * scale) + 'px');
-                gridOverlay.style.display = showGridCheck?.checked ? 'block' : 'none';
-
-                const ghostRef = document.getElementById('ghostReference');
-                const ghostImg = document.getElementById('ghostImg') as HTMLImageElement;
-                const ghostHitbox = document.getElementById('ghostHitbox');
-                const activeTile = CORE_TILES.find(t => t.id === selectedTileKey);
-                
-                if (ghostRef && activeTile && cropperInstance) {
-                    ghostRef.style.display = (currentCropMode === 'ghost') ? 'flex' : 'none';
-                    if (ghostImg) {
-                        const targetW = 128; // Fixed size on screen for stability
-                        const targetH = 128;
-                        ghostRef.style.width = targetW + 'px';
-                        ghostRef.style.height = targetH + 'px';
-
-                        // Sync crop box to the ghost reference exactly
-                        if (currentCropMode === 'ghost') {
-                            const containerData = cropperInstance.getContainerData();
-                            const centerX = (containerData.width - targetW) / 2;
-                            const centerY = (containerData.height - targetH) / 2;
-                            isSnapping = true;
-                            cropperInstance.setCropBoxData({
-                                left: centerX,
-                                top: centerY,
-                                width: targetW,
-                                height: targetH
-                            });
-                            setTimeout(() => { isSnapping = false; }, 50);
-                        }
+                },
+                zoom(event: any) {
+                    updateSlicingGrid();
+                    if (zoomSlider && event.detail.ratio) {
+                        zoomSlider.value = event.detail.ratio.toString();
                     }
+                },
+                crop(event: any) {
+                    if (isSnapping || !cropperInstance) return;
+                    updateSlicingGrid();
                     
-                    if (ghostImg) {
-                        ghostImg.dataset.noTheme = 'true';
-                        let desertSrc = activeTile.src;
-                        if (desertSrc.includes('/Resources/') && !desertSrc.includes('/Desert/') && !desertSrc.includes('/Global/')) {
-                            desertSrc = desertSrc.replace(/\/Resources\/[^/]+\//, '/Resources/Desert/');
-                        }
-                        ghostImg.src = desertSrc;
-                    }
-                    if (activeTile.hitbox && ghostHitbox) {
-                        ghostHitbox.style.display = 'block';
-                        ghostHitbox.style.top = (activeTile.hitbox.y * 100) + '%';
-                        ghostHitbox.style.left = '0';
-                        ghostHitbox.style.width = '100%';
-                        ghostHitbox.style.height = (activeTile.hitbox.h * 100) + '%';
-                    } else if (ghostHitbox) {
-                        ghostHitbox.style.display = 'none';
+                    if (currentCropMode === 'ghost' || currentCropMode === 'smart' || !snapToGridCheck?.checked) return;
+
+                    const gw = parseInt(gridSizeWInput?.value || '32');
+                    const gh = parseInt(gridSizeHInput?.value || '32');
+                    const gm = parseInt(gridMarginInput?.value || '0');
+                    const gs = parseInt(gridSpacingInput?.value || '0');
+                    const d = event.detail;
+
+                    const tileX = Math.round((d.x - gm) / (gw + gs));
+                    const tileY = Math.round((d.y - gm) / (gh + gs));
+                    const rx = gm + tileX * (gw + gs);
+                    const ry = gm + tileY * (gh + gs);
+                    const rw = Math.round(d.width / gw) * gw;
+                    const rh = Math.round(d.height / gh) * gh;
+
+                    if (Math.abs(d.x - rx) > 0.5 || Math.abs(d.y - ry) > 0.5 || Math.abs(d.width - rw) > 0.5 || Math.abs(d.height - rh) > 0.5) {
+                        isSnapping = true;
+                        cropperInstance.setData({ x: rx, y: ry, width: rw, height: rh });
+                        setTimeout(() => { isSnapping = false; }, 50);
                     }
                 }
-            };
-
-            if (zoomSlider) {
-                zoomSlider.oninput = () => {
-                    cropperInstance?.zoomTo(parseFloat(zoomSlider.value));
-                };
-            }
-            if (rotateSlider) {
-                rotateSlider.oninput = () => {
-                    cropperInstance?.rotateTo(parseInt(rotateSlider.value));
-                };
-            }
-            if (resetTransformBtn) {
-                resetTransformBtn.onclick = () => {
-                    cropperInstance?.reset();
-                    if (zoomSlider) zoomSlider.value = "1";
-                    if (rotateSlider) rotateSlider.value = "0";
-                };
-            }
-            if (fitImageBtn) {
-                fitImageBtn.onclick = () => {
-                    cropperInstance?.setDragMode('move');
-                    cropperInstance?.zoomTo(1);
-                    cropperInstance?.reset();
-                };
-            }
-
-            const initRightClickPan = () => {
-                const container = document.querySelector('.cropper-container') as HTMLElement;
-                if (!container || container.dataset.panInit === 'true') return;
-                
-                container.dataset.panInit = 'true';
-                let isRightDragging = false;
-                let lastX = 0, lastY = 0;
-                container.oncontextmenu = (e) => e.preventDefault();
-                container.addEventListener('mousedown', (e) => {
-                    if (e.button === 2) {
-                        isRightDragging = true;
-                        lastX = e.clientX;
-                        lastY = e.clientY;
-                        container.style.cursor = 'grabbing';
-                    }
-                }, true);
-                window.addEventListener('mousemove', (e) => {
-                    if (isRightDragging && cropperInstance) {
-                        const dx = e.clientX - lastX;
-                        const dy = e.clientY - lastY;
-                        if (!isNaN(dx) && !isNaN(dy)) {
-                            cropperInstance.move(dx, dy);
-                        }
-                        lastX = e.clientX;
-                        lastY = e.clientY;
-                    }
-                });
-                window.addEventListener('mouseup', () => {
-                    if (isRightDragging) {
-                        isRightDragging = false;
-                        container.style.cursor = '';
-                    }
-                });
-            };
+            });
 
             if (gridOverlay) {
                 let isDraggingGrid = false;
@@ -1047,90 +1080,6 @@ function initStudioControls() {
                 };
             }
 
-            // @ts-ignore
-            cropperInstance = new Cropper(croppingSource, {
-                aspectRatio: NaN,
-                viewMode: 0,
-                background: false,
-                zoomable: true,
-                scalable: true,
-                movable: true,
-                zoomOnWheel: true,
-                wheelZoomRatio: 0.1,
-                cropBoxResizable: true,
-                toggleDragModeOnDblclick: true,
-                guides: false,
-                center: false,
-                highlight: false,
-                responsive: true,
-                checkOrientation: true,
-                ready() {
-                    updateSlicingGrid();
-                    initRightClickPan();
-                    
-                    // Force the correct mode on first load
-                    if (currentCropMode === 'ghost') {
-                        cropperInstance.setDragMode('move');
-                        const canvasData = cropperInstance.getCanvasData();
-                        cropperInstance.setData({ x: 0, width: canvasData.naturalWidth });
-                    } else if (currentCropMode === 'manual') {
-                        cropperInstance.setDragMode('crop');
-                    } else if (currentCropMode === 'smart') {
-                        cropperInstance.setDragMode('move');
-                    }
-}
-                },
-                zoom(event) {
-                    updateSlicingGrid();
-                    if (zoomSlider && event.detail.ratio) {
-                        zoomSlider.value = event.detail.ratio.toString();
-                    }
-                },
-                crop(event) {
-                    if (isSnapping || !cropperInstance)
-                        return;
-                    updateSlicingGrid();
-                    
-                    // Ghost mode: logic is handled in updateSlicingGrid for dynamic sizing
-                    if (currentCropMode === 'ghost') {
-                        return;
-                    }
-                    
-                    // Smart mode: Do NOT snap to grid in the crop handler
-                    if (currentCropMode === 'smart') {
-                        return;
-                    }
-
-                    if (!snapToGridCheck?.checked)
-                        return;
-
-                    const gw = parseInt(gridSizeWInput?.value || '32');
-                    const gh = parseInt(gridSizeHInput?.value || '32');
-                    const gm = parseInt(gridMarginInput?.value || '0');
-                    const gs = parseInt(gridSpacingInput?.value || '0');
-                    const d = event.detail;
-
-                    const tileX = Math.round((d.x - gm) / (gw + gs));
-                    const tileY = Math.round((d.y - gm) / (gh + gs));
-                    const rx = gm + tileX * (gw + gs);
-                    const ry = gm + tileY * (gh + gs);
-
-                    const rw = Math.round(d.width / gw) * gw;
-                    const rh = Math.round(d.height / gh) * gh;
-
-                    if (Math.abs(d.x - rx) > 0.5 || Math.abs(d.y - ry) > 0.5 || Math.abs(d.width - rw) > 0.5 || Math.abs(d.height - rh) > 0.5) {
-                        isSnapping = true;
-                        cropperInstance.setData({
-                            x: rx,
-                            y: ry,
-                            width: rw,
-                            height: rh
-                        });
-                        setTimeout(() => { isSnapping = false; }, 50);
-                    }
-                }
-            });
-
             [gridSizeWInput, gridSizeHInput, gridMarginInput, gridSpacingInput].forEach(inp => {
                 if (inp) inp.oninput = updateSlicingGrid;
             });
@@ -1138,6 +1087,31 @@ function initStudioControls() {
         };
         reader.readAsDataURL(file);
     };
+
+    if (zoomSlider) {
+        zoomSlider.oninput = () => {
+            cropperInstance?.zoomTo(parseFloat(zoomSlider.value));
+        };
+    }
+    if (rotateSlider) {
+        rotateSlider.oninput = () => {
+            cropperInstance?.rotateTo(parseInt(rotateSlider.value));
+        };
+    }
+    if (resetTransformBtn) {
+        resetTransformBtn.onclick = () => {
+            cropperInstance?.reset();
+            if (zoomSlider) zoomSlider.value = "1";
+            if (rotateSlider) rotateSlider.value = "0";
+        };
+    }
+    if (fitImageBtn) {
+        fitImageBtn.onclick = () => {
+            cropperInstance?.setDragMode('move');
+            cropperInstance?.zoomTo(1);
+            cropperInstance?.reset();
+        };
+    }
 
     const cleanupAndCloseCrop = () => {
         if (cropperInstance) {
@@ -1210,9 +1184,6 @@ function initStudioControls() {
             }, 'image/png');
         };
     }
-
-    if (saveBtn) saveBtn.onclick = handleStudioSubmit;
-    renderStudioPresets();
 }
 
 function resetStudio() {
