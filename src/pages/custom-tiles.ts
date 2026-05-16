@@ -75,6 +75,12 @@ let currentEquipTargetPack = null; // Stores target pack during verification
 // Editor state
 let selectedTileKey = null;
 let editedTileFiles = {}; // Map of key -> File/Blob object
+let cropperInstance = null;
+let isAspectRatioLocked = true; 
+let gridSize = 32; 
+let isGridVisible = true;
+let isSnapEnabled = true;
+let currentCropMode = 'ghost'; 
 
 document.addEventListener('DOMContentLoaded', async () => {
     initStudioControls();
@@ -99,28 +105,29 @@ function initEquipControls() {
     const unequipBtn = document.getElementById('unequipThemeBtn');
 
     const hideModal = () => {
-        confirmModal.classList.remove('active');
+        confirmModal?.classList.remove('active');
         currentEquipTargetPack = null;
     };
 
-    cancelBtn.onclick = hideModal;
+    if (cancelBtn) cancelBtn.onclick = hideModal;
     if (closeBtn) closeBtn.onclick = hideModal;
 
-    confirmBtn.onclick = () => {
-        if (currentEquipTargetPack) {
-            equipTheme(currentEquipTargetPack);
-        }
-        hideModal();
-    };
+    if (confirmBtn) {
+        confirmBtn.onclick = () => {
+            if (currentEquipTargetPack) {
+                equipTheme(currentEquipTargetPack);
+            }
+            hideModal();
+        };
+    }
 
-    unequipBtn.onclick = () => {
-        window.unequipTheme();
-    };
+    if (unequipBtn) {
+        unequipBtn.onclick = () => {
+            (window as any).unequipTheme();
+        };
+    }
 }
 
-/**
- * Inspect localStorage to determine if a theme is active
- */
 /**
  * Inspect localStorage to determine if themes are active
  */
@@ -146,12 +153,10 @@ function refreshEquippedBanner() {
     currentEquippedThemeIds = new Set(equippedArr.map(p => p.id));
     
     if (equippedArr.length > 0) {
-        // Render an elegant, interactive list of active theme chips!
         let html = '<span style="margin-right: 8px;">Active Layers:</span>';
         
         equippedArr.forEach((pack, index) => {
             const safeName = escapeHTML(pack.name || 'Theme');
-            // High priority tags appear first (top of stack)
             html += `
                 <span class="theme-chip" title="Priority #${index + 1} (Top layer)">
                     ${safeName}
@@ -182,17 +187,16 @@ function triggerEquipPrompt(pack) {
 
     const isAlreadyEquipped = currentEquippedThemeIds.has(pack.id);
     
-    nameDisplay.textContent = pack.name || 'Custom Theme';
-    authorDisplay.textContent = pack.user_name || 'Unknown';
+    if (nameDisplay) nameDisplay.textContent = pack.name || 'Custom Theme';
+    if (authorDisplay) authorDisplay.textContent = pack.user_name || 'Unknown';
 
-    // Populate preview grid dynamically
     if (gridDisplay) {
         gridDisplay.innerHTML = '';
         const data = pack.tile_data || {};
         const keys = Object.keys(data);
         
         if (keys.length === 0) {
-            gridDisplay.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:2rem; opacity:0.5;">${window.cp_translate('No customized tiles in this pack.')}</div>`;
+            gridDisplay.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:2rem; opacity:0.5;">${(window as any).cp_translate('No customized tiles in this pack.')}</div>`;
         } else {
             keys.forEach(k => {
                 const src = data[k];
@@ -211,22 +215,21 @@ function triggerEquipPrompt(pack) {
         }
     }
 
-    // Tweak confirmation button states based on active equipping stack
     if (confirmBtn) {
         if (isAlreadyEquipped) {
-            confirmBtn.textContent = window.cp_translate('Equipped');
-            confirmBtn.disabled = true;
+            confirmBtn.textContent = (window as any).cp_translate('Equipped');
+            (confirmBtn as HTMLButtonElement).disabled = true;
             confirmBtn.style.opacity = "0.5";
             confirmBtn.style.cursor = "default";
         } else {
-            confirmBtn.textContent = window.cp_translate('Equip Theme');
-            confirmBtn.disabled = false;
+            confirmBtn.textContent = (window as any).cp_translate('Equip Theme');
+            (confirmBtn as HTMLButtonElement).disabled = false;
             confirmBtn.style.opacity = "";
             confirmBtn.style.cursor = "";
         }
     }
     
-    modal.classList.add('active');
+    modal?.classList.add('active');
 }
 
 /**
@@ -242,10 +245,8 @@ function equipTheme(pack) {
         }
     } catch(e) { equippedArr = []; }
 
-    // Prevent duplication: remove previous instance of this theme
     equippedArr = equippedArr.filter(p => p.id !== pack.id);
     
-    // Push to the FRONT of stack (highest drawing priority)
     equippedArr.unshift({
         id: pack.id,
         name: pack.name,
@@ -255,20 +256,16 @@ function equipTheme(pack) {
     
     localStorage.setItem('equipped_themes', JSON.stringify(equippedArr));
     refreshEquippedBanner();
-    
-    // Refresh lists to re-paint pulsed borders
     renderPacks();
 }
 
 /**
  * Remove a specific theme or purge entire stack if no ID is provided
  */
-window.unequipTheme = function(packId = null) {
+(window as any).unequipTheme = function(packId = null) {
     if (!packId) {
-        // Clear ALL layers
         localStorage.removeItem('equipped_themes');
     } else {
-        // Evict specific layer
         let equippedArr = [];
         try {
             const existing = localStorage.getItem('equipped_themes');
@@ -288,8 +285,6 @@ window.unequipTheme = function(packId = null) {
     }
     
     refreshEquippedBanner();
-    
-    // Re-render lists to reflect updated pulse outlines
     renderPacks();
 };
 
@@ -303,7 +298,6 @@ async function initUserData() {
             currentUserId = session.user.id;
             currentUserName = session.user.user_metadata.full_name || session.user.user_metadata.name || 'Anonymous Builder';
         } else {
-            // Force layout hide of "My Creations" for non-auth
             const myGrid = document.getElementById('myCreationsGrid');
             if (myGrid) {
                 myGrid.innerHTML = `
@@ -328,20 +322,17 @@ async function loadPacks() {
     if (marketGrid) marketGrid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; opacity:0.7;">Contacting servers...</div>';
     
     try {
-        // 1. Fetch ALL packs and include counts of tile_pack_likes
         const { data: packs, error } = await supabase
             .from('custom_tile_packs')
             .select('*, tile_pack_likes(count)');
             
         if (error) throw error;
         
-        // 2. Map the records nicely
         const normalizedPacks = packs.map(p => ({
             ...p,
             likesCount: p.tile_pack_likes?.[0]?.count || 0
         }));
         
-        // 2.5. Fetch precise active user like flags to ensure synchronous UI rendering
         if (currentUserId) {
             const { data: myLikes } = await supabase
                 .from('tile_pack_likes')
@@ -352,16 +343,13 @@ async function loadPacks() {
             }
         }
         
-        // 3. Separate personal collections
         if (currentUserId) {
             myPrivatePacks = normalizedPacks.filter(p => p.user_id === currentUserId);
         } else {
             myPrivatePacks = [];
         }
         
-        // Marketplace holds all Public packs
         allPublicPacks = normalizedPacks.filter(p => p.is_public === true);
-        
         renderPacks();
         
     } catch (err) {
@@ -374,26 +362,24 @@ async function loadPacks() {
  * Filter, sort, and render grid lists
  */
 function renderPacks() {
-    const searchTerm = document.getElementById('packSearch')?.value.toLowerCase() || '';
-    const sortRule = document.getElementById('packSortFilter')?.value || 'newest';
+    const searchTerm = (document.getElementById('packSearch') as HTMLInputElement)?.value.toLowerCase() || '';
+    const sortRule = (document.getElementById('packSortFilter') as HTMLSelectElement)?.value || 'newest';
     
-    // Sort comparator
     const sortFn = (a, b) => {
         if (sortRule === 'likes') {
             if (b.likesCount !== a.likesCount) return b.likesCount - a.likesCount;
         }
-        // default Newest fallback
-        return new Date(b.created_at) - new Date(a.created_at);
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     };
     
-    // 1. Filter & render "My Creations"
     const myGrid = document.getElementById('myCreationsGrid');
     if (myGrid && currentUserId) {
         let myFiltered = myPrivatePacks.filter(p => 
             (p.name || '').toLowerCase().includes(searchTerm)
         ).sort(sortFn);
         
-        document.getElementById('myCountBadge').textContent = myFiltered.length;
+        const badge = document.getElementById('myCountBadge');
+        if (badge) badge.textContent = myFiltered.length.toString();
         
         if (myFiltered.length === 0) {
             myGrid.innerHTML = `
@@ -410,14 +396,14 @@ function renderPacks() {
         }
     }
     
-    // 2. Filter & render "Tile Marketplace"
     const marketGrid = document.getElementById('marketGrid');
     if (marketGrid) {
         let marketFiltered = allPublicPacks.filter(p => 
             (p.name || '').toLowerCase().includes(searchTerm)
         ).sort(sortFn);
         
-        document.getElementById('marketCountBadge').textContent = marketFiltered.length;
+        const badge = document.getElementById('marketCountBadge');
+        if (badge) badge.textContent = marketFiltered.length.toString();
         
         if (marketFiltered.length === 0) {
             marketGrid.innerHTML = `
@@ -444,16 +430,13 @@ function createPackCard(pack, isOwner = false) {
     
     div.className = `tile-pack-card ${isEquipped ? 'active-equipped' : ''}`;
     
-    // Click anywhere on the card body (excluding buttons) to prompt Preview
     div.onclick = (e) => {
         triggerEquipPrompt(pack);
     };
     
-    // Compute preview strip (first 3 modified tiles)
     const keys = Object.keys(pack.tile_data || {});
     let previewIcons = '';
     
-    // Pull first 3 images or default fillers
     for(let i=0; i<3; i++) {
         const key = keys[i] || null;
         const src = key ? pack.tile_data[key] : CORE_TILES[i].src;
@@ -462,8 +445,6 @@ function createPackCard(pack, isOwner = false) {
     
     const safeName = escapeHTML(pack.name || 'Default Pack');
     const safeAuthor = escapeHTML(pack.user_name || 'Anonymous Builder');
-    
-    // Verify real-time like status against synced client state
     const isLiked = likedPackIds.has(pack.id);
     
     div.innerHTML = `
@@ -499,27 +480,25 @@ function createPackCard(pack, isOwner = false) {
         </div>
     `;
     
-    // Attach likes interaction
-    const likeBtn = div.querySelector('.pack-like-btn');
+    const likeBtn = div.querySelector('.pack-like-btn') as HTMLButtonElement;
     likeBtn.onclick = (e) => {
-        e.stopPropagation(); // Don't trigger Equip modal
+        e.stopPropagation(); 
         handleLikeClick(pack.id, likeBtn);
     };
     
-    // Attach privacy and delete switchers
     if (isOwner) {
-        const privBtn = div.querySelector('.privacy-toggle');
+        const privBtn = div.querySelector('.privacy-toggle') as HTMLButtonElement;
         privBtn.onclick = (e) => {
-            e.stopPropagation(); // Don't trigger Equip modal
+            e.stopPropagation();
             togglePrivacy(pack.id, pack.is_public, privBtn);
         };
 
-        const delBtn = div.querySelector('.pack-delete-btn');
+        const delBtn = div.querySelector('.pack-delete-btn') as HTMLButtonElement;
         if (delBtn) {
             delBtn.onmouseenter = () => delBtn.style.background = 'rgba(239, 68, 68, 0.3)';
             delBtn.onmouseleave = () => delBtn.style.background = 'rgba(239, 68, 68, 0.15)';
             delBtn.onclick = (e) => {
-                e.stopPropagation(); // Don't trigger Equip modal
+                e.stopPropagation();
                 handleDeletePack(pack.id, pack.name, delBtn);
             };
         }
@@ -545,13 +524,11 @@ async function togglePrivacy(packId, isCurrentlyPublic, button) {
             .eq('id', packId);
             
         if (error) throw error;
-        
-        // Force re-fetch data quietly and render
-        await loadPacks();
+        await (window as any).loadPacks();
         
     } catch (e) {
         console.error("Privacy patch failed:", e);
-        alert(window.cp_translate("Failed to update privacy settings."));
+        alert((window as any).cp_translate("Failed to update privacy settings."));
         button.disabled = false;
     }
 }
@@ -573,10 +550,7 @@ async function handleDeletePack(packId, packName, button) {
     button.textContent = '...';
 
     try {
-        // Step 1: Delete relational constraints (likes collection)
         await supabase.from('tile_pack_likes').delete().eq('pack_id', packId);
-
-        // Step 2: Delete parent record from Database
         const { error } = await supabase
             .from('custom_tile_packs')
             .delete()
@@ -585,7 +559,6 @@ async function handleDeletePack(packId, packName, button) {
 
         if (error) throw error;
 
-        // Step 3: Purge memory references in localStorage if this skin set was equipped
         try {
             const existing = localStorage.getItem('equipped_themes');
             if (existing) {
@@ -604,12 +577,12 @@ async function handleDeletePack(packId, packName, button) {
             }
         } catch(e) { console.warn("LocalStorage clean failed", e); }
 
-        alert(`${window.cp_translate('✅ Tile pack')} "${packName}" ${window.cp_translate('has been successfully deleted!')}`);
-        await loadPacks(); // Fully reload listings silently
+        alert(`${(window as any).cp_translate('✅ Tile pack')} "${packName}" ${(window as any).cp_translate('has been successfully deleted!')}`);
+        await (window as any).loadPacks();
         
     } catch (err) {
         console.error("Failed to delete pack:", err);
-        alert(`${window.cp_translate('❌ Delete operation failed:')} ${err.message}`);
+        alert(`${(window as any).cp_translate('❌ Delete operation failed:')} ${err.message}`);
         button.disabled = false;
         button.textContent = orig;
     }
@@ -620,20 +593,18 @@ async function handleDeletePack(packId, packName, button) {
  */
 async function handleLikeClick(packId, button) {
     if (!currentUserId) {
-        alert(window.cp_translate('Please sign in to like tile packs!'));
+        alert((window as any).cp_translate('Please sign in to like tile packs!'));
         return;
     }
     
     let wasLiked = false;
     
     try {
-        // Optimistic check: insert inside tile_pack_likes
         const { error } = await supabase
             .from('tile_pack_likes')
             .insert({ user_id: currentUserId, pack_id: packId });
             
         if (error) {
-            // If error code is 23505, unique constraint hit -> user already liked -> UNLIKE
             if (error.code === '23505') {
                 const { error: delError } = await supabase
                     .from('tile_pack_likes')
@@ -652,7 +623,6 @@ async function handleLikeClick(packId, button) {
             wasLiked = true;
         }
         
-        // Refresh quiet fetch for accurate totals
         const { data: cnt } = await supabase
             .from('tile_pack_likes')
             .select('id', { count: 'exact' })
@@ -660,21 +630,19 @@ async function handleLikeClick(packId, button) {
             
         const finalCount = cnt ? (cnt.length || 0) : 0;
         
-        // Update local state cache lists so filter re-rendering maintains counts!
         [...myPrivatePacks, ...allPublicPacks].forEach(p => {
             if (p.id === packId) {
                 p.likesCount = finalCount;
             }
         });
         
-        // MASS DOM SYNCHRONIZATION: Loop all hearts in both grids with this packId!
         const allMatchingBtns = document.querySelectorAll(`.pack-like-btn[data-id="${packId}"]`);
         allMatchingBtns.forEach(btn => {
             btn.classList.toggle('liked', wasLiked);
             const svg = btn.querySelector('svg');
             if(svg) svg.setAttribute('fill', wasLiked ? 'currentColor' : 'none');
             const counter = btn.querySelector('.like-counter');
-            if(counter) counter.textContent = finalCount;
+            if(counter) counter.textContent = finalCount.toString();
         });
         
     } catch (e) {
@@ -691,424 +659,497 @@ function initStudioControls() {
     const openBtn = document.getElementById('openStudioBtn');
     const closeBtn = document.getElementById('closeStudioBtn');
     const cancelBtn = document.getElementById('cancelStudioBtn');
-    const saveBtn = document.getElementById('savePackBtn');
-    const fileInput = document.getElementById('tileFileInput');
+    const saveBtn = document.getElementById('savePackBtn') as HTMLButtonElement;
+    const fileInput = document.getElementById('tileFileInput') as HTMLInputElement;
     
-    // HammerStudio V2 UI Elements
     const cropModal = document.getElementById('cropModal');
     const closeCropBtn = document.getElementById('closeCropBtn');
     const cancelCropBtn = document.getElementById('cancelCropBtn');
     const applyCropBtn = document.getElementById('applyCropBtn');
     
-    const workspace = document.getElementById('studioWorkspace');
-    const transformLayer = document.getElementById('transformLayer');
-    const croppingSource = document.getElementById('croppingSource') as HTMLImageElement;
-    const gridOverlay = document.getElementById('slicingGridOverlay');
-    
     const zoomSlider = document.getElementById('zoomSlider') as HTMLInputElement;
     const rotateSlider = document.getElementById('rotateSlider') as HTMLInputElement;
-    const resetBtn = document.getElementById('resetTransformBtn');
-    const fitBtn = document.getElementById('fitImageBtn');
+    const fitImageBtn = document.getElementById('fitImageBtn');
+    const resetTransformBtn = document.getElementById('resetTransformBtn');
+
+    const croppingSource = document.getElementById('croppingSource') as HTMLImageElement;
+    const showGridCheck = document.getElementById('showGridCheck') as HTMLInputElement;
+    const snapToGridCheck = document.getElementById('snapToGridCheck') as HTMLInputElement;
     
     const gridSizeWInput = document.getElementById('gridSizeWInput') as HTMLInputElement;
     const gridSizeHInput = document.getElementById('gridSizeHInput') as HTMLInputElement;
     const gridMarginInput = document.getElementById('gridMarginInput') as HTMLInputElement;
     const gridSpacingInput = document.getElementById('gridSpacingInput') as HTMLInputElement;
-    const showGridCheck = document.getElementById('showGridCheck') as HTMLInputElement;
+    const gridOverlay = document.getElementById('slicingGridOverlay');
+    const cropModeSelect = document.getElementById('cropModeSelect');
 
-    // Open main studio modal
+    if (cropModeSelect) {
+        cropModeSelect.addEventListener('click', (e) => {
+            const btn = (e.target as HTMLElement).closest('.mode-btn-v2') as HTMLElement;
+            if (!btn) return;
+            
+            e.preventDefault();
+            e.stopPropagation();
+            
+            cropModeSelect.querySelectorAll('.mode-btn-v2').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentCropMode = btn.dataset.mode;
+
+            const ghostRef = document.getElementById('ghostReference');
+            if (ghostRef) {
+                ghostRef.style.visibility = (currentCropMode === 'ghost') ? 'visible' : 'hidden';
+            }
+
+            if (cropperInstance) {
+                if (currentCropMode === 'ghost') {
+                    const canvasData = cropperInstance.getCanvasData();
+                    cropperInstance.setAspectRatio(NaN);
+                    cropperInstance.setData({
+                        x: 0,
+                        width: canvasData.naturalWidth
+                    });
+                    if (snapToGridCheck) snapToGridCheck.checked = false;
+                } else if (currentCropMode === 'manual') {
+                    cropperInstance.setAspectRatio(NaN);
+                    if (snapToGridCheck) snapToGridCheck.checked = false;
+                } else if (currentCropMode === 'smart') {
+                    cropperInstance.setAspectRatio(NaN);
+                    if (snapToGridCheck) snapToGridCheck.checked = true;
+                }
+            }
+        });
+    }
+
     if (openBtn) {
         openBtn.onclick = () => {
             if (!currentUserId) {
-                alert(window.cp_translate("Please sign in via Discord to create custom tile packs!"));
+                alert((window as any).cp_translate("Please sign in via Discord to create custom tile packs!"));
                 return;
             }
             resetStudio();
             modal?.classList.add('active');
         };
     }
-    
-    // Close main studio modal
+
     const closeModal = () => modal?.classList.remove('active');
     if (closeBtn) closeBtn.onclick = closeModal;
     if (cancelBtn) cancelBtn.onclick = closeModal;
-    
-    // Transform State
-    let transform = { x: 0, y: 0, scale: 1, rotation: 0 };
-    let isDragging = false;
-    let startX = 0, startY = 0;
 
-    const updateTransforms = () => {
-        if (!transformLayer) return;
-        // Use translate3d for hardware acceleration and smoother movement
-        transformLayer.style.transform = `translate3d(${transform.x}px, ${transform.y}px, 0) rotate(${transform.rotation}deg) scale(${transform.scale})`;
-        
-        // Sync UI Slider without triggering jumping
-        if (zoomSlider) zoomSlider.value = transform.scale.toString();
-        if (rotateSlider) rotateSlider.value = transform.rotation.toString();
-        
-        updateSlicingGrid();
-    };
-
-    const updateSlicingGrid = () => {
-        if (!gridOverlay || !croppingSource) return;
-        
-        const gw = parseInt(gridSizeWInput?.value || '32');
-        const gh = parseInt(gridSizeHInput?.value || '32');
-        const gm = parseInt(gridMarginInput?.value || '0');
-        const gs = parseInt(gridSpacingInput?.value || '0');
-        
-        gridOverlay.style.setProperty('--grid-w', gw + 'px');
-        gridOverlay.style.setProperty('--grid-h', gh + 'px');
-        gridOverlay.style.setProperty('--grid-m', gm + 'px');
-        gridOverlay.style.setProperty('--grid-s', gs + 'px');
-        
-        gridOverlay.style.display = showGridCheck?.checked ? 'block' : 'none';
-        
-        // Update Ghost Info
-        const ghostHitbox = document.getElementById('ghostHitbox');
-        const activeTile = CORE_TILES.find(t => t.id === selectedTileKey);
-        
-        if (activeTile?.hitbox && ghostHitbox) {
-            ghostHitbox.style.display = 'flex'; // Use flex for center text
-            ghostHitbox.style.top = (activeTile.hitbox.y * 100) + '%';
-            ghostHitbox.style.left = '0';
-            ghostHitbox.style.width = '100%';
-            ghostHitbox.style.height = (activeTile.hitbox.h * 100) + '%';
-        } else if (ghostHitbox) {
-            ghostHitbox.style.display = 'none';
-        }
-    };
-
-    const resetTransform = () => {
-        transform = { x: 0, y: 0, scale: 1, rotation: 0 };
-        updateTransforms();
-    };
-
-    const fitImage = () => {
-        if (!croppingSource || !workspace) return;
-        const wsRect = workspace.getBoundingClientRect();
-        const imgW = croppingSource.naturalWidth;
-        const imgH = croppingSource.naturalHeight;
-        
-        // Center the image and fit to view
-        const scale = Math.min(wsRect.width / imgW, wsRect.height / imgH) * 0.8;
-        transform.scale = scale;
-        transform.x = 0;
-        transform.y = 0;
-        updateTransforms();
-    };
-
-    // Mouse / Touch Dragging
-    if (workspace) {
-        let lastMouseX = 0;
-        let lastMouseY = 0;
-
-        workspace.onmousedown = (e) => {
-            if (e.button !== 0 && e.button !== 2) return;
-            isDragging = true;
-            lastMouseX = e.clientX;
-            lastMouseY = e.clientY;
-            workspace.style.cursor = 'grabbing';
-            e.preventDefault();
-        };
-
-        window.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            const dx = e.clientX - lastMouseX;
-            const dy = e.clientY - lastMouseY;
-            
-            transform.x += dx;
-            transform.y += dy;
-            
-            lastMouseX = e.clientX;
-            lastMouseY = e.clientY;
-            
-            requestAnimationFrame(updateTransforms);
-        });
-
-        window.addEventListener('mouseup', () => {
-            isDragging = false;
-            if (workspace) workspace.style.cursor = 'grab';
-        });
-
-        workspace.onwheel = (e) => {
-            e.preventDefault();
-            const delta = e.deltaY > 0 ? 0.9 : 1.1;
-            const newScale = Math.max(0.05, Math.min(20, transform.scale * delta));
-            
-            // Adjust translation to keep mouse point anchored
-            const rect = workspace.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left - rect.width / 2;
-            const mouseY = e.clientY - rect.top - rect.height / 2;
-            
-            // Math: Point P in world space = (Mouse - X) / Scale
-            // We want (Mouse - X_new) / Scale_new = (Mouse - X_old) / Scale_old
-            transform.x = mouseX - (mouseX - transform.x) * (newScale / transform.scale);
-            transform.y = mouseY - (mouseY - transform.y) * (newScale / transform.scale);
-            transform.scale = newScale;
-            
-            updateTransforms();
-        };
-
-        workspace.oncontextmenu = (e) => e.preventDefault();
-    }
-
-    // Grid Interaction
-    if (gridOverlay) {
-        gridOverlay.onclick = (e) => {
-            e.stopPropagation();
-            const rect = gridOverlay.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const clickY = e.clientY - rect.top;
-            
-            const gw = parseInt(gridSizeWInput?.value || '32');
-            const gh = parseInt(gridSizeHInput?.value || '32');
-            const gm = parseInt(gridMarginInput?.value || '0');
-            const gs = parseInt(gridSpacingInput?.value || '0');
-            
-            const col = Math.floor((clickX - gm) / (gw + gs));
-            const row = Math.floor((clickY - gm) / (gh + gs));
-            
-            if (col >= 0 && row >= 0) {
-                // Center this cell in the workspace
-                const cellCenterX = gm + col * (gw + gs) + gw / 2;
-                const cellCenterY = gm + row * (gh + gs) + gh / 2;
-                
-                const imgW = croppingSource.naturalWidth;
-                const imgH = croppingSource.naturalHeight;
-                
-                // We want cellCenterX, cellCenterY to be at workspace center (0,0 in relative coords)
-                // Offset = (Center - ImageCenter)
-                transform.x = (imgW / 2 - cellCenterX) * transform.scale;
-                transform.y = (imgH / 2 - cellCenterY) * transform.scale;
-                updateTransforms();
-            }
-        };
-    }
-
-    // UI Events
-    zoomSlider?.addEventListener('input', () => {
-        const newScale = parseFloat(zoomSlider.value);
-        // Compensate translation to keep center stable during zoom
-        const delta = newScale / transform.scale;
-        transform.x *= delta;
-        transform.y *= delta;
-        transform.scale = newScale;
-        updateTransforms();
-    });
-    rotateSlider?.addEventListener('input', () => {
-        transform.rotation = parseFloat(rotateSlider.value);
-        updateTransforms();
-    });
-    resetBtn?.addEventListener('click', resetTransform);
-    fitBtn?.addEventListener('click', fitImage);
-    
-    [gridSizeWInput, gridSizeHInput, gridMarginInput, gridSpacingInput, showGridCheck].forEach(el => {
-        el?.addEventListener('input', updateSlicingGrid);
-    });
-
-    // File Input
     fileInput.onchange = (e) => {
         const file = (e.target as HTMLInputElement).files?.[0];
         if (!file || !selectedTileKey) return;
         
         if (file.size > 5 * 1024 * 1024) {
-            alert(window.cp_translate("Original file size too large! Max limit 5MB."));
+            alert((window as any).cp_translate("Original file size too large! Max limit 5MB for cropping."));
             return;
         }
         
         const reader = new FileReader();
         reader.onload = (evt) => {
             croppingSource.src = evt.target?.result as string;
-            croppingSource.onload = () => {
-                cropModal?.classList.add('active');
-                
-                // Initialize Ghost (Always Desert version)
-                const ghostImg = document.getElementById('ghostImg') as HTMLImageElement;
-                const activeTile = CORE_TILES.find(t => t.id === selectedTileKey);
-                if (ghostImg && activeTile) {
-                    // Bypass the global theme interceptor to ensure we see the base reference
-                    ghostImg.dataset.noTheme = 'true';
-                    
-                    // Force path to Desert if it's a theme-able resource
-                    let desertSrc = activeTile.src;
-                    if (desertSrc.includes('/Resources/') && !desertSrc.includes('/Desert/') && !desertSrc.includes('/Global/')) {
-                        // Attempt to map environment-specific tiles to Desert
-                        desertSrc = desertSrc.replace(/\/Resources\/[^/]+\//, '/Resources/Desert/');
-                    }
-                    ghostImg.src = desertSrc;
+            cropModal?.classList.add('active');
+            
+            if (cropModeSelect) {
+                cropModeSelect.querySelectorAll('.mode-btn-v2').forEach(b => {
+                    b.classList.toggle('active', (b as HTMLElement).dataset.mode === currentCropMode);
+                });
+                const ghostRef = document.getElementById('ghostReference');
+                if (ghostRef) {
+                    ghostRef.style.visibility = (currentCropMode === 'ghost') ? 'visible' : 'hidden';
                 }
+            }
+
+            if (cropperInstance) {
+                cropperInstance.destroy();
+            }
+
+            let isSnapping = false;
+            const updateSlicingGrid = () => {
+                if (!cropperInstance || !gridOverlay) return;
+                const canvasData = cropperInstance.getCanvasData();
+                gridOverlay.style.width = canvasData.width + 'px';
+                gridOverlay.style.height = canvasData.height + 'px';
+                gridOverlay.style.left = canvasData.left + 'px';
+                gridOverlay.style.top = canvasData.top + 'px';
                 
-                resetTransform();
-                fitImage();
+                const gw = parseInt(gridSizeWInput?.value || '32');
+                const gh = parseInt(gridSizeHInput?.value || '32');
+                const gm = parseInt(gridMarginInput?.value || '0');
+                const gs = parseInt(gridSpacingInput?.value || '0');
+                const scale = canvasData.width / canvasData.naturalWidth;
+                
+                gridOverlay.style.setProperty('--grid-w', (gw * scale) + 'px');
+                gridOverlay.style.setProperty('--grid-h', (gh * scale) + 'px');
+                gridOverlay.style.setProperty('--grid-m', (gm * scale) + 'px');
+                gridOverlay.style.setProperty('--grid-s', (gs * scale) + 'px');
+                gridOverlay.style.display = showGridCheck?.checked ? 'block' : 'none';
+
+                const ghostRef = document.getElementById('ghostReference');
+                const ghostImg = document.getElementById('ghostImg') as HTMLImageElement;
+                const ghostHitbox = document.getElementById('ghostHitbox');
+                const activeTile = CORE_TILES.find(t => t.id === selectedTileKey);
+                
+                if (ghostRef && activeTile && cropperInstance) {
+                    const cropBoxData = cropperInstance.getCropBoxData();
+                    ghostRef.style.display = 'block';
+                    ghostRef.style.visibility = (currentCropMode === 'ghost') ? 'visible' : 'hidden';
+                    ghostRef.style.width = cropBoxData.width + 'px';
+                    ghostRef.style.height = cropBoxData.height + 'px';
+                    ghostRef.style.left = cropBoxData.left + 'px';
+                    ghostRef.style.top = cropBoxData.top + 'px';
+                    
+                    if (ghostImg) {
+                        ghostImg.dataset.noTheme = 'true';
+                        let desertSrc = activeTile.src;
+                        if (desertSrc.includes('/Resources/') && !desertSrc.includes('/Desert/') && !desertSrc.includes('/Global/')) {
+                            desertSrc = desertSrc.replace(/\/Resources\/[^/]+\//, '/Resources/Desert/');
+                        }
+                        ghostImg.src = desertSrc;
+                    }
+                    if (activeTile.hitbox && ghostHitbox) {
+                        ghostHitbox.style.display = 'block';
+                        ghostHitbox.style.top = (activeTile.hitbox.y * 100) + '%';
+                        ghostHitbox.style.left = '0';
+                        ghostHitbox.style.width = '100%';
+                        ghostHitbox.style.height = (activeTile.hitbox.h * 100) + '%';
+                    } else if (ghostHitbox) {
+                        ghostHitbox.style.display = 'none';
+                    }
+                }
             };
+
+            if (zoomSlider) {
+                zoomSlider.oninput = () => {
+                    cropperInstance?.zoomTo(parseFloat(zoomSlider.value));
+                };
+            }
+            if (rotateSlider) {
+                rotateSlider.oninput = () => {
+                    cropperInstance?.rotateTo(parseInt(rotateSlider.value));
+                };
+            }
+            if (resetTransformBtn) {
+                resetTransformBtn.onclick = () => {
+                    cropperInstance?.reset();
+                    if (zoomSlider) zoomSlider.value = "1";
+                    if (rotateSlider) rotateSlider.value = "0";
+                };
+            }
+            if (fitImageBtn) {
+                fitImageBtn.onclick = () => {
+                    cropperInstance?.setDragMode('move');
+                    cropperInstance?.zoomTo(1);
+                    cropperInstance?.reset();
+                };
+            }
+
+            const initRightClickPan = () => {
+                const container = document.querySelector('.cropper-container') as HTMLElement;
+                if (!container || container.dataset.panInit === 'true') return;
+                
+                container.dataset.panInit = 'true';
+                let isRightDragging = false;
+                let lastX = 0, lastY = 0;
+                container.oncontextmenu = (e) => e.preventDefault();
+                container.addEventListener('mousedown', (e) => {
+                    if (e.button === 2) {
+                        isRightDragging = true;
+                        lastX = e.clientX;
+                        lastY = e.clientY;
+                        container.style.cursor = 'grabbing';
+                    }
+                }, true);
+                window.addEventListener('mousemove', (e) => {
+                    if (isRightDragging && cropperInstance) {
+                        const dx = e.clientX - lastX;
+                        const dy = e.clientY - lastY;
+                        if (!isNaN(dx) && !isNaN(dy)) {
+                            cropperInstance.move(dx, dy);
+                        }
+                        lastX = e.clientX;
+                        lastY = e.clientY;
+                    }
+                });
+                window.addEventListener('mouseup', () => {
+                    if (isRightDragging) {
+                        isRightDragging = false;
+                        container.style.cursor = '';
+                    }
+                });
+            };
+
+            if (gridOverlay) {
+                gridOverlay.onclick = (e) => {
+                    if (!cropperInstance || isSnapping) return;
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    
+                    const rect = gridOverlay.getBoundingClientRect();
+                    const canvasData = cropperInstance.getCanvasData();
+                    if (canvasData.width === 0 || canvasData.height === 0) return;
+
+                    const scale = canvasData.naturalWidth / canvasData.width;
+                    const clickX = (e.clientX - rect.left) * scale;
+                    const clickY = (e.clientY - rect.top) * scale;
+                    if (isNaN(clickX) || isNaN(clickY)) return;
+
+                    const gw = parseInt(gridSizeWInput?.value || '32');
+                    const gh = parseInt(gridSizeHInput?.value || '32');
+                    const gm = parseInt(gridMarginInput?.value || '0');
+                    const gs = parseInt(gridSpacingInput?.value || '0');
+                    
+                    const tileX = Math.floor((clickX - gm) / (gw + gs));
+                    const tileY = Math.floor((clickY - gm) / (gh + gs));
+                    
+                    if (tileX >= 0 && tileY >= 0) {
+                        const snapX = gm + tileX * (gw + gs);
+                        const snapY = gm + tileY * (gh + gs);
+                        if (snapX < 0 || snapX >= canvasData.naturalWidth || snapY < 0 || snapY >= canvasData.naturalHeight) return;
+
+                        if (currentCropMode === 'smart') {
+                            const tempCanvas = document.createElement('canvas');
+                            tempCanvas.width = canvasData.naturalWidth;
+                            tempCanvas.height = canvasData.naturalHeight;
+                            const ctx = tempCanvas.getContext('2d', { willReadFrequently: true });
+                            ctx?.drawImage(croppingSource, 0, 0);
+                            
+                            const bounds = getTrimmedBounds(tempCanvas, snapX, snapY, gw, gh);
+                            isSnapping = true;
+                            if (bounds) {
+                                cropperInstance.setData(bounds);
+                            } else {
+                                cropperInstance.setData({ x: snapX, y: snapY, width: gw, height: gh });
+                            }
+                            setTimeout(() => { isSnapping = false; }, 50);
+                        } else {
+                            isSnapping = true;
+                            cropperInstance.setData({ x: snapX, y: snapY, width: gw, height: gh });
+                            setTimeout(() => { isSnapping = false; }, 50);
+                        }
+                    }
+                };
+            }
+
+            // @ts-ignore
+            cropperInstance = new Cropper(croppingSource, {
+                aspectRatio: NaN,
+                viewMode: 0,
+                background: false,
+                zoomable: true,
+                scalable: true,
+                movable: true,
+                zoomOnWheel: true,
+                wheelZoomRatio: 0.1,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: true,
+                guides: false,
+                center: false,
+                highlight: false,
+                responsive: true,
+                checkOrientation: true,
+                ready() {
+                    updateSlicingGrid();
+                    initRightClickPan();
+                    if (currentCropMode === 'ghost') {
+                        const canvasData = cropperInstance.getCanvasData();
+                        cropperInstance.setData({ x: 0, width: canvasData.naturalWidth });
+                    }
+                },
+                zoom(event) {
+                    updateSlicingGrid();
+                    if (zoomSlider && event.detail.ratio) {
+                        zoomSlider.value = event.detail.ratio.toString();
+                    }
+                },
+                crop(event) {
+                    updateSlicingGrid();
+                    if (isSnapping) return;
+
+                    if (currentCropMode === 'ghost') {
+                        const canvasData = cropperInstance.getCanvasData();
+                        const d = event.detail;
+                        if (Math.abs(d.x) > 0.1 || Math.abs(d.width - canvasData.naturalWidth) > 0.1) {
+                            isSnapping = true;
+                            cropperInstance.setData({ x: 0, width: canvasData.naturalWidth });
+                            setTimeout(() => { isSnapping = false; }, 10);
+                        }
+                        return;
+                    }
+
+                    if (!snapToGridCheck?.checked) return;
+                    const gw = parseInt(gridSizeWInput?.value || '32');
+                    const gh = parseInt(gridSizeHInput?.value || '32');
+                    const gm = parseInt(gridMarginInput?.value || '0');
+                    const gs = parseInt(gridSpacingInput?.value || '0');
+                    const d = event.detail;
+                    const tileX = Math.round((d.x - gm) / (gw + gs));
+                    const tileY = Math.round((d.y - gm) / (gh + gs));
+                    const rx = gm + tileX * (gw + gs);
+                    const ry = gm + tileY * (gh + gs);
+                    if (Math.abs(d.x - rx) > 0.1 || Math.abs(d.y - ry) > 0.1) {
+                        isSnapping = true;
+                        cropperInstance.setData({ x: rx, y: ry });
+                        setTimeout(() => { isSnapping = false; }, 10);
+                    }
+                }
+            });
+
+            [gridSizeWInput, gridSizeHInput, gridMarginInput, gridSpacingInput].forEach(inp => {
+                if (inp) inp.oninput = updateSlicingGrid;
+            });
+            if (showGridCheck) showGridCheck.onchange = updateSlicingGrid;
         };
         reader.readAsDataURL(file);
     };
 
     const cleanupAndCloseCrop = () => {
+        if (cropperInstance) {
+            cropperInstance.destroy();
+            cropperInstance = null;
+        }
+        const ghostRef = document.getElementById('ghostReference');
+        if (ghostRef) ghostRef.style.display = 'none';
         cropModal?.classList.remove('active');
         fileInput.value = "";
     };
 
-    closeCropBtn.onclick = cleanupAndCloseCrop;
-    cancelCropBtn.onclick = cleanupAndCloseCrop;
+    if (closeCropBtn) closeCropBtn.onclick = cleanupAndCloseCrop;
+    if (cancelCropBtn) cancelCropBtn.onclick = cleanupAndCloseCrop;
 
-    applyCropBtn.onclick = () => {
-        const outputSize = 512;
-        const ghostSize = 128; // The size of the ghost layer in DOM
-        const ratio = outputSize / ghostSize;
-
-        const canvas = document.createElement('canvas');
-        canvas.width = outputSize;
-        canvas.height = outputSize;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-
-        // 1. Move to the center of the target canvas
-        ctx.translate(outputSize / 2, outputSize / 2);
-        
-        // 2. Apply Rotation
-        ctx.rotate(transform.rotation * Math.PI / 180);
-        
-        // 3. Apply Scaling (including the ratio between DOM and Canvas)
-        const finalScale = transform.scale * ratio;
-        ctx.scale(finalScale, finalScale);
-        
-        // 4. Apply Translation (must be divided by current scale to work with translate() after scale())
-        // transform.x/y are screen-space offsets from center. 
-        // We need to convert them to "natural" space at current scale.
-        ctx.translate(transform.x / transform.scale, transform.y / transform.scale);
-        
-        // 5. Draw image centered
-        ctx.drawImage(croppingSource, -croppingSource.naturalWidth / 2, -croppingSource.naturalHeight / 2);
-
-        const dataUrl = canvas.toDataURL('image/png');
-        const cell = document.querySelector(`.tile-edit-cell[data-id="${selectedTileKey}"]`);
-        if (cell) {
-            (cell.querySelector('.tile-cell-img') as HTMLImageElement).src = dataUrl;
-            cell.classList.add('customized');
-            if (!cell.querySelector('.customized-badge')) {
-                const b = document.createElement('div');
-                b.className = 'customized-badge';
-                cell.appendChild(b);
+    if (applyCropBtn) {
+        applyCropBtn.onclick = () => {
+            if (!cropperInstance) return;
+            const naturalData = cropperInstance.getData();
+            const canvas = cropperInstance.getCroppedCanvas({
+                imageSmoothingEnabled: naturalData.width > 128,
+                imageSmoothingQuality: 'high'
+            });
+            if (!canvas) {
+                alert((window as any).cp_translate("Could not read cropped region."));
+                return;
             }
-        }
+            
+            const maxOutputSize = 512;
+            let targetW, targetH;
+            const aspect = naturalData.width / naturalData.height;
+            if (aspect >= 1) {
+                targetW = Math.min(naturalData.width, maxOutputSize);
+                targetH = targetW / aspect;
+            } else {
+                targetH = Math.min(naturalData.height, maxOutputSize);
+                targetW = targetH * aspect;
+            }
 
-        canvas.toBlob((blob) => {
-            if (blob) editedTileFiles[selectedTileKey] = blob;
-            cleanupAndCloseCrop();
-        }, 'image/png');
-    };
+            const finalCanvas = document.createElement('canvas');
+            finalCanvas.width = targetW;
+            finalCanvas.height = targetH;
+            const ctx = finalCanvas.getContext('2d');
+            if (ctx) {
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.drawImage(canvas, 0, 0, targetW, targetH);
+            }
 
-    saveBtn.onclick = handleStudioSubmit;
+            const dataUrl = finalCanvas.toDataURL('image/png');
+            const cell = document.querySelector(`.tile-edit-cell[data-id="${selectedTileKey}"]`);
+            if (cell) {
+                (cell.querySelector('.tile-cell-img') as HTMLImageElement).src = dataUrl;
+                cell.classList.add('customized');
+                if (!cell.querySelector('.customized-badge')) {
+                    const b = document.createElement('div');
+                    b.className = 'customized-badge';
+                    cell.appendChild(b);
+                }
+            }
+
+            finalCanvas.toBlob((blob) => {
+                if (blob) editedTileFiles[selectedTileKey] = blob;
+                cleanupAndCloseCrop();
+            }, 'image/png');
+        };
+    }
+
+    if (saveBtn) saveBtn.onclick = handleStudioSubmit;
     renderStudioPresets();
 }
 
-/**
- * Clear Studio local memory
- */
 function resetStudio() {
     editedTileFiles = {};
     selectedTileKey = null;
-    document.getElementById('packNameInput').value = '';
-    document.getElementById('packPublicCheck').checked = true;
-    document.getElementById('studioLoader').classList.remove('active');
+    const nameInput = document.getElementById('packNameInput') as HTMLInputElement;
+    const publicCheck = document.getElementById('packPublicCheck') as HTMLInputElement;
+    if (nameInput) nameInput.value = '';
+    if (publicCheck) publicCheck.checked = true;
+    document.getElementById('studioLoader')?.classList.remove('active');
     renderStudioPresets();
 }
 
-/**
- * Print the base core tiles inside modal body
- */
 function renderStudioPresets() {
     const grid = document.getElementById('studioTileGrid');
-    if(!grid) return;
-    
+    if (!grid) return;
     grid.innerHTML = '';
-    
     CORE_TILES.forEach(tile => {
         const cell = document.createElement('div');
         cell.className = 'tile-edit-cell';
         cell.setAttribute('data-id', tile.id);
         cell.innerHTML = `
-            <img src="${tile.src}" class="tile-cell-img" alt="${tile.label}">
+            <img src="${tile.src}" class="tile-cell-img" alt="${tile.label}" data-no-theme="true">
             <span class="tile-cell-label">${tile.label}</span>
         `;
-        
-        // Trigger hidden file inputs
         cell.onclick = () => {
             selectedTileKey = tile.id;
-            document.getElementById('tileFileInput').click();
+            document.getElementById('tileFileInput')?.click();
         };
-        
         grid.appendChild(cell);
     });
 }
 
-/**
- * The Master Submit Routine: uploads each texture, links references, pushes JSONB metadata
- */
 async function handleStudioSubmit() {
     const nameInput = (document.getElementById('packNameInput') as HTMLInputElement).value.trim();
-    if(!nameInput) {
-        alert(window.cp_translate('Please give your Tile Pack a name!'));
+    if (!nameInput) {
+        alert((window as any).cp_translate('Please give your Tile Pack a name!'));
         return;
     }
-    
     const modifiedCount = Object.keys(editedTileFiles).length;
-    if(modifiedCount === 0) {
-        alert(window.cp_translate('Customize at least one tile before saving!'));
+    if (modifiedCount === 0) {
+        alert((window as any).cp_translate('Customize at least one tile before saving!'));
         return;
     }
-    
     const loader = document.getElementById('studioLoader');
     const loaderText = document.getElementById('loaderText');
     const saveBtn = document.getElementById('savePackBtn') as HTMLButtonElement;
     
-    // Anti-Spam protection! Disable inputs.
-    saveBtn.disabled = true;
-    loader.classList.add('active');
+    if (saveBtn) saveBtn.disabled = true;
+    loader?.classList.add('active');
     
     try {
-        const isPublic = (document.getElementById('packPublicCheck') as HTMLInputElement).checked;
+        const publicCheck = document.getElementById('packPublicCheck') as HTMLInputElement;
+        const isPublic = publicCheck ? publicCheck.checked : true;
         const timestamp = Date.now();
         const sanitizedName = nameInput.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-        
         if (loaderText) loaderText.textContent = `Preparing uploads (0/${modifiedCount})...`;
         
         const finalTileData = {};
         let uploadIdx = 0;
         
-        // Step 1: Run asynchronous loop to upload textures to Storage
-        for(const [tileId, fileObj] of Object.entries(editedTileFiles)) {
+        for (const [tileId, fileObj] of Object.entries(editedTileFiles)) {
             uploadIdx++;
             if (loaderText) loaderText.textContent = `Uploading ${tileId} (${uploadIdx}/${modifiedCount})...`;
-            
             const fileExt = (fileObj as any).name ? (fileObj as any).name.split('.').pop() : 'png';
-            // Store inside storage pathway: user_id / timestamp_packname / tile_id . ext
             const uploadPath = `${currentUserId}/${timestamp}_${sanitizedName}/${tileId}.${fileExt}`;
             
-            const { data: sData, error: sError } = await (supabase as any).storage
+            const { error: sError } = await (supabase as any).storage
                 .from('custom_tiles')
                 .upload(uploadPath, fileObj, { upsert: true });
-                
             if (sError) throw sError;
             
-            // Step 2: Acquire read URL
             const { data: { publicUrl } } = (supabase as any).storage
                 .from('custom_tiles')
                 .getPublicUrl(uploadPath);
-                
             finalTileData[tileId] = publicUrl;
         }
         
         if (loaderText) loaderText.textContent = 'Saving metadata to cloud DB...';
-        
-        // Step 3: Push JSON into custom_tile_packs
         const { error: dbError } = await (supabase as any)
             .from('custom_tile_packs')
             .insert({
@@ -1121,20 +1162,17 @@ async function handleStudioSubmit() {
             
         if (dbError) throw dbError;
         
-        // Complete & reload
-        loader.classList.remove('active');
-        document.getElementById('studioModal').classList.remove('active');
-        
-        alert(window.cp_translate('Tile Pack safely deployed and published! ✨'));
-        await loadPacks();
+        loader?.classList.remove('active');
+        document.getElementById('studioModal')?.classList.remove('active');
+        alert((window as any).cp_translate('Tile Pack safely deployed and published! ✨'));
+        await (window as any).loadPacks();
         
     } catch (err) {
         console.error("Publishing failed:", err);
-        alert(`${window.cp_translate('Deployment failed. Verify your internet or Supabase SQL script implementation! Details:')} ${err.message || err}`);
+        alert(`${(window as any).cp_translate('Deployment failed. Verify your internet or Supabase SQL script implementation! Details:')} ${err.message || err}`);
     } finally {
-        // Restore interactivity and clean overlay
-        loader.classList.remove('active');
-        saveBtn.disabled = false;
+        loader?.classList.remove('active');
+        if (saveBtn) saveBtn.disabled = false;
     }
 }
 
@@ -1146,4 +1184,31 @@ function escapeHTML(str) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+}
+
+function getTrimmedBounds(canvas, startX, startY, width, height) {
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(startX, startY, width, height);
+    const data = imageData.data;
+    let minX = width, minY = height, maxX = 0, maxY = 0;
+    let found = false;
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            const alpha = data[(y * width + x) * 4 + 3];
+            if (alpha > 10) {
+                if (x < minX) minX = x;
+                if (x > maxX) maxX = x;
+                if (y < minY) minY = y;
+                if (y > maxY) maxY = y;
+                found = true;
+            }
+        }
+    }
+    if (!found) return null;
+    return {
+        x: startX + minX,
+        y: startY + minY,
+        width: (maxX - minX) + 1,
+        height: (maxY - minY) + 1
+    };
 }
