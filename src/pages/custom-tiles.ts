@@ -704,20 +704,20 @@ function initStudioControls() {
                 const gridOverlay = document.getElementById('slicingGridOverlay');
                 if (currentCropMode === 'ghost') {
                     cropperInstance.setAspectRatio(NaN);
-                    cropperInstance.setDragMode('move');
                     cropperInstance.setOptions({
                         cropBoxMovable: false,
                         cropBoxResizable: false
                     });
+                    cropperInstance.setDragMode('move');
                     if (gridOverlay) gridOverlay.style.pointerEvents = 'none';
                     if (snapToGridCheck) snapToGridCheck.checked = false;
                 } else if (currentCropMode === 'manual') {
                     cropperInstance.setAspectRatio(NaN);
-                    cropperInstance.setDragMode('crop');
                     cropperInstance.setOptions({
                         cropBoxMovable: true,
                         cropBoxResizable: true
                     });
+                    cropperInstance.setDragMode('crop');
                     if (gridOverlay) gridOverlay.style.pointerEvents = 'none';
                     if (snapToGridCheck) snapToGridCheck.checked = false;
                     
@@ -731,11 +731,11 @@ function initStudioControls() {
                     });
                 } else if (currentCropMode === 'smart') {
                     cropperInstance.setAspectRatio(NaN);
-                    cropperInstance.setDragMode('move');
                     cropperInstance.setOptions({
                         cropBoxMovable: true,
                         cropBoxResizable: true
                     });
+                    cropperInstance.setDragMode('move');
                     if (gridOverlay) {
                         gridOverlay.style.pointerEvents = 'auto';
                         gridOverlay.style.zIndex = '2000'; // Above cropper
@@ -790,13 +790,20 @@ function initStudioControls() {
             }
 
             let isSnapping = false;
-            const updateSlicingGrid = () => {
-                if (!cropperInstance || !gridOverlay) return;
-                const canvasData = cropperInstance.getCanvasData();
-                gridOverlay.style.width = canvasData.width + 'px';
-                gridOverlay.style.height = canvasData.height + 'px';
-                gridOverlay.style.left = canvasData.left + 'px';
-                gridOverlay.style.top = canvasData.top + 'px';
+                const updateSlicingGrid = () => {
+                    if (!cropperInstance || !gridOverlay) return;
+                    
+                    // Ensure grid is inside the container for perfect alignment
+                    const cropperContainer = document.querySelector('.cropper-container');
+                    if (cropperContainer && gridOverlay.parentElement !== cropperContainer) {
+                        cropperContainer.appendChild(gridOverlay);
+                    }
+
+                    const canvasData = cropperInstance.getCanvasData();
+                    gridOverlay.style.width = canvasData.width + 'px';
+                    gridOverlay.style.height = canvasData.height + 'px';
+                    gridOverlay.style.left = canvasData.left + 'px';
+                    gridOverlay.style.top = canvasData.top + 'px';
                 
                 const gw = parseInt(gridSizeWInput?.value || '32');
                 const gh = parseInt(gridSizeHInput?.value || '32');
@@ -1020,9 +1027,16 @@ function initStudioControls() {
                 ready() {
                     updateSlicingGrid();
                     initRightClickPan();
+                    
+                    // Force the correct mode on first load
                     if (currentCropMode === 'ghost') {
+                        cropperInstance.setDragMode('move');
                         const canvasData = cropperInstance.getCanvasData();
                         cropperInstance.setData({ x: 0, width: canvasData.naturalWidth });
+                    } else if (currentCropMode === 'manual') {
+                        cropperInstance.setDragMode('crop');
+                    } else if (currentCropMode === 'smart') {
+                        cropperInstance.setDragMode('move');
                     }
                 },
                 zoom(event) {
