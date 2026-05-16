@@ -53,11 +53,11 @@
         <header class="studio-header">
             <div class="studio-title">
                 <h1>Custom Tiles Studio</h1>
-                <p>Reimagine the game visually. Override standard tiles with your own designs.</p>
+                <p>Create high-quality tile packs to personalize your maps.</p>
             </div>
             <button id="openStudioBtn" class="create-pack-btn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                Create Pack
+                New Pack
             </button>
         </header>
 
@@ -159,10 +159,15 @@
                 <button class="close-modal-btn" id="closeCropBtn">&times;</button>
             </header>
             
-            <div class="modal-body" style="background: #0a0a10; display: flex; align-items: center; justify-content: center;">
-                <div class="cropper-frame">
+            <div class="modal-body" style="background: #0a0a10; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; min-height: 400px;">
+                <div class="cropper-frame" style="position: relative;">
                     <img id="croppingSource" style="max-width: 100%; display: block;">
                     <div id="slicingGridOverlay" class="slicing-grid-overlay"></div>
+                    <!-- Reference Ghost Layer -->
+                    <div id="ghostReference" style="position: absolute; pointer-events: none; opacity: 0.4; z-index: 5; display: none; transform-origin: top left;">
+                        <img id="ghostImg" src="" style="width: 100%; height: 100%; object-fit: contain;">
+                        <div id="ghostHitbox" style="position: absolute; border: 2px dashed #ff4b4b; background: rgba(255, 75, 75, 0.1); box-sizing: border-box; display: none;"></div>
+                    </div>
                 </div>
             </div>
 

@@ -4,8 +4,8 @@ import { supabase } from '../core/supabase-client.js';
 // Base configurable tiles preset
 const CORE_TILES = [
     // Base Desert Environment Tiles
-    { id: 'Wall', label: 'Wall 1', src: './Resources/Desert/Tiles/Wall.png' },
-    { id: 'Wall2', label: 'Wall 2', src: './Resources/Desert/Tiles/Wall2.png' },
+    { id: 'Wall', label: 'Wall 1', src: './Resources/Desert/Tiles/Wall.png', hitbox: { y: 0.6, h: 0.4 } },
+    { id: 'Wall2', label: 'Wall 2', src: './Resources/Desert/Tiles/Wall2.png', hitbox: { y: 0.6, h: 0.4 } },
     { id: 'Bush', label: 'Bush', src: './Resources/Desert/Tiles/Bush.png' },
     { id: 'Cactus', label: 'Cactus', src: './Resources/Desert/Tiles/Cactus.png' },
     { id: 'Crate', label: 'Crate', src: './Resources/Desert/Tiles/Crate.png' },
@@ -786,6 +786,35 @@ function initStudioControls() {
                 gridOverlay.style.setProperty('--grid-s', (gs * scale) + 'px');
                 
                 gridOverlay.style.display = showGridCheck?.checked ? 'block' : 'none';
+
+                // Update Ghost Reference
+                const ghostRef = document.getElementById('ghostReference');
+                const ghostImg = document.getElementById('ghostImg') as HTMLImageElement;
+                const ghostHitbox = document.getElementById('ghostHitbox');
+                const activeTile = CORE_TILES.find(t => t.id === selectedTileKey);
+
+                if (ghostRef && activeTile) {
+                    const cropData = cropperInstance.getData();
+                    const canvasData = cropperInstance.getCanvasData();
+                    
+                    ghostRef.style.display = 'block';
+                    ghostRef.style.width = (cropData.width * scale) + 'px';
+                    ghostRef.style.height = (cropData.height * scale) + 'px';
+                    ghostRef.style.left = (canvasData.left + (cropData.x * scale)) + 'px';
+                    ghostRef.style.top = (canvasData.top + (cropData.y * scale)) + 'px';
+                    
+                    if (ghostImg) ghostImg.src = activeTile.src;
+                    
+                    if (activeTile.hitbox && ghostHitbox) {
+                        ghostHitbox.style.display = 'block';
+                        ghostHitbox.style.top = (activeTile.hitbox.y * 100) + '%';
+                        ghostHitbox.style.left = '0';
+                        ghostHitbox.style.width = '100%';
+                        ghostHitbox.style.height = (activeTile.hitbox.h * 100) + '%';
+                    } else if (ghostHitbox) {
+                        ghostHitbox.style.display = 'none';
+                    }
+                }
             };
 
             const initRightClickPan = () => {
@@ -929,6 +958,9 @@ function initStudioControls() {
             cropperInstance.destroy();
             cropperInstance = null;
         }
+        const ghostRef = document.getElementById('ghostReference');
+        if (ghostRef) ghostRef.style.display = 'none';
+
         cropModal.classList.remove('active');
         fileInput.value = ""; // Reset input
     };
@@ -967,17 +999,16 @@ function initStudioControls() {
             return;
         }
 
-        // 2. Final optimization to 128x128 with specialized interpolation
+        // 2. Final optimization to High Quality (512x512)
         const finalCanvas = document.createElement('canvas');
-        finalCanvas.width = 128;
-        finalCanvas.height = 128;
+        const outputSize = 512; // High Resolution for better detail in engine
+        finalCanvas.width = outputSize;
+        finalCanvas.height = outputSize;
         const ctx = finalCanvas.getContext('2d');
         if (ctx) {
-            // If the source was already near 128px, it's likely pixel art -> Nearest Neighbor
-            // If it was large, use high-quality Lanczos-like scaling
-            ctx.imageSmoothingEnabled = naturalData.width >= 128;
+            ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = 'high';
-            ctx.drawImage(canvas, 0, 0, 128, 128);
+            ctx.drawImage(canvas, 0, 0, outputSize, outputSize);
         }
 
         // Generate visual UI preview

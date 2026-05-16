@@ -136,7 +136,7 @@ const TRANSLATIONS = {
         'Unequip': 'Снять',
         'Custom Tiles Studio': 'Студия своих тайлов',
         'Reimagine the game visually. Override standard tiles with your own designs.': 'Переосмыслите игру визуально. Заменяйте стандартные тайлы своими.',
-        'Create Pack': 'Создать пак',
+        'New Pack': 'Новый пак',
         'Search custom tile packs...': 'Поиск паков тайлов...',
         'Most Liked': 'Популярные',
         'Newest First': 'Сначала новые',
@@ -235,6 +235,9 @@ const TRANSLATIONS = {
         'Equipped': 'Экипировано',
         'Close': 'Закрыть',
         'No customized tiles in this pack.': 'В этом паке нет измененных тайлов.',
+        'HITBOX': 'ХИТБОКС',
+        'Ratio 1:1': 'Соотношение 1:1',
+        'Free Form': 'Свободно',
 
         // SIZES
         'Regular': 'Обычный'

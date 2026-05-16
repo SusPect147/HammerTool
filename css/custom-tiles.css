@@ -639,12 +639,38 @@
     background-position: var(--grid-m) var(--grid-m);
 }
 
-.slicing-grid-overlay:hover {
-    opacity: 0.9;
-}
-
 .slicing-grid-overlay.active {
     display: block;
+}
+
+/* Ghost Reference Styles */
+#ghostReference {
+    border: 2px solid rgba(0, 210, 255, 0.4);
+    box-sizing: border-box;
+    box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
+    overflow: hidden;
+}
+
+#ghostImg {
+    filter: drop-shadow(0 0 5px rgba(0, 210, 255, 0.5));
+}
+
+#ghostHitbox {
+    border: 2px dashed #ff4b4b;
+    background: rgba(255, 75, 75, 0.1);
+    box-shadow: 0 0 10px rgba(255, 75, 75, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#ghostHitbox::after {
+    content: 'HITBOX';
+    font-size: 8px;
+    color: #ff4b4b;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    opacity: 0.8;
 }
 
 .slicing-grid-overlay::before {

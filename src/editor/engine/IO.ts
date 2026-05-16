@@ -131,7 +131,7 @@ async saveMap() {
                 const { data, error } = await supabase
                     .from('maps')
                     .insert([payload])
-                    .select();
+                    .select('*');
                 
                 if (error) throw error;
                 savedMapId = data[0].id;
