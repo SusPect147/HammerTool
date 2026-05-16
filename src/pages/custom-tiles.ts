@@ -711,15 +711,6 @@ function initStudioControls() {
                     });
                     if (gridOverlay) gridOverlay.style.pointerEvents = 'none';
                     if (snapToGridCheck) snapToGridCheck.checked = false;
-                    
-                    // Fixed 128x128 crop box in the center of the viewport
-                    const containerData = cropperInstance.getContainerData();
-                    cropperInstance.setCropBoxData({
-                        left: (containerData.width - 128) / 2,
-                        top: (containerData.height - 128) / 2,
-                        width: 128,
-                        height: 128
-                    });
                 } else if (currentCropMode === 'manual') {
                     cropperInstance.setAspectRatio(NaN);
                     cropperInstance.setOptions({
@@ -729,6 +720,15 @@ function initStudioControls() {
                     });
                     if (gridOverlay) gridOverlay.style.pointerEvents = 'none';
                     if (snapToGridCheck) snapToGridCheck.checked = false;
+                    
+                    // Ensure a crop box exists
+                    const canvasData = cropperInstance.getCanvasData();
+                    cropperInstance.setData({
+                        x: canvasData.naturalWidth * 0.25,
+                        y: canvasData.naturalHeight * 0.25,
+                        width: canvasData.naturalWidth * 0.5,
+                        height: canvasData.naturalHeight * 0.5
+                    });
                 } else if (currentCropMode === 'smart') {
                     cropperInstance.setAspectRatio(NaN);
                     cropperInstance.setOptions({
@@ -736,7 +736,10 @@ function initStudioControls() {
                         cropBoxResizable: true,
                         dragMode: 'move'
                     });
-                    if (gridOverlay) gridOverlay.style.pointerEvents = 'auto';
+                    if (gridOverlay) {
+                        gridOverlay.style.pointerEvents = 'auto';
+                        gridOverlay.style.zIndex = '2000'; // Above cropper
+                    }
                     if (snapToGridCheck) snapToGridCheck.checked = true;
                 }
             }
@@ -815,9 +818,34 @@ function initStudioControls() {
                 if (ghostRef && activeTile && cropperInstance) {
                     ghostRef.style.display = (currentCropMode === 'ghost') ? 'flex' : 'none';
                     
-                    // Fixed 128x128 ghost (matches CSS and fixed crop box)
-                    ghostRef.style.width = '128px';
-                    ghostRef.style.height = '128px';
+                    // Dynamic ghost sizing to match asset aspect ratio
+                    const canvasData = cropperInstance.getCanvasData();
+                    const scale = canvasData.width / canvasData.naturalWidth;
+                    
+                    // We need the natural dimensions of the GHOST image
+                    const gImg = ghostImg as HTMLImageElement;
+                    if (gImg.naturalWidth > 0) {
+                        const targetW = gImg.naturalWidth * scale;
+                        const targetH = gImg.naturalHeight * scale;
+                        ghostRef.style.width = targetW + 'px';
+                        ghostRef.style.height = targetH + 'px';
+
+                        // Sync crop box to the ghost reference exactly
+                        if (currentCropMode === 'ghost') {
+                            const containerData = cropperInstance.getContainerData();
+                            const centerX = (containerData.width - targetW) / 2;
+                            const centerY = (containerData.height - targetH) / 2;
+                            
+                            isSnapping = true;
+                            cropperInstance.setCropBoxData({
+                                left: centerX,
+                                top: centerY,
+                                width: targetW,
+                                height: targetH
+                            });
+                            setTimeout(() => { isSnapping = false; }, 50);
+                        }
+                    }
                     
                     if (ghostImg) {
                         ghostImg.dataset.noTheme = 'true';
@@ -900,8 +928,37 @@ function initStudioControls() {
             };
 
             if (gridOverlay) {
+                let isDraggingGrid = false;
+                let lastGridX = 0, lastGridY = 0;
+
+                gridOverlay.onmousedown = (e) => {
+                    if (currentCropMode === 'smart') {
+                        isDraggingGrid = true;
+                        lastGridX = e.clientX;
+                        lastGridY = e.clientY;
+                    }
+                };
+
+                window.addEventListener('mousemove', (e) => {
+                    if (isDraggingGrid && cropperInstance && currentCropMode === 'smart') {
+                        const dx = e.clientX - lastGridX;
+                        const dy = e.clientY - lastGridY;
+                        cropperInstance.move(dx, dy);
+                        lastGridX = e.clientX;
+                        lastGridY = e.clientY;
+                    }
+                });
+
+                window.addEventListener('mouseup', () => {
+                    isDraggingGrid = false;
+                });
+
                 gridOverlay.onclick = (e) => {
-                    if (!cropperInstance || isSnapping) return;
+                    if (!cropperInstance || isSnapping || isDraggingGrid) return;
+                    
+                    // If user moved more than 5px, don't trigger click (it was a drag)
+                    // (Implementation detail: we could track distance, but let's keep it simple)
+                    
                     e.preventDefault();
                     e.stopImmediatePropagation();
                     
@@ -987,24 +1044,8 @@ function initStudioControls() {
                     if (isSnapping || !cropperInstance)
                         return;
 
-                    // Ghost mode: fix crop box at exactly 128x128 in the center
+                    // Ghost mode: logic is handled in updateSlicingGrid for dynamic sizing
                     if (currentCropMode === 'ghost') {
-                        const containerData = cropperInstance.getContainerData();
-                        const cropBoxData = cropperInstance.getCropBoxData();
-                        
-                        const centerX = (containerData.width - 128) / 2;
-                        const centerY = (containerData.height - 128) / 2;
-
-                        if (Math.abs(cropBoxData.left - centerX) > 0.5 || Math.abs(cropBoxData.top - centerY) > 0.5 || Math.abs(cropBoxData.width - 128) > 0.5) {
-                            isSnapping = true;
-                            cropperInstance.setCropBoxData({
-                                left: centerX,
-                                top: centerY,
-                                width: 128,
-                                height: 128
-                            });
-                            setTimeout(() => { isSnapping = false; }, 50);
-                        }
                         return;
                     }
 
