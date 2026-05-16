@@ -300,22 +300,28 @@ export const RendererMixin = {
                     const cacheKey = `${tileId}_${imgPath}`;
                     img = this.tileImages[cacheKey];
 
-                    if (!img) {
-                        img = new Image();
-                        img.onload = () => this.scheduleDraw();
-                        img.src = imgPath;
-                        img.onerror = () => {
-                            console.error(`Failed to load objective image: ${imgPath}`);
-                        };
-                        this.tileImages[cacheKey] = img;
-                    }
+                        if (!img) {
+                            img = new Image();
+                            img.onload = () => this.scheduleDraw();
+                            img.src = imgPath;
+                            img.onerror = () => {
+                                console.error(`Failed to load objective image: ${imgPath}`);
+                                // Fallback to Desert if current theme fails
+                                if (this.environment !== 'Desert' && imgPath.includes(this.environment)) {
+                                    const fallbackPath = imgPath.replace(this.environment, 'Desert');
+                                    console.info(`Attempting fallback to: ${fallbackPath}`);
+                                    img.src = fallbackPath;
+                                }
+                            };
+                            this.tileImages[cacheKey] = img;
+                        }
                 }
             } else {
                 img = this.tileImages[tileId];
             }
         }
 
-        if (!img || !img.complete) return;
+        if (!img || !img.complete || img.naturalWidth === 0) return;
 
 
         // Get tile dimensions data
@@ -710,7 +716,7 @@ export const RendererMixin = {
             for (const goal of this.goalImages) {
                 const img = this.goalImageCache[`${goal.name}${this.environment}`] ||
                     this.goalImageCache[`${goal.name}`];
-                if (!img) continue;
+                if (!img || !img.complete || img.naturalWidth === 0) continue;
 
                 this.ctx.drawImage(
                     img,

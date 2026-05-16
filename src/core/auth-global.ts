@@ -70,14 +70,13 @@ window.getThemeDisplayText = async function(environmentId) {
 };
 
 // ==========================================================
-window.getThemedAsset = function(standardPath, parentEnvironment = null) {
+window.getThemedAsset = function(standardPath, parentEnvironment = null, forceBypass = false) {
     if (!standardPath || typeof standardPath !== 'string') return standardPath;
     
     try {
         const normalized = standardPath.replace(/\\/g, '/');
         
         // 1. ROUTING ENGINE: Extract specific CUSTOM_[packId] signals from URL path!
-        // Enables seamless rendering of third-party maps with custom themes!
         let forcedPackId = null;
         let extractionPath = normalized;
         
@@ -86,11 +85,16 @@ window.getThemedAsset = function(standardPath, parentEnvironment = null) {
             const customPart = parts.find(p => p.startsWith('CUSTOM_'));
             if (customPart) {
                 forcedPackId = customPart.replace('CUSTOM_', '');
-                // Re-route matching to baseline 'Desert' paths so the matcher identifies the asset type perfectly
+                // Re-route matching to baseline 'Desert' paths
                 extractionPath = normalized.replace(customPart, 'Desert');
             }
         }
         
+        // If we are forcing a bypass, just return the extraction path (which is the default "Desert" version)
+        if (forceBypass) {
+            return extractionPath;
+        }
+
         let targetThemes = [];
         
         if (forcedPackId) {
@@ -99,19 +103,9 @@ window.getThemedAsset = function(standardPath, parentEnvironment = null) {
             if (cachedData) {
                 targetThemes = [cachedData];
             } else {
-                // Fallback instantly to standard Desert assets to prevent any 404 / Canvas crashes!
                 return extractionPath;
             }
         } else {
-            // SHOCK ABSORBER: Never apply standard Desert theme overlays to incompatible biomes (like Mortuary),
-            // even if those biomes encounter missing assets and fall back to Desert assets!
-            if (parentEnvironment && parentEnvironment !== 'Desert' && !parentEnvironment.startsWith('CUSTOM_')) {
-                return standardPath;
-            }
-
-            // Local User Theme Routine: Retrieve equipped layers stack
-            // CRITICAL FIX: Limit editor-session overrides STRICTLY to the editor.html page context!
-            // Prevents stale localStorage keys from cross-contaminating public gallery renders with previous editor skins!
             const isEditor = window.location.pathname.includes('editor.html');
             const editorSkin = isEditor ? localStorage.getItem('editor_active_skin') : null;
             const activeThemesStr = localStorage.getItem('equipped_themes');
@@ -131,7 +125,6 @@ window.getThemedAsset = function(standardPath, parentEnvironment = null) {
                     const packId = editorSkin.replace('CUSTOM_', '');
                     targetThemes = themeStack.filter(p => p.id === packId);
                     
-                    // Deep Cache Fallback: Render unowned/unequipped cloned maps seamlessly via cached DB payloads
                     if (targetThemes.length === 0 && window.globalThemeCache[packId]) {
                         targetThemes = [window.globalThemeCache[packId]];
                     }
@@ -139,8 +132,6 @@ window.getThemedAsset = function(standardPath, parentEnvironment = null) {
                     return standardPath;
                 }
             } else {
-                // If inside the editor and no explicit custom skin overrides are set,
-                // ALWAYS render pure, raw native assets to prevent equipped themes from leaking!
                 targetThemes = isEditor ? [] : themeStack;
             }
         }
@@ -222,14 +213,11 @@ window.getThemedAsset = function(standardPath, parentEnvironment = null) {
             
             // Only inspect valid asset string strings (skipping external URLs, base64 payloads, blobs)
             if (typeof value === 'string' && value.length > 3 && !value.startsWith('data:') && !value.startsWith('blob:') && !value.startsWith('http')) {
-                // EXEMPTION: Respect explicit data-no-theme flag or global bypass to ensure base references!
-                if (this.dataset.noTheme === 'true' || window.cp_bypassTheme) {
-                    originalSrcDescriptor.set.call(this, value);
-                    return;
-                }
-
-                // Pass parent environment context to the interceptor to secure biome boundaries!
-                processedVal = window.getThemedAsset(value, this.parentEnvironment);
+                // Determine if we should bypass the theme
+                const shouldBypass = (this.dataset.noTheme === 'true' || window.cp_bypassTheme);
+                
+                // Even if bypassing, we use getThemedAsset to resolve any virtual "CUSTOM_" paths to "Desert"
+                processedVal = window.getThemedAsset(value, this.parentEnvironment, shouldBypass);
             }
             
             // CORS INTEGRATOR: If redirected to a remote Supabase CDN URL, apply crossOrigin = 'anonymous'

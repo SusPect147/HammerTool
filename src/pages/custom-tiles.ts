@@ -322,6 +322,7 @@ async function initUserData() {
 /**
  * Fetch both user packs and public marketplace packs from Supabase
  */
+(window as any).loadPacks = loadPacks;
 async function loadPacks() {
     const marketGrid = document.getElementById('marketGrid');
     if (marketGrid) marketGrid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; opacity:0.7;">Contacting servers...</div>';
@@ -1125,7 +1126,7 @@ async function handleStudioSubmit() {
         document.getElementById('studioModal').classList.remove('active');
         
         alert(window.cp_translate('Tile Pack safely deployed and published! ✨'));
-        await (window as any).loadPacks();
+        await loadPacks();
         
     } catch (err) {
         console.error("Publishing failed:", err);
