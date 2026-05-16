@@ -684,6 +684,92 @@ function initStudioControls() {
     const cropModeSelect = document.getElementById('cropModeSelect');
 
     if (cropModeSelect) {
+        const switchMode = (mode: string) => {
+            if (!cropperInstance) return;
+            currentCropMode = mode;
+            
+            const ghostRef = document.getElementById('ghostReference');
+            if (ghostRef) {
+                ghostRef.style.visibility = (currentCropMode === 'ghost') ? 'visible' : 'hidden';
+            }
+
+            // Save current transform
+            const canvasData = cropperInstance.getCanvasData();
+            const containerData = cropperInstance.getContainerData();
+            const cropData = cropperInstance.getData();
+
+            // Recreate cropper with new options (since v1.x doesn't support setOptions)
+            cropperInstance.destroy();
+            
+            const options: any = {
+                aspectRatio: NaN,
+                viewMode: 0,
+                background: false,
+                zoomable: true,
+                movable: true,
+                cropBoxMovable: (currentCropMode !== 'ghost'),
+                cropBoxResizable: (currentCropMode !== 'ghost'),
+                dragMode: (currentCropMode === 'manual') ? 'crop' : 'move',
+                guides: false,
+                center: false,
+                highlight: false,
+                ready() {
+                    updateSlicingGrid();
+                    initRightClickPan();
+                    
+                    // Restore state
+                    cropperInstance.setCanvasData(canvasData);
+                    if (currentCropMode === 'ghost') {
+                        // In ghost mode, center it
+                        const targetW = 128;
+                        const targetH = 128;
+                        const centerX = (containerData.width - targetW) / 2;
+                        const centerY = (containerData.height - targetH) / 2;
+                        cropperInstance.setCropBoxData({
+                            left: centerX,
+                            top: centerY,
+                            width: targetW,
+                            height: targetH
+                        });
+                    } else {
+                        cropperInstance.setData(cropData);
+                    }
+                },
+                zoom(event) {
+                    updateSlicingGrid();
+                    if (zoomSlider && event.detail.ratio) {
+                        zoomSlider.value = event.detail.ratio.toString();
+                    }
+                },
+                crop(event) {
+                    if (isSnapping || !cropperInstance) return;
+                    updateSlicingGrid();
+                    
+                    if (currentCropMode === 'ghost' || currentCropMode === 'smart' || !snapToGridCheck?.checked) return;
+                    
+                    const gw = parseInt(gridSizeWInput?.value || '32');
+                    const gh = parseInt(gridSizeHInput?.value || '32');
+                    const gm = parseInt(gridMarginInput?.value || '0');
+                    const gs = parseInt(gridSpacingInput?.value || '0');
+                    const d = event.detail;
+                    const tileX = Math.round((d.x - gm) / (gw + gs));
+                    const tileY = Math.round((d.y - gm) / (gh + gs));
+                    const rx = gm + tileX * (gw + gs);
+                    const ry = gm + tileY * (gh + gs);
+                    const rw = Math.round(d.width / gw) * gw;
+                    const rh = Math.round(d.height / gh) * gh;
+
+                    if (Math.abs(d.x - rx) > 0.5 || Math.abs(d.y - ry) > 0.5 || Math.abs(d.width - rw) > 0.5 || Math.abs(d.height - rh) > 0.5) {
+                        isSnapping = true;
+                        cropperInstance.setData({ x: rx, y: ry, width: rw, height: rh });
+                        setTimeout(() => { isSnapping = false; }, 50);
+                    }
+                }
+            };
+
+            cropperInstance = new Cropper(croppingSource, options);
+        };
+
         cropModeSelect.addEventListener('click', (e) => {
             const btn = (e.target as HTMLElement).closest('.mode-btn-v2') as HTMLElement;
             if (!btn) return;
@@ -693,55 +779,9 @@ function initStudioControls() {
             
             cropModeSelect.querySelectorAll('.mode-btn-v2').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            currentCropMode = btn.dataset.mode;
-
-            const ghostRef = document.getElementById('ghostReference');
-            if (ghostRef) {
-                ghostRef.style.visibility = (currentCropMode === 'ghost') ? 'visible' : 'hidden';
-            }
-
-            if (cropperInstance) {
-                const gridOverlay = document.getElementById('slicingGridOverlay');
-                if (currentCropMode === 'ghost') {
-                    cropperInstance.setAspectRatio(NaN);
-                    cropperInstance.setOptions({
-                        cropBoxMovable: false,
-                        cropBoxResizable: false
-                    });
-                    cropperInstance.setDragMode('move');
-                    if (gridOverlay) gridOverlay.style.pointerEvents = 'none';
-                    if (snapToGridCheck) snapToGridCheck.checked = false;
-                } else if (currentCropMode === 'manual') {
-                    cropperInstance.setAspectRatio(NaN);
-                    cropperInstance.setOptions({
-                        cropBoxMovable: true,
-                        cropBoxResizable: true
-                    });
-                    cropperInstance.setDragMode('crop');
-                    if (gridOverlay) gridOverlay.style.pointerEvents = 'none';
-                    if (snapToGridCheck) snapToGridCheck.checked = false;
-                    
-                    // Ensure a crop box exists
-                    const canvasData = cropperInstance.getCanvasData();
-                    cropperInstance.setData({
-                        x: canvasData.naturalWidth * 0.25,
-                        y: canvasData.naturalHeight * 0.25,
-                        width: canvasData.naturalWidth * 0.5,
-                        height: canvasData.naturalHeight * 0.5
-                    });
-                } else if (currentCropMode === 'smart') {
-                    cropperInstance.setAspectRatio(NaN);
-                    cropperInstance.setOptions({
-                        cropBoxMovable: true,
-                        cropBoxResizable: true
-                    });
-                    cropperInstance.setDragMode('move');
-                    if (gridOverlay) {
-                        gridOverlay.style.pointerEvents = 'auto';
-                        gridOverlay.style.zIndex = '2000'; // Above cropper
-                    }
-                    if (snapToGridCheck) snapToGridCheck.checked = true;
-                }
+            
+            if (btn.dataset.mode) {
+                switchMode(btn.dataset.mode);
             }
         });
     }
@@ -1038,6 +1078,7 @@ function initStudioControls() {
                     } else if (currentCropMode === 'smart') {
                         cropperInstance.setDragMode('move');
                     }
+}
                 },
                 zoom(event) {
                     updateSlicingGrid();
@@ -1046,37 +1087,34 @@ function initStudioControls() {
                     }
                 },
                 crop(event) {
-                    updateSlicingGrid();
                     if (isSnapping || !cropperInstance)
                         return;
-
+                    updateSlicingGrid();
+                    
                     // Ghost mode: logic is handled in updateSlicingGrid for dynamic sizing
                     if (currentCropMode === 'ghost') {
                         return;
                     }
-
-                    // Smart mode: Do NOT snap to grid in the crop handler, 
-                    // as it will overwrite the trimmed bounds calculated in gridOverlay.onclick
+                    
+                    // Smart mode: Do NOT snap to grid in the crop handler
                     if (currentCropMode === 'smart') {
                         return;
                     }
 
                     if (!snapToGridCheck?.checked)
                         return;
-                    
+
                     const gw = parseInt(gridSizeWInput?.value || '32');
                     const gh = parseInt(gridSizeHInput?.value || '32');
                     const gm = parseInt(gridMarginInput?.value || '0');
                     const gs = parseInt(gridSpacingInput?.value || '0');
                     const d = event.detail;
-                    
-                    // Advanced Snap Logic (Tiled-compatible)
+
                     const tileX = Math.round((d.x - gm) / (gw + gs));
                     const tileY = Math.round((d.y - gm) / (gh + gs));
                     const rx = gm + tileX * (gw + gs);
                     const ry = gm + tileY * (gh + gs);
-                    
-                    // Round width/height to multiples of size
+
                     const rw = Math.round(d.width / gw) * gw;
                     const rh = Math.round(d.height / gh) * gh;
 
