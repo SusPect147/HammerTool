@@ -781,10 +781,14 @@ export const InputMixin = {
 
             if (id === '0' || id === '-1') return; // Skip empty and occupied tiles
 
-            if (def.showInGamemode && Array.isArray(def.showInGamemode) && !def.showInGamemode.includes(this.gamemode))
-                return;
-            if (def.showInEnvironment && Array.isArray(def.showInEnvironment) && !def.showInEnvironment.includes(this.environment))
-                return;
+            if (def.showInGamemode) {
+                const allowed = Array.isArray(def.showInGamemode) ? def.showInGamemode : [def.showInGamemode];
+                if (!allowed.includes(this.gamemode)) return;
+            }
+            if (def.showInEnvironment) {
+                const allowed = Array.isArray(def.showInEnvironment) ? def.showInEnvironment : [def.showInEnvironment];
+                if (!allowed.includes(this.environment)) return;
+            }
 
             const btn = document.createElement('button');
             btn.className = 'tile-btn';
