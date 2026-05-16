@@ -1,28 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <script>(function(){const t=localStorage.getItem('cp_app_theme');if(t&&t!=='space')document.documentElement.setAttribute('data-theme',t);})();</script>
+    <script>(function () { const t = localStorage.getItem('cp_app_theme'); if (t && t !== 'space') document.documentElement.setAttribute('data-theme', t); })();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compass - Custom Tiles Studio</title>
     <meta name="description" content="Customize Brawl Stars tiles and browse custom community tile packs on Compass.">
     <link rel="icon" href="./Resources/Additional/Icons/compass.png" type="image/x-icon">
-    
+
     <!-- Framework Styles -->
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./css/dashboard.css">
-    
+
     <!-- Custom Tiles Core Styles -->
     <link rel="stylesheet" href="./css/custom-tiles.css">
-    
+
     <!-- CropperJS Framework -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 </head>
+
 <body>
     <!-- Particle Vortex Animated Canvas (Blurred & Subtle) -->
-    <canvas id="vortexCanvas" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; pointer-events:none; filter:blur(15px); opacity:0.3;"></canvas>
-    
+    <canvas id="vortexCanvas"
+        style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; pointer-events:none; filter:blur(15px); opacity:0.3;"></canvas>
+
     <!-- Navigation Top Bar -->
     <div class="top-bar">
         <a href="./index.html" class="logo">
@@ -30,11 +33,11 @@
             Compass
         </a>
         <div class="top-bar-right" id="navLinks">
-                <a href="./editor.html">Editor</a>
-                <a href="./explore.html">Gallery</a>
-                <a href="./dashboard.html">My Maps</a>
-                <a href="./custom-tiles.html">Custom Tiles</a>
-                <a href="./forum.html">Forum</a>
+            <a href="./editor.html">Editor</a>
+            <a href="./explore.html">Gallery</a>
+            <a href="./dashboard.html">My Maps</a>
+            <a href="./custom-tiles.html">Custom Tiles</a>
+            <a href="./forum.html">Forum</a>
             <!-- Auth Injected -->
         </div>
     </div>
@@ -44,11 +47,12 @@
         <div class="equipped-theme-banner" id="equippedThemeBanner" style="display: none;">
             <div class="banner-content">
                 <span class="banner-icon">🎨</span>
-                <div class="banner-text" id="equippedBannerText">Active Theme: <strong>Loading...</strong> | by <strong>Builder</strong></div>
+                <div class="banner-text" id="equippedBannerText">Active Theme: <strong>Loading...</strong> | by
+                    <strong>Builder</strong></div>
             </div>
             <button class="unequip-btn" id="unequipThemeBtn">Unequip</button>
         </div>
-        
+
         <!-- Header Area -->
         <header class="studio-header">
             <div class="studio-title">
@@ -56,7 +60,11 @@
                 <p>Create high-quality tile packs to personalize your maps.</p>
             </div>
             <button id="openStudioBtn" class="create-pack-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
                 New Pack
             </button>
         </header>
@@ -66,7 +74,7 @@
             <div class="search-bar">
                 <input type="text" id="packSearch" placeholder="Search custom tile packs..." class="search-input">
             </div>
-            
+
             <div class="filter-controls">
                 <select id="packSortFilter" class="filter-select">
                     <option value="likes">Most Liked</option>
@@ -122,7 +130,8 @@
             <div class="modal-body">
                 <div class="studio-input-group">
                     <label for="packNameInput">Pack Name</label>
-                    <input type="text" id="packNameInput" class="studio-text-input" placeholder="e.g. Cyberpunk Grid, Neon Retro, Lava Cave..." maxlength="40">
+                    <input type="text" id="packNameInput" class="studio-text-input"
+                        placeholder="e.g. Cyberpunk Grid, Neon Retro, Lava Cave..." maxlength="40">
                 </div>
 
                 <div class="studio-input-group">
@@ -130,7 +139,7 @@
                     <p style="font-size: 0.75rem; opacity: 0.5; margin-bottom: 1rem;">
                         Click any item to replace it with an image from your device (.png/.jpg, max 1MB).
                     </p>
-                    
+
                     <!-- Interactive Tile Settee -->
                     <div class="studio-tile-grid" id="studioTileGrid">
                         <!-- Rendered via JS -->
@@ -141,7 +150,8 @@
             <footer class="modal-footer">
                 <div style="display: flex; align-items: center; gap: 0.5rem; margin-right: auto;">
                     <input type="checkbox" id="packPublicCheck" checked style="cursor:pointer;">
-                    <label for="packPublicCheck" style="font-size: 0.8rem; cursor: pointer; user-select:none;">🌍 Public / Publish</label>
+                    <label for="packPublicCheck" style="font-size: 0.8rem; cursor: pointer; user-select:none;">🌍 Public
+                        / Publish</label>
                 </div>
                 <button class="cancel-btn" id="cancelStudioBtn">Cancel</button>
                 <button class="save-pack-btn" id="savePackBtn">Save Pack</button>
@@ -161,12 +171,12 @@
                 </div>
                 <button class="close-modal-btn" id="closeCropBtn">&times;</button>
             </header>
-            
+
             <div class="modal-body studio-v2-body">
                 <!-- Workspace: Fixed Viewport -->
                 <div class="studio-workspace" id="studioWorkspace">
                     <div class="checkerboard-bg"></div>
-                    
+
                     <!-- Transformation Layer (The Uploaded Image) -->
                     <div class="transform-layer" id="transformLayer">
                         <img id="croppingSource" src="" alt="Source">
@@ -188,9 +198,12 @@
                     <div class="control-group-v2">
                         <label>Crop Mode</label>
                         <div class="mode-select-v2" id="cropModeSelect">
-                            <button class="mode-btn-v2 active" data-mode="ghost" title="Spans full image width, height matches target">Ghost Match</button>
-                            <button class="mode-btn-v2" data-mode="manual" title="Freely resize the crop area">Manual</button>
-                            <button class="mode-btn-v2" data-mode="smart" title="Click grid sectors to auto-trim to content">Smart Grid</button>
+                            <button class="mode-btn-v2 active" data-mode="ghost"
+                                title="Spans full image width, height matches target">Ghost Match</button>
+                            <button class="mode-btn-v2" data-mode="manual"
+                                title="Freely resize the crop area">Manual</button>
+                            <button class="mode-btn-v2" data-mode="smart"
+                                title="Click grid sectors to auto-trim to content">Smart Grid</button>
                         </div>
                     </div>
 
@@ -246,30 +259,38 @@
     </div>
 
     <!-- ==========================================
-         EQUIP THEME CONFIRMATION MODAL
+         EQUIP THEME CONFIRMATION MODAL test 1
          ========================================== -->
     <div class="modal-overlay" id="equipConfirmModal" style="z-index: 2020;">
         <div class="modal-container" style="max-width: 600px; display: flex; flex-direction: column; max-height: 85vh;">
             <header class="modal-header">
                 <h2 id="equipModalTitle">Theme Preview</h2>
-                <button class="close-modal-btn" id="closePreviewBtn" style="font-size: 1.5rem; color: rgba(255,255,255,0.4); background: none; border: none; cursor: pointer;">&times;</button>
+                <button class="close-modal-btn" id="closePreviewBtn"
+                    style="font-size: 1.5rem; color: rgba(255,255,255,0.4); background: none; border: none; cursor: pointer;">&times;</button>
             </header>
             <div class="modal-body" style="display: flex; flex-direction: column; gap: 1.5rem; padding: 1.5rem 2rem;">
                 <p style="opacity: 0.8; line-height: 1.6; font-size: 0.95rem; text-align: center; margin: 0;">
-                    <strong id="equipThemeNameDisplay" style="color: var(--accent, var(--neon-blue)); font-size: 1.2rem;"></strong> <br>
-                    <span style="font-size: 0.85rem; opacity: 0.7;">created by</span> <span id="equipThemeAuthorDisplay" style="font-weight: 700;"></span>
+                    <strong id="equipThemeNameDisplay"
+                        style="color: var(--accent, var(--neon-blue)); font-size: 1.2rem;"></strong> <br>
+                    <span style="font-size: 0.85rem; opacity: 0.7;">created by</span> <span id="equipThemeAuthorDisplay"
+                        style="font-weight: 700;"></span>
                 </p>
-                
+
                 <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                    <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 600;">Customized Tiles</h4>
-                    <div id="previewTilesGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 0.75rem; max-height: 300px; overflow-y: auto; padding: 0.5rem; background: rgba(0,0,0,0.15); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                    <h4
+                        style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 600;">
+                        Customized Tiles</h4>
+                    <div id="previewTilesGrid"
+                        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 0.75rem; max-height: 300px; overflow-y: auto; padding: 0.5rem; background: rgba(0,0,0,0.15); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
                         <!-- Dynamic injection in JS -->
                     </div>
                 </div>
             </div>
-            <footer class="modal-footer" style="display: flex; gap: 1rem; background: rgba(0, 0, 0, 0.1); border-top: 1px solid rgba(255, 255, 255, 0.05); padding: 1.2rem 2rem;">
+            <footer class="modal-footer"
+                style="display: flex; gap: 1rem; background: rgba(0, 0, 0, 0.1); border-top: 1px solid rgba(255, 255, 255, 0.05); padding: 1.2rem 2rem;">
                 <button class="cancel-btn" id="cancelEquipBtn" style="flex: 1; padding: 0.8rem;">Close</button>
-                <button class="save-pack-btn" id="confirmEquipBtn" style="flex: 1; padding: 0.8rem;">Equip Theme</button>
+                <button class="save-pack-btn" id="confirmEquipBtn" style="flex: 1; padding: 0.8rem;">Equip
+                    Theme</button>
             </footer>
         </div>
     </div>
@@ -281,7 +302,8 @@
     <div class="tooltip-floating">
         ?
         <div class="tooltip-text">
-            This site is not affiliated with or endorsed by Supercell. Brawl Stars and all related assets belong to Supercell.
+            This site is not affiliated with or endorsed by Supercell. Brawl Stars and all related assets belong to
+            Supercell.
         </div>
     </div>
 
@@ -292,4 +314,5 @@
     <!-- Fluid Vortex Background (Subtle) -->
     <script type="module" src="./js/common/particle-vortex-ambient.js"></script>
 </body>
+
 </html>
