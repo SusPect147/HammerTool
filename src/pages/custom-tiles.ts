@@ -927,10 +927,13 @@ function initStudioControls() {
                 const ghostImg = document.getElementById('ghostImg') as HTMLImageElement;
                 const activeTile = CORE_TILES.find(t => t.id === selectedTileKey);
                 if (ghostImg && activeTile) {
+                    // Bypass the global theme interceptor to ensure we see the base reference
+                    ghostImg.dataset.noTheme = 'true';
+                    
                     // Force path to Desert if it's a theme-able resource
                     let desertSrc = activeTile.src;
-                    if (desertSrc.includes('/Resources/') && !desertSrc.includes('/Desert/')) {
-                        // Attempt to map Global or other themes to Desert
+                    if (desertSrc.includes('/Resources/') && !desertSrc.includes('/Desert/') && !desertSrc.includes('/Global/')) {
+                        // Attempt to map environment-specific tiles to Desert
                         desertSrc = desertSrc.replace(/\/Resources\/[^/]+\//, '/Resources/Desert/');
                     }
                     ghostImg.src = desertSrc;

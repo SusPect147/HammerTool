@@ -99,20 +99,28 @@ async saveMap() {
             // Robust author detection matching other site modules
             const author = user.user_metadata.full_name || user.user_metadata.display_name || user.user_metadata.name || 'Anonymous';
 
-            const isPublic = document.getElementById('isPublicToggle')?.checked ?? true;
+            let finalEnvironment = environment;
+            const galleryToggle = document.getElementById('showThemeInGalleryToggle') as HTMLInputElement;
+            const galleryEnabled = galleryToggle?.checked ?? true;
+
+            // Logic: If custom theme is disabled for gallery, prompt for a standard fallback environment
+            if (!galleryEnabled && environment.startsWith('CUSTOM_')) {
+                const fallback = prompt(window.ht_translate('Select a standard environment for gallery preview:') + "\n(Desert, Wasteland, Mine, Grassy_Field, Mortuary, etc.)", "Desert");
+                if (fallback) finalEnvironment = fallback;
+            }
 
             const payload = { 
                 name: mapName, 
                 size: mapSize, 
                 gamemode: gamemode, 
-                environment: environment, 
+                environment: finalEnvironment, 
                 map_data: this.tileGrid,
                 author_name: author,
                 user_id: user.id,
                 is_public: isPublic,
                 theme_options: {
-                    gallery: document.getElementById('showThemeInGalleryToggle')?.checked ?? true,
-                    download: document.getElementById('showThemeInDownloadToggle')?.checked ?? true
+                    gallery: galleryEnabled,
+                    download: (document.getElementById('showThemeInDownloadToggle') as HTMLInputElement)?.checked ?? true
                 }
             };
 
@@ -425,8 +433,9 @@ async exportMap() {
         const originalEnv = this.environment;
         let targetEnv = this.environment;
 
+        // Handle disabled theme download
         if (!includeTheme && targetEnv.startsWith('CUSTOM_')) {
-            const fallback = prompt("Export Theme is disabled for this map. Enter a standard environment name (e.g., Desert, Arcade, Stadium) or leave blank for Desert:", "Desert");
+            const fallback = prompt(window.ht_translate('Select a standard environment for the PNG image:') + "\n(Desert, Wasteland, Mine, Grassy_Field, Mortuary, etc.)", "Desert");
             targetEnv = fallback || "Desert";
         }
 
