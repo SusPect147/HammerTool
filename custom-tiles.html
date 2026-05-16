@@ -162,15 +162,25 @@
             <div class="modal-body" style="background: #0a0a10; display: flex; align-items: center; justify-content: center;">
                 <div class="cropper-frame">
                     <img id="croppingSource" style="max-width: 100%; display: block;">
+                    <div id="slicingGridOverlay" class="slicing-grid-overlay"></div>
                 </div>
             </div>
 
             <footer class="modal-footer" style="display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: space-between;">
-                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                    <button class="cancel-btn" id="cropAspectBtn" style="padding: 0.7rem;">🔒 Ratio 1:1</button>
-                    <button class="cancel-btn" id="cropRotateBtn" style="padding: 0.7rem;">🔄 Rotate</button>
-                    <button class="cancel-btn" id="cropZoomInBtn" style="padding: 0.7rem;">➕</button>
-                    <button class="cancel-btn" id="cropZoomOutBtn" style="padding: 0.7rem;">➖</button>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                    <button class="cancel-btn" id="cropAspectBtn" style="padding: 0.7rem;" title="Lock/Unlock Aspect Ratio">🔒 1:1</button>
+                    <button class="cancel-btn" id="cropRotateBtn" style="padding: 0.7rem;" title="Rotate 90°">🔄</button>
+                    
+                    <div class="divider" style="width: 1px; height: 20px; background: rgba(255,255,255,0.1); margin: 0 0.5rem;"></div>
+                    
+                    <label style="font-size: 0.75rem; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 0.4rem; cursor: pointer; user-select: none;">
+                        <input type="checkbox" id="showGridCheck" style="margin: 0;"> Grid
+                    </label>
+                    <label style="font-size: 0.75rem; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 0.4rem; cursor: pointer; user-select: none;">
+                        <input type="checkbox" id="snapToGridCheck" style="margin: 0;"> Snap
+                    </label>
+                    <input type="number" id="gridSizeInput" value="32" min="8" max="256" step="8" 
+                           style="width: 50px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #fff; font-size: 0.75rem; padding: 2px 4px;">
                 </div>
                 <div style="display: flex; gap: 0.5rem;">
                     <button class="cancel-btn" id="cancelCropBtn">Cancel</button>

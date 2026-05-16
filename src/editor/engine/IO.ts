@@ -44,6 +44,13 @@ async loadMap(mapId) {
             const isPublicToggle = document.getElementById('isPublicToggle');
             if (isPublicToggle) isPublicToggle.checked = data.is_public ?? true;
 
+            const showThemeInGalleryToggle = document.getElementById('showThemeInGalleryToggle');
+            const showThemeInDownloadToggle = document.getElementById('showThemeInDownloadToggle');
+            
+            const themeOptions = data.theme_options || { gallery: true, download: true };
+            if (showThemeInGalleryToggle) showThemeInGalleryToggle.checked = themeOptions.gallery ?? true;
+            if (showThemeInDownloadToggle) showThemeInDownloadToggle.checked = themeOptions.download ?? true;
+
             // 2. Configure instance variables and underlying grid
             this.gamemode = data.gamemode || 'Gem_Grab';
             this.environment = data.environment || 'Desert';
@@ -101,7 +108,11 @@ async saveMap() {
                 map_data: this.tileGrid,
                 author_name: author,
                 user_id: user.id,
-                is_public: isPublic
+                is_public: isPublic,
+                theme_options: {
+                    gallery: document.getElementById('showThemeInGalleryToggle')?.checked ?? true,
+                    download: document.getElementById('showThemeInDownloadToggle')?.checked ?? true
+                }
             };
 
             let savedMapId = null;
@@ -396,9 +407,31 @@ async createMapPNG() {
         return canvas.toDataURL('image/png');
     },
 
-async exportMap(code = this.tileGrid[this.defaultTileLayer], gamemode, env) {
+async exportMap() {
         const mapName = document.getElementById('mapName').value || 'Untitled Map';
-        const dataUrl = await this.createMapPNG(code, gamemode, env);
+        const includeTheme = document.getElementById('showThemeInDownloadToggle')?.checked ?? true;
+        
+        const originalEnv = this.environment;
+        let targetEnv = this.environment;
+
+        if (!includeTheme && targetEnv.startsWith('CUSTOM_')) {
+            const fallback = prompt("Export Theme is disabled for this map. Enter a standard environment name (e.g., Desert, Arcade, Stadium) or leave blank for Desert:", "Desert");
+            targetEnv = fallback || "Desert";
+        }
+
+        if (targetEnv !== originalEnv) {
+            this.environment = targetEnv;
+            await this.loadTileImages();
+            await this.loadEnvironmentBackgrounds();
+        }
+
+        const dataUrl = await this.createMapPNG();
+
+        if (targetEnv !== originalEnv) {
+            this.environment = originalEnv;
+            await this.loadTileImages();
+            await this.loadEnvironmentBackgrounds();
+        }
 
         const link = document.createElement('a');
         link.download = `${mapName}.png`;

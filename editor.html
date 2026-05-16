@@ -304,11 +304,16 @@
             <section class="below-map">
                 <div class="save-export-buttons">
                     <div class="visibility-toggle"
-                        style="display: flex; align-items: center; gap: 0.5rem; margin-right: 0.5rem;">
-                        <input type="checkbox" id="isPublicToggle" checked style="cursor:pointer;">
-                        <label for="isPublicToggle"
-                            style="color: #fff; font-size: 0.85rem; cursor: pointer; user-select: none;">🌍
-                            Public</label>
+                        style="display: flex; align-items: center; gap: 1rem; margin-right: 1.5rem; flex-wrap: wrap;">
+                        <label style="color: #fff; font-size: 0.8rem; cursor: pointer; user-select: none; display: flex; align-items: center; gap: 0.4rem;">
+                            <input type="checkbox" id="isPublicToggle" checked style="cursor:pointer;"> 🌍 Public
+                        </label>
+                        <label title="Show your custom theme to others in the gallery" style="color: rgba(255,255,255,0.7); font-size: 0.75rem; cursor: pointer; user-select: none; display: flex; align-items: center; gap: 0.4rem;">
+                            <input type="checkbox" id="showThemeInGalleryToggle" checked style="cursor:pointer;"> Gallery Theme
+                        </label>
+                        <label title="Include custom theme assets when downloading the map image" style="color: rgba(255,255,255,0.7); font-size: 0.75rem; cursor: pointer; user-select: none; display: flex; align-items: center; gap: 0.4rem;">
+                            <input type="checkbox" id="showThemeInDownloadToggle" checked style="cursor:pointer;"> Export Theme
+                        </label>
                     </div>
                     <button id="saveBtn" class="text-btn" title="Save Map (Ctrl+S)">Save Map</button>
                     <button id="exportBtn" class="text-btn" title="Export as PNG (Ctrl+E)">Download Map</button>
