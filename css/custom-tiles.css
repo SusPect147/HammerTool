@@ -654,7 +654,7 @@
     position: absolute;
     transform-origin: center center;
     z-index: 1;
-    pointer-events: none; /* Mouse events handled by workspace */
+    pointer-events: none; /* Mouse events handled by specific overlays or cropper */
 }
 
 .transform-layer img {
@@ -737,8 +737,9 @@
     flex-direction: column;
     padding: 1.5rem;
     gap: 2rem;
-    z-index: 20;
+    z-index: 100; /* Ensure it stays above workspace and overlays */
     box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+    pointer-events: auto;
 }
 
 .control-group-v2 {
@@ -796,6 +797,12 @@
     top: 50%;
     transform: translateY(-50%);
     font-size: 0.9rem;
+    pointer-events: none;
+}
+
+/* Ensure CropperJS container is interactive despite parent being pointer-events: none */
+.cropper-container {
+    pointer-events: auto !important;
 }
 
 .slider-row {
