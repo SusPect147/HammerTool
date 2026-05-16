@@ -686,6 +686,28 @@ function initStudioControls() {
     let isSnapping = false;
     let updatePending = false;
     let offscreenCanvas: HTMLCanvasElement | null = null;
+    let isRightDragging = false;
+    let isDraggingGrid = false;
+    let gridDragDistance = 0;
+    let lastX = 0, lastY = 0;
+
+    // Reset all states and styles when closing studio
+    const resetStudioStates = () => {
+        isSnapping = false;
+        updatePending = false;
+        isRightDragging = false;
+        isDraggingGrid = false;
+        gridDragDistance = 0;
+        document.body.style.cursor = 'default';
+        const container = document.querySelector('.cropper-container') as HTMLElement;
+        if (container) container.style.cursor = '';
+        
+        // Ensure gridOverlay is not lost when cropper container is destroyed
+        const workspace = document.getElementById('transformLayer');
+        if (gridOverlay && workspace && gridOverlay.parentElement !== workspace) {
+            workspace.appendChild(gridOverlay);
+        }
+    };
 
     const updateSlicingGrid = () => {
         if (!cropperInstance || !gridOverlay || updatePending) return;
@@ -705,6 +727,7 @@ function initStudioControls() {
             gridOverlay.style.height = canvasData.height + 'px';
             gridOverlay.style.left = canvasData.left + 'px';
             gridOverlay.style.top = canvasData.top + 'px';
+            gridOverlay.style.pointerEvents = (currentCropMode === 'smart') ? 'auto' : 'none';
         
             const gw = parseInt(gridSizeWInput?.value || '32');
             const gh = parseInt(gridSizeHInput?.value || '32');
@@ -752,13 +775,41 @@ function initStudioControls() {
         });
     };
 
+    // Shared window listeners to avoid leaks and memory issues
+    window.addEventListener('mousemove', (e) => {
+        if (isRightDragging && cropperInstance) {
+            const dx = e.clientX - lastX;
+            const dy = e.clientY - lastY;
+            if (!isNaN(dx) && !isNaN(dy)) {
+                cropperInstance.move(dx, dy);
+            }
+            lastX = e.clientX;
+            lastY = e.clientY;
+        } else if (isDraggingGrid && cropperInstance && currentCropMode === 'smart') {
+            const dx = e.clientX - lastX;
+            const dy = e.clientY - lastY;
+            gridDragDistance += Math.sqrt(dx * dx + dy * dy);
+            cropperInstance.move(dx, dy);
+            lastX = e.clientX;
+            lastY = e.clientY;
+        }
+    });
+
+    window.addEventListener('mouseup', () => {
+        if (isRightDragging || isDraggingGrid) {
+            isRightDragging = false;
+            isDraggingGrid = false;
+            document.body.style.cursor = 'default';
+            const container = document.querySelector('.cropper-container') as HTMLElement;
+            if (container) container.style.cursor = '';
+        }
+    });
+
     const initRightClickPan = () => {
         const container = document.querySelector('.cropper-container') as HTMLElement;
         if (!container || container.dataset.panInit === 'true') return;
         
         container.dataset.panInit = 'true';
-        let isRightDragging = false;
-        let lastX = 0, lastY = 0;
         container.oncontextmenu = (e) => e.preventDefault();
         container.addEventListener('mousedown', (e) => {
             if (e.button === 2) {
@@ -768,24 +819,66 @@ function initStudioControls() {
                 container.style.cursor = 'grabbing';
             }
         }, true);
-        window.addEventListener('mousemove', (e) => {
-            if (isRightDragging && cropperInstance) {
-                const dx = e.clientX - lastX;
-                const dy = e.clientY - lastY;
-                if (!isNaN(dx) && !isNaN(dy)) {
-                    cropperInstance.move(dx, dy);
-                }
+    };
+
+    // Set up grid clicks only once
+    if (gridOverlay && gridOverlay.dataset.gridInit !== 'true') {
+        gridOverlay.dataset.gridInit = 'true';
+        
+        (gridOverlay as HTMLElement).onmousedown = (e) => {
+            if (currentCropMode === 'smart') {
+                isDraggingGrid = true;
                 lastX = e.clientX;
                 lastY = e.clientY;
+                gridDragDistance = 0;
             }
-        });
-        window.addEventListener('mouseup', () => {
-            if (isRightDragging) {
-                isRightDragging = false;
-                container.style.cursor = '';
+        };
+
+        (gridOverlay as HTMLElement).onclick = (e) => {
+            if (!cropperInstance || isSnapping || gridDragDistance > 5) return;
+            
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            
+            const rect = gridOverlay.getBoundingClientRect();
+            const canvasData = cropperInstance.getCanvasData();
+            if (canvasData.width === 0 || canvasData.height === 0) return;
+
+            const scale = canvasData.naturalWidth / canvasData.width;
+            const clickX = (e.clientX - rect.left) * scale;
+            const clickY = (e.clientY - rect.top) * scale;
+            if (isNaN(clickX) || isNaN(clickY)) return;
+
+            const gw = parseInt(gridSizeWInput?.value || '32');
+            const gh = parseInt(gridSizeHInput?.value || '32');
+            const gm = parseInt(gridMarginInput?.value || '0');
+            const gs = parseInt(gridSpacingInput?.value || '0');
+            
+            const tileX = Math.floor((clickX - gm) / (gw + gs));
+            const tileY = Math.floor((clickY - gm) / (gh + gs));
+            
+            if (tileX >= 0 && tileY >= 0) {
+                const snapX = gm + tileX * (gw + gs);
+                const snapY = gm + tileY * (gh + gs);
+                if (snapX < 0 || snapX >= canvasData.naturalWidth || snapY < 0 || snapY >= canvasData.naturalHeight) return;
+
+                if (currentCropMode === 'smart' && offscreenCanvas) {
+                    const bounds = getTrimmedBounds(offscreenCanvas, snapX, snapY, gw, gh);
+                    isSnapping = true;
+                    if (bounds) {
+                        cropperInstance.setData(bounds);
+                    } else {
+                        cropperInstance.setData({ x: snapX, y: snapY, width: gw, height: gh });
+                    }
+                    setTimeout(() => { isSnapping = false; }, 50);
+                } else if (currentCropMode === 'smart') {
+                    isSnapping = true;
+                    cropperInstance.setData({ x: snapX, y: snapY, width: gw, height: gh });
+                    setTimeout(() => { isSnapping = false; }, 50);
+                }
             }
-        });
-    };
+        };
+    }
 
     const switchMode = (mode: string) => {
         if (!cropperInstance) return;
@@ -1005,81 +1098,6 @@ function initStudioControls() {
                 }
             });
 
-            if (gridOverlay) {
-                let isDraggingGrid = false;
-                let lastGridX = 0, lastGridY = 0;
-                let gridDragDistance = 0;
-                
-                (gridOverlay as HTMLElement).onmousedown = (e) => {
-                    if (currentCropMode === 'smart') {
-                        isDraggingGrid = true;
-                        lastGridX = e.clientX;
-                        lastGridY = e.clientY;
-                        gridDragDistance = 0;
-                    }
-                };
-
-                window.addEventListener('mousemove', (e) => {
-                    if (isDraggingGrid && cropperInstance && currentCropMode === 'smart') {
-                        const dx = e.clientX - lastGridX;
-                        const dy = e.clientY - lastGridY;
-                        gridDragDistance += Math.sqrt(dx * dx + dy * dy);
-                        cropperInstance.move(dx, dy);
-                        lastGridX = e.clientX;
-                        lastGridY = e.clientY;
-                    }
-                });
-
-                window.addEventListener('mouseup', () => {
-                    setTimeout(() => { isDraggingGrid = false; }, 10);
-                });
-
-                (gridOverlay as HTMLElement).onclick = (e) => {
-                    if (!cropperInstance || isSnapping || gridDragDistance > 5) return;
-                    
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    
-                    const rect = gridOverlay.getBoundingClientRect();
-                    const canvasData = cropperInstance.getCanvasData();
-                    if (canvasData.width === 0 || canvasData.height === 0) return;
-
-                    const scale = canvasData.naturalWidth / canvasData.width;
-                    const clickX = (e.clientX - rect.left) * scale;
-                    const clickY = (e.clientY - rect.top) * scale;
-                    if (isNaN(clickX) || isNaN(clickY)) return;
-
-                    const gw = parseInt(gridSizeWInput?.value || '32');
-                    const gh = parseInt(gridSizeHInput?.value || '32');
-                    const gm = parseInt(gridMarginInput?.value || '0');
-                    const gs = parseInt(gridSpacingInput?.value || '0');
-                    
-                    const tileX = Math.floor((clickX - gm) / (gw + gs));
-                    const tileY = Math.floor((clickY - gm) / (gh + gs));
-                    
-                    if (tileX >= 0 && tileY >= 0) {
-                        const snapX = gm + tileX * (gw + gs);
-                        const snapY = gm + tileY * (gh + gs);
-                        if (snapX < 0 || snapX >= canvasData.naturalWidth || snapY < 0 || snapY >= canvasData.naturalHeight) return;
-
-                        if (currentCropMode === 'smart' && offscreenCanvas) {
-                            const bounds = getTrimmedBounds(offscreenCanvas, snapX, snapY, gw, gh);
-                            isSnapping = true;
-                            if (bounds) {
-                                cropperInstance.setData(bounds);
-                            } else {
-                                cropperInstance.setData({ x: snapX, y: snapY, width: gw, height: gh });
-                            }
-                            setTimeout(() => { isSnapping = false; }, 50);
-                        } else {
-                            isSnapping = true;
-                            cropperInstance.setData({ x: snapX, y: snapY, width: gw, height: gh });
-                            setTimeout(() => { isSnapping = false; }, 50);
-                        }
-                    }
-                };
-            }
-
             [gridSizeWInput, gridSizeHInput, gridMarginInput, gridSpacingInput].forEach(inp => {
                 if (inp) inp.oninput = updateSlicingGrid;
             });
@@ -1114,6 +1132,7 @@ function initStudioControls() {
     }
 
     const cleanupAndCloseCrop = () => {
+        resetStudioStates();
         if (cropperInstance) {
             cropperInstance.destroy();
             cropperInstance = null;
@@ -1124,7 +1143,6 @@ function initStudioControls() {
         const studioLoader = document.getElementById('studioLoader');
         if (studioLoader) studioLoader.classList.remove('active');
         
-        document.body.style.cursor = 'default';
         cropModal?.classList.remove('active');
         fileInput.value = "";
     };
