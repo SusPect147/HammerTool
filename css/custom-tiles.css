@@ -598,176 +598,273 @@
 }
 
 /* ==========================================
-   CROPPER RESPONSIVE CUSTOMIZATIONS
+   HAMMERSTUDIO V2 - VIEWPORT-CENTRIC EDITOR
    ========================================== */
 
-.cropper-frame {
-    background-color: #050508;
-    background-image: 
-        linear-gradient(45deg, rgba(255,255,255,0.08) 25%, transparent 25%), 
-        linear-gradient(-45deg, rgba(255,255,255,0.08) 25%, transparent 25%), 
-        linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.08) 75%), 
-        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.08) 75%);
-    background-size: 24px 24px;
-    background-position: 0 0, 0 12px, 12px -12px, -12px 0px;
-    border-radius: 12px;
-    border: 1px dashed rgba(255,255,255,0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-}
-
-/* SLICING GRID OVERLAY */
-.slicing-grid-overlay {
-    position: absolute;
-    inset: 0;
-    pointer-events: auto; /* Enable clicking to select cells */
-    z-index: 10;
-    opacity: 0.6;
-    display: none;
-    cursor: crosshair;
-    --grid-w: 32px;
-    --grid-h: 32px;
-    --grid-m: 0px;
-    --grid-s: 0px;
-    background-image: 
-        linear-gradient(to right, rgba(0, 255, 255, 0.5) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(0, 255, 255, 0.5) 1px, transparent 1px);
-    background-size: calc(var(--grid-w) + var(--grid-s)) calc(var(--grid-h) + var(--grid-s));
-    background-position: var(--grid-m) var(--grid-m);
-}
-
-.slicing-grid-overlay.active {
-    display: block;
-}
-
-/* Ghost Reference Styles */
-#ghostReference {
-    border: 2px solid rgba(0, 210, 255, 0.4);
-    box-sizing: border-box;
-    box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
-    overflow: hidden;
-    position: absolute;
-    pointer-events: none;
-    z-index: 100;
-    display: none;
-    transform-origin: top left;
-    mix-blend-mode: overlay;
-}
-
-#ghostImg {
-    filter: drop-shadow(0 0 5px rgba(0, 210, 255, 0.5));
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    opacity: 0.6;
-}
-
-#ghostHitbox {
-    border: 2px dashed #ff4b4b;
-    background: rgba(255, 75, 75, 0.15);
-    box-shadow: 0 0 10px rgba(255, 75, 75, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    box-sizing: border-box;
-}
-
-#ghostHitbox::after {
-    content: 'HITBOX';
-    font-size: 8px;
-    color: #ff4b4b;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    opacity: 0.8;
-}
-
-/* Checkerboard Background for Transparency */
-.cropping-area-bg {
-    background-image: 
-        linear-gradient(45deg, #15151e 25%, transparent 25%), 
-        linear-gradient(-45deg, #15151e 25%, transparent 25%), 
-        linear-gradient(45deg, transparent 75%, #15151e 75%), 
-        linear-gradient(-45deg, transparent 75%, #15151e 75%) !important;
-    background-size: 20px 20px !important;
-    background-position: 0 0, 0 10px, 10px -10px, -10px 0px !important;
-    background-color: #0a0a10 !important;
-}
-
-/* Fix "Doubled Grid" - hide default cropper grid if ours is visible */
-.cropper-grid, .cropper-view-box {
-    outline: none !important;
-}
-.cropper-line, .cropper-point {
-    background-color: var(--primary-color) !important;
-}
-
-.slicing-grid-overlay::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: 
-        linear-gradient(to right, rgba(0, 210, 255, 0.3) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(0, 210, 255, 0.3) 1px, transparent 1px);
-    background-size: var(--grid-size, 32px) var(--grid-size, 32px);
-}
-
-/* Adjust cropper.js UI components to dark design */
-.cropper-view-box,
-.cropper-face {
-    border-radius: 4px;
-}
-.cropper-line, .cropper-point {
-    background-color: var(--neon-blue) !important;
-}
-.cropper-point.point-se {
-    width: 10px;
-    height: 10px;
-    opacity: 1;
-}
-.cropper-bg {
-    background-image: none !important;
-    background-color: #050508 !important;
-}
-
-@media (max-height: 700px) {
-    .cropper-frame {
-        max-height: 45vh !important;
-    }
-}
-
-/* ==========================================
-   FULLSCREEN CROP MODAL OVERRIDES
-   ========================================== */
-
-#cropModal .modal-container {
+.studio-v2-container {
     width: 100vw !important;
     height: 100vh !important;
     max-width: 100vw !important;
     max-height: 100vh !important;
-    border-radius: 0px !important;
-    border: none !important;
-    box-shadow: none !important;
-    transform: none !important;
-}
-
-#cropModal .modal-body {
-    padding: 0 !important;
+    border-radius: 0 !important;
     display: flex;
     flex-direction: column;
-    overflow: hidden !important;
+    background: #050508 !important;
 }
 
-#cropModal .cropper-frame {
+.studio-v2-body {
+    display: flex !important;
+    flex-direction: row !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #000;
+}
+
+/* WORKSPACE */
+.studio-workspace {
     flex: 1;
-    width: 100% !important;
-    height: 100% !important;
-    max-height: none !important;
-    border-radius: 0 !important;
-    border: none !important;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    user-select: none;
+}
+
+.studio-workspace:active {
+    cursor: grabbing;
+}
+
+.checkerboard-bg {
+    position: absolute;
+    inset: 0;
+    background-image: 
+        linear-gradient(45deg, #111 25%, transparent 25%), 
+        linear-gradient(-45deg, #111 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, #111 75%), 
+        linear-gradient(-45deg, transparent 75%, #111 75%);
+    background-size: 32px 32px;
+    background-position: 0 0, 0 16px, 16px -16px, -16px 0px;
+    z-index: 0;
+}
+
+/* TRANSFORMATION LAYER */
+.transform-layer {
+    position: absolute;
+    transform-origin: center center;
+    z-index: 1;
+    pointer-events: none; /* Mouse events handled by workspace */
+}
+
+.transform-layer img {
+    display: block;
+    max-width: none;
+}
+
+/* GHOST LAYER (FIXED IN CENTER) */
+.ghost-layer-fixed {
+    position: absolute;
+    width: 128px; /* Default tile size in workspace */
+    height: 128px;
+    z-index: 10;
+    pointer-events: none;
+    border: 2px solid var(--neon-blue);
+    box-shadow: 0 0 30px rgba(0, 210, 255, 0.3);
+    background: rgba(0, 210, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.ghost-layer-fixed img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0.4;
+    mix-blend-mode: screen;
+}
+
+.ghost-hitbox-v2 {
+    position: absolute;
+    border: 2px dashed #ff4b4b;
+    background: rgba(255, 75, 75, 0.1);
+    box-sizing: border-box;
+    display: none;
+}
+
+/* SLICING GRID */
+.slicing-grid-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: auto;
+    cursor: crosshair;
+    background-image: 
+        linear-gradient(to right, rgba(0, 210, 255, 0.2) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 210, 255, 0.2) 1px, transparent 1px);
+    background-size: var(--grid-w, 32px) var(--grid-h, 32px);
+    background-position: var(--grid-m, 0px) var(--grid-m, 0px);
+}
+
+/* VIEWPORT UI */
+.viewport-center-mark {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    z-index: 11;
+    pointer-events: none;
+}
+.viewport-center-mark::before, .viewport-center-mark::after {
+    content: '';
+    position: absolute;
+    background: rgba(255, 255, 255, 0.3);
+}
+.viewport-center-mark::before { top: 50%; left: 0; width: 100%; height: 1px; }
+.viewport-center-mark::after { left: 50%; top: 0; width: 1px; height: 100%; }
+
+/* CONTROLS SIDEBAR */
+.studio-controls-v2 {
+    width: 320px;
+    background: #0a0a0f;
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    gap: 2rem;
+    z-index: 20;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.control-group-v2 {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.control-group-v2 label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.slider-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.slider-row span {
+    font-size: 0.8rem;
+    color: #fff;
+    opacity: 0.8;
+}
+
+.slider-row input[type="range"] {
+    width: 100%;
+    accent-color: var(--neon-blue);
+}
+
+.btn-row-v2 {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.tool-btn-v2 {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 0.5rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tool-btn-v2:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.grid-inputs-v2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+}
+
+.input-field-v2 {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.input-field-v2 span {
+    font-size: 0.7rem;
+    opacity: 0.5;
+}
+
+.input-field-v2 input {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: #fff;
+    padding: 0.4rem;
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.toggle-row-v2 {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.toggle-row-v2 label {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.studio-actions-v2 {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.studio-actions-v2 button {
+    width: 100%;
+}
+
+.v2-badge {
+    background: var(--neon-blue);
+    color: #000;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.6rem;
+    font-weight: 900;
+    vertical-align: middle;
+    margin-left: 0.5rem;
+}
+
+.header-main h2 {
+    margin: 0;
+}
+
+.header-subtitle {
+    font-size: 0.8rem;
+    opacity: 0.4;
+    margin: 0;
 }
 
 /* ==========================================

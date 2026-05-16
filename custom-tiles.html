@@ -14,10 +14,6 @@
     
     <!-- Custom Tiles Core Styles -->
     <link rel="stylesheet" href="./css/custom-tiles.css">
-
-    <!-- Image Cropper Utility -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 </head>
 <body>
     <!-- Particle Vortex Animated Canvas (Blurred & Subtle) -->
@@ -153,60 +149,88 @@
          PIXEL-PERFECT CROP MODAL
          ========================================== -->
     <div class="modal-overlay" id="cropModal" style="z-index: 2010;">
-        <div class="modal-container">
+        <div class="modal-container studio-v2-container">
             <header class="modal-header">
-                <h2>Pixel Perfect Crop</h2>
+                <div class="header-main">
+                    <h2>HammerStudio <span class="v2-badge">V2</span></h2>
+                    <p class="header-subtitle">Align your texture with the ghost reference</p>
+                </div>
                 <button class="close-modal-btn" id="closeCropBtn">&times;</button>
             </header>
             
-            <div class="modal-body cropping-area-bg" style="background: #0a0a10; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; min-height: 400px;">
-                <div class="cropper-frame" style="position: relative;">
-                    <img id="croppingSource" style="max-width: 100%; display: block;">
-                    <div id="slicingGridOverlay" class="slicing-grid-overlay"></div>
-                    <!-- Reference Ghost Layer -->
-                    <div id="ghostReference" style="position: absolute; pointer-events: none; opacity: 0.4; z-index: 5; display: none; transform-origin: top left;">
-                        <img id="ghostImg" src="" style="width: 100%; height: 100%; object-fit: contain;">
-                        <div id="ghostHitbox" style="position: absolute; border: 2px dashed #ff4b4b; background: rgba(255, 75, 75, 0.1); box-sizing: border-box; display: none;"></div>
+            <div class="modal-body studio-v2-body">
+                <!-- Workspace: Fixed Viewport -->
+                <div class="studio-workspace" id="studioWorkspace">
+                    <div class="checkerboard-bg"></div>
+                    
+                    <!-- Transformation Layer (The Uploaded Image) -->
+                    <div class="transform-layer" id="transformLayer">
+                        <img id="croppingSource" src="" alt="Source">
+                        <div id="slicingGridOverlay" class="slicing-grid-overlay"></div>
                     </div>
-                </div>
-            </div>
 
-            <footer class="modal-footer" style="display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: space-between;">
-                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
-                    <button class="cancel-btn" id="cropAspectBtn" style="padding: 0.7rem;" title="Lock/Unlock Aspect Ratio">🔒 1:1</button>
-                    <button class="cancel-btn" id="cropRotateBtn" style="padding: 0.7rem;" title="Rotate 90°">🔄</button>
-                    
-                    <div class="divider" style="width: 1px; height: 20px; background: rgba(255,255,255,0.1); margin: 0 0.5rem;"></div>
-                    
-                    <label title="Show/Hide grid" style="font-size: 0.75rem; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 0.4rem; cursor: pointer; user-select: none;">
-                        <input type="checkbox" id="showGridCheck" checked style="margin: 0;"> Grid
-                    </label>
-                    <label title="Snap selection to cells" style="font-size: 0.75rem; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 0.4rem; cursor: pointer; user-select: none;">
-                        <input type="checkbox" id="snapToGridCheck" checked style="margin: 0;"> Snap
-                    </label>
-                    
-                    <div style="display: flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.03); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
-                        <span style="font-size: 0.65rem; opacity: 0.5;">Size:</span>
-                        <input type="number" id="gridSizeWInput" value="32" min="8" max="512" style="width: 42px; background: none; border: none; border-bottom: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 0.75rem; padding: 0; text-align: center;" title="Width">
-                        <span style="font-size: 0.6rem; opacity: 0.3;">×</span>
-                        <input type="number" id="gridSizeHInput" value="32" min="8" max="512" style="width: 42px; background: none; border: none; border-bottom: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 0.75rem; padding: 0; text-align: center;" title="Height">
-                        
-                        <span style="width: 8px;"></span>
-                        
-                        <span style="font-size: 0.65rem; opacity: 0.5;">Margin:</span>
-                        <input type="number" id="gridMarginInput" value="0" min="0" style="width: 35px; background: none; border: none; border-bottom: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 0.75rem; padding: 0; text-align: center;" title="Margin (offset from top-left)">
-                        
-                        <span style="width: 8px;"></span>
-                        
-                        <span style="font-size: 0.65rem; opacity: 0.5;">Space:</span>
-                        <input type="number" id="gridSpacingInput" value="0" min="0" style="width: 35px; background: none; border: none; border-bottom: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 0.75rem; padding: 0; text-align: center;" title="Spacing between cells">
+                    <!-- Fixed Ghost Reference (Center) -->
+                    <div class="ghost-layer-fixed" id="ghostReference">
+                        <img id="ghostImg" src="" alt="Ghost">
+                        <div id="ghostHitbox" class="ghost-hitbox-v2"></div>
                     </div>
+
+                    <!-- Viewport UI Overlays -->
+                    <div class="viewport-center-mark"></div>
                 </div>
-                <div style="display: flex; gap: 0.5rem;">
-                    <button class="cancel-btn" id="cancelCropBtn">Cancel</button>
-                    <button class="save-pack-btn" id="applyCropBtn">Apply Crop</button>
-                </div>
-            </footer>
+
+                <!-- Controls Sidebar -->
+                <aside class="studio-controls-v2">
+                    <div class="control-group-v2">
+                        <label>Transform</label>
+                        <div class="slider-row">
+                            <span>Zoom</span>
+                            <input type="range" id="zoomSlider" min="0.1" max="10" step="0.01" value="1">
+                        </div>
+                        <div class="slider-row">
+                            <span>Rotate</span>
+                            <input type="range" id="rotateSlider" min="-180" max="180" step="1" value="0">
+                        </div>
+                        <div class="btn-row-v2">
+                            <button class="tool-btn-v2" id="resetTransformBtn" title="Reset Transform">Reset</button>
+                            <button class="tool-btn-v2" id="fitImageBtn" title="Fit to Viewport">Fit</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group-v2">
+                        <label>Slicing Grid</label>
+                        <div class="grid-inputs-v2">
+                            <div class="input-field-v2">
+                                <span>Size W</span>
+                                <input type="number" id="gridSizeWInput" value="32">
+                            </div>
+                            <div class="input-field-v2">
+                                <span>Size H</span>
+                                <input type="number" id="gridSizeHInput" value="32">
+                            </div>
+                            <div class="input-field-v2">
+                                <span>Margin</span>
+                                <input type="number" id="gridMarginInput" value="0">
+                            </div>
+                            <div class="input-field-v2">
+                                <span>Spacing</span>
+                                <input type="number" id="gridSpacingInput" value="0">
+                            </div>
+                        </div>
+                        <div class="toggle-row-v2">
+                            <label><input type="checkbox" id="showGridCheck" checked> Show Grid</label>
+                            <label><input type="checkbox" id="snapToGridCheck" checked> Snap to Cells</label>
+                        </div>
+                    </div>
+
+                    <div class="studio-actions-v2">
+                        <button class="cancel-btn" id="cancelCropBtn">Cancel</button>
+                        <button class="save-pack-btn" id="applyCropBtn">Apply Texture</button>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </div>
         </div>
     </div>
 
