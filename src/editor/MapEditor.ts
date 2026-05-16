@@ -32,10 +32,6 @@ export class MapEditor {
             throw new Error('Canvas not found');
         }
 
-        if (!this.headless) {
-            this.canvas.onload = () => this.centerCanvas();
-        }
-
         this.headless = headless;
         this.existingMap = existingMap;
         this.ctx = this.canvas.getContext('2d');

@@ -89,7 +89,7 @@ export const RendererMixin = {
             const cacheKey = `${cachePrefix}${imageName}`;
 
             // Search on cache
-            let img = this.tileImages[cacheKey];
+            img = this.tileImages[cacheKey];
 
             // If don't exist, do
             if (!img) {
@@ -397,11 +397,10 @@ export const RendererMixin = {
         if (!type) return;
 
         // Get mapEditor context for map size and tile size
-        const mapEditor = window.mapEditor;
-        const mapWidth = mapEditor?.mapWidth || 40;
-        const mapHeight = mapEditor?.mapHeight || 40;
-        const tileSize = mapEditor?.tileSize || 64;
-        const padding = mapEditor?.canvasPadding || 0;
+        const mapWidth = this.mapWidth || 40;
+        const mapHeight = this.mapHeight || 40;
+        const tileSize = this.tileSize || 64;
+        const padding = this.canvasPadding || 0;
 
         // Calculate landing position offset
         let dx = 0, dy = 0, dist = 12;
@@ -426,12 +425,12 @@ export const RendererMixin = {
 
         // Draw the landing image at (lx, ly), size 2x2 tiles
         const imgPath = 'Resources/Global/JumpLanding.png';
-        let img = mapEditor?.tileImages?.[imgPath];
+        let img = this.tileImages?.[imgPath];
         if (!img) {
-            img = new window.Image();
+            img = new Image();
             img.src = imgPath;
-            if (mapEditor && mapEditor.tileImages) mapEditor.tileImages[imgPath] = img;
-            img.onload = () => mapEditor?.scheduleDraw && mapEditor.scheduleDraw();
+            if (this.tileImages) this.tileImages[imgPath] = img;
+            img.onload = () => this.scheduleDraw && this.scheduleDraw();
             img.onerror = () => { console.error('Failed to load JumpLanding image:', imgPath); };
         }
         if (!img.complete || img.naturalWidth === 0) return;
@@ -669,38 +668,6 @@ export const RendererMixin = {
                             const red = tile?.red ?? false;
 
                             this.drawTile(this.ctx, tileId, x, y, red);
-                        });
-                    });
-            });
-
-
-        Array.from(tilesByLayer.keys())
-            .sort((a, b) => a - b)
-            .forEach(layerKey => {
-                const tiles = tilesByLayer.get(layerKey);
-
-                // Group tiles by row (y value)
-                const rows = new Map();
-
-                tiles.forEach(tile => {
-                    const { y } = tile;
-                    if (!rows.has(y)) {
-                        rows.set(y, []);
-                    }
-                    rows.get(y).push(tile);
-                });
-
-                // Draw tiles row by row
-                Array.from(rows.keys())
-                    .sort((a, b) => a - b)
-                    .forEach(y => {
-                        const rowTiles = rows.get(y);
-
-                        rowTiles.sort((a, b) => a.x - b.x);
-
-                        rowTiles.forEach(({ x, y, tileId }) => {
-                            const tile = getTileAt(layerKey, x, y);
-                            const red = tile?.red ?? false;
 
                             if (this.showGuides && tileId >= 20 && tileId <= 27) {
                                 this.showJumpLanding(this.ctx, tileId, x, y);

@@ -1,6 +1,6 @@
 {
   "name": "atlas-horizon-main",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "<div align=\"center\">\r   <img src=\"Resources/Additional/Icons/HammerTool.webp\" alt=\"HammerTool Logo\" width=\"120\"/>",
   "main": "index.js",
   "scripts": {

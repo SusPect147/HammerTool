@@ -1791,12 +1791,18 @@ body.top-bar-hidden .mapmaker-container {
     min-height: 100vh;
 }
 
-/* Hoverable Docked Restore Handle */
+.topbar-collapse-btn:hover {
+    color: #ffffff !important;
+    background: rgba(255,255,255,0.05) !important;
+}
+
+/* Centralized Topbar Controls */
+.collapse-topbar-btn,
 .restore-topbar-btn {
     position: fixed;
     top: 0;
     left: 50%;
-    transform: translateX(-50%) translateY(-100%);
+    transform: translateX(-50%);
     background: color-mix(in srgb, var(--bg-elevated, #0f0f17) 90%, transparent);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-top: none;
@@ -1808,20 +1814,34 @@ body.top-bar-hidden .mapmaker-container {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.25s ease, color 0.2s;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, color 0.2s;
     backdrop-filter: blur(12px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
+
+.collapse-topbar-btn:hover,
 .restore-topbar-btn:hover {
     color: #ffffff;
     background: var(--bg-elevated, #0f0f17);
 }
-body.top-bar-hidden .restore-topbar-btn {
-    transform: translateX(-50%) translateY(0);
+
+/* Show collapse button only when top bar is visible */
+body.top-bar-hidden .collapse-topbar-btn {
+    transform: translateX(-50%) translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
 }
 
-.topbar-collapse-btn:hover {
-    color: #ffffff !important;
-    background: rgba(255,255,255,0.05) !important;
+/* Show restore button only when top bar is hidden */
+body:not(.top-bar-hidden) .restore-topbar-btn {
+    transform: translateX(-50%) translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+body.top-bar-hidden .restore-topbar-btn {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
 }
 

@@ -105,7 +105,7 @@ export const TILE_RENDER_DATA = {
     'Wall2': { scaleX: 1, scaleY: 1.75, offsetX: 0, offsetY: -50, opacity: 1, zIndex: 5 },
     'Crate': { scaleX: 1, scaleY: 1.8, offsetX: 0, offsetY: -51, opacity: 1, zIndex: 5 },
     'Barrel': { scaleX: 1, scaleY: 1.69, offsetX: 0, offsetY: -42.5, opacity: 1, zIndex: 5 },
-    'Cactus': [1*1.1, 1.67*1.1, -5, -51, 1, 5],
+    'Cactus': { scaleX: 1.1, scaleY: 1.837, offsetX: -5, offsetY: -51, opacity: 1, zIndex: 5 },
     'Water': { scaleX: 1, scaleY: 1, offsetX: 0, offsetY: 0, opacity: 1, zIndex: 5 },
     // Base fence types
     'Fence': { scaleX: 1.08, scaleY: 1.71, offsetX: -4, offsetY: -50, opacity: 1, zIndex: 5 },
@@ -159,7 +159,7 @@ export const TILE_RENDER_DATA = {
     'Trio Spawn': { scaleX: 1.7, scaleY: 1.7, offsetX: -35, offsetY: -35, opacity: 0.85, zIndex: 7 },
     'Yellow Spawn': { scaleX: 1.7, scaleY: 1.7, offsetX: -35, offsetY: -35, opacity: 0.85, zIndex: 7 },
     'Objective': { scaleX: 2, scaleY: 2.21, offsetX: -50, offsetY: -115, opacity: 1, zIndex: 10 },
-    'Smoke': [1*1.4, 1.1*1.4, -15, -35, 1, 5],
+    'Smoke': { scaleX: 1.4, scaleY: 1.54, offsetX: -15, offsetY: -35, opacity: 1, zIndex: 5 },
     'Heal Pad': { scaleX: 1, scaleY: 1.12, offsetX: 0, offsetY: 0, opacity: 1, zIndex: 5 },
     'Slow Tile': { scaleX: 1, scaleY: 1.11, offsetX: 0, offsetY: 0, opacity: 1, zIndex: 5 },
     'Speed Tile': { scaleX: 1, scaleY: 1.11, offsetX: 0, offsetY: 0, opacity: 1, zIndex: 5 },
@@ -216,7 +216,7 @@ export const TILE_RENDER_DATA = {
     'Amulet': { scaleX: 1.2, scaleY: 2.0585, offsetX: -10, offsetY: -50, opacity: 1, zIndex: 10 },
     'Bomb': { scaleX: 1.4, scaleY: 2.2, offsetX: -20, offsetY: -85, opacity: 1, zIndex: 10 },
     'Box_Loaded': { scaleX: 1, scaleY: 1.75, offsetX: 0, offsetY: -50, opacity: 1, zIndex: 5 },
-};;
+};
 
 export const OBJECTIVE_DATA = {
     'Gem_Grab': { scaleX: 2, scaleY: 2, offsetX: -50, offsetY: -50, opacity: 1, zIndex: 10 },
@@ -224,8 +224,8 @@ export const OBJECTIVE_DATA = {
     'Bounty': { scaleX: 1.2, scaleY: 2.0585, offsetX: -10, offsetY: -50, opacity: 1, zIndex: 10 },
     'Brawl_Ball': { scaleX: 1.3, scaleY: 1.495, offsetX: -15, offsetY: -20, opacity: 1, zIndex: 10 },
     'Siege': {
-        upper: [2 * 1.2, 2.64 * 1.2, -47, -192, 1, 10],  // Blue Ike (upper part) - slightly smaller
-        lower: [2 * 1.2, 2.83 * 1.2, -93, -214, 1, 10]   // Red Ike (lower part) - slightly larger
+        upper: { scaleX: 2.4, scaleY: 3.168, offsetX: -47, offsetY: -192, opacity: 1, zIndex: 10 },
+        lower: { scaleX: 2.4, scaleY: 3.396, offsetX: -93, offsetY: -214, opacity: 1, zIndex: 10 }
     },
     'Lone_Star': { scaleX: 1.2, scaleY: 2.0585, offsetX: -10, offsetY: -50, opacity: 1, zIndex: 10 },
 			'Takedown': { scaleX: 1.2, scaleY: 1.9, offsetX: -10, offsetY: -50, opacity: 1, zIndex: 10 },
@@ -238,15 +238,15 @@ export const OBJECTIVE_DATA = {
     'Bot_Drop': { scaleX: 1.9, scaleY: 1.9, offsetX: -46.5, offsetY: -46.5, opacity: 0.85, zIndex: 7 },
     'Paint_Brawl': { scaleX: 1.4, scaleY: 2.2, offsetX: -20, offsetY: -85, opacity: 1, zIndex: 10 },
     'Spirit_Wars': {
-        upper: [2 * 1.2, 2.64 * 1.2, -47, -192, 1, 10],  // Blue Ike (upper part) - slightly smaller
-        lower: [2 * 1.2, 2.83 * 1.2, -93, -214, 1, 10]   // Red Ike (lower part) - slightly larger
+        upper: { scaleX: 2.4, scaleY: 3.168, offsetX: -47, offsetY: -192, opacity: 1, zIndex: 10 },
+        lower: { scaleX: 2.4, scaleY: 3.396, offsetX: -93, offsetY: -214, opacity: 1, zIndex: 10 }
     },
     'Hockey': { scaleX: 1.5, scaleY: 1.695, offsetX: -25, offsetY: -26, opacity: 1, zIndex: 10 },
     'Token_Run': { scaleX: 4, scaleY: 4, offsetX: -150, offsetY: -150, opacity: 1, zIndex: 10 },
     'Dodgebrawl': { scaleX: 1.3, scaleY: 1.495, offsetX: -15, offsetY: -20, opacity: 1, zIndex: 10 },
     'Safe_Blast': { scaleX: 2, scaleY: 2.21, offsetX: -50, offsetY: -115, opacity: 1, zIndex: 10 },
     'Love_Bombing': { scaleX: 1.7, scaleY: 1.85, offsetX: -25, offsetY: -60, opacity: 1, zIndex: 10 },
-};;
+};
 
 export const ENV_OBJECTIVE_DATA = {
     City: {
@@ -269,7 +269,7 @@ export const ENV_OBJECTIVE_DATA = {
     },
     Super_City: {
         'Gem_Grab': { scaleX: 2.3, scaleY: 2.4, offsetX: -69, offsetY: -60, opacity: 1, zIndex: 10 },
-        'Heist': [1.8 * 1.2, 3.2 * 0.9, -57, -180, 1, 10],
+        'Heist': { scaleX: 2.16, scaleY: 2.88, offsetX: -57, offsetY: -180, opacity: 1, zIndex: 10 },
     },
     Gift_Shop: {
         'Gem_Grab': { scaleX: 2.4, scaleY: 2.276, offsetX: -69, offsetY: -60, opacity: 1, zIndex: 10 },
@@ -298,7 +298,7 @@ export const ENV_OBJECTIVE_DATA = {
     },
     Fighting_Game: {
         'Gem_Grab': { scaleX: 2.42, scaleY: 2.54, offsetX: -54, offsetY: -76, opacity: 1, zIndex: 10 },
-        'Heist': [2*0.9, 3.56*0.9, -37.5, -175, 1, 10],
+        'Heist': { scaleX: 1.8, scaleY: 3.204, offsetX: -37.5, offsetY: -175, opacity: 1, zIndex: 10 },
     },
     Biodome: {
         'Gem_Grab': { scaleX: 2.4, scaleY: 2.5, offsetX: -65, offsetY: -78, opacity: 1, zIndex: 10 },
@@ -308,7 +308,7 @@ export const ENV_OBJECTIVE_DATA = {
     },
     Deep_Sea: {
         'Gem_Grab': { scaleX: 2.18, scaleY: 2.42, offsetX: -59, offsetY: -60, opacity: 1, zIndex: 10 },
-        'Heist': [2 * 1.2, 3.56 * 0.9, -75, -190, 1, 10],
+        'Heist': { scaleX: 2.4, scaleY: 3.204, offsetX: -75, offsetY: -190, opacity: 1, zIndex: 10 },
 				'Paint_Brawl': { scaleX: 1.7, scaleY: 2.5, offsetX: -30, offsetY: -75, opacity: 1, zIndex: 10 },
     },
     Ghost_Station: {
@@ -361,7 +361,7 @@ export const ENV_OBJECTIVE_DATA = {
     },
     Katana_Kingdom: {
         'Gem_Grab': { scaleX: 2.4, scaleY: 2.54, offsetX: -40, offsetY: -70, opacity: 1, zIndex: 10 },
-        'Heist': [1.8 * 1.2, 3.2 * 0.9, -57, -185, 1, 10],
+        'Heist': { scaleX: 2.16, scaleY: 2.88, offsetX: -57, offsetY: -185, opacity: 1, zIndex: 10 },
     },
     Subway_Surfers: {
         'Gem_Grab': { scaleX: 2.6, scaleY: 2.5, offsetX: -60, offsetY: -75, opacity: 1, zIndex: 10 },
@@ -401,12 +401,12 @@ export const ENV_OBJECTIVE_DATA = {
     Z_CrimsonForest: {
         'Gem_Grab': { scaleX: 2, scaleY: 2.1, offsetX: -49, offsetY: -43, opacity: 1, zIndex: 10 },
     },
-};;
+};
 
 export const ENV_TILE_RENDER_DATA = {
     Mine: {
         'Wall': { scaleX: 1, scaleY: 1.8, offsetX: 0, offsetY: -51, opacity: 1, zIndex: 5 },
-        'Wall2': [1*1.1, 1.65*1.1, -5, -50, 1, 5],
+        'Wall2': { scaleX: 1.1, scaleY: 1.815, offsetX: -5, offsetY: -50, opacity: 1, zIndex: 5 },
         'Cactus': { scaleX: 1, scaleY: 1.68, offsetX: 0, offsetY: -50, opacity: 1, zIndex: 5 },
     },
     Desert: {
@@ -421,13 +421,13 @@ export const ENV_TILE_RENDER_DATA = {
     },
     Oasis: {
         'Wall2': { scaleX: 1, scaleY: 1.8, offsetX: 0, offsetY: -50, opacity: 1, zIndex: 5 },
-        'Skull': [1*1.1, 1.59*1.1, -5, -42.5, 1, 5],
+        'Skull': { scaleX: 1.1, scaleY: 1.749, offsetX: -5, offsetY: -42.5, opacity: 1, zIndex: 5 },
     },
     Holiday: {
-        'Wall': [1*1.05, 1.73*1.05, -2.5, -55, 1, 5],
-        'Wall2': [1*1.1, 1.64*1.1, -5, -50, 1, 5],
+        'Wall': { scaleX: 1.05, scaleY: 1.8165, offsetX: -2.5, offsetY: -55, opacity: 1, zIndex: 5 },
+        'Wall2': { scaleX: 1.1, scaleY: 1.804, offsetX: -5, offsetY: -50, opacity: 1, zIndex: 5 },
         'Barrel': { scaleX: 1, scaleY: 1.83, offsetX: 0, offsetY: -52, opacity: 1, zIndex: 5 },
-        'Skull': [1*1.1, 1.22*1.1, -5, -5, 1, 5]
+        'Skull': { scaleX: 1.1, scaleY: 1.342, offsetX: -5, offsetY: -5, opacity: 1, zIndex: 5 }
     },
     City: {
       'Horizontal': { scaleX: 1.05, scaleY: 1.323, offsetX: -2.5, offsetY: -15, opacity: 1, zIndex: 5 },
@@ -454,7 +454,7 @@ export const ENV_TILE_RENDER_DATA = {
     Mortuary: {
         'Wall': { scaleX: 1, scaleY: 1.8, offsetX: 0, offsetY: -51, opacity: 1, zIndex: 5 },
         'Wall2': { scaleX: 1, scaleY: 1.8, offsetX: 0, offsetY: -51, opacity: 1, zIndex: 5 },
-        'Cactus': [1*1.1, 1.42*1.1, -5, -27.5, 1, 5],
+        'Cactus': { scaleX: 1.1, scaleY: 1.562, offsetX: -5, offsetY: -27.5, opacity: 1, zIndex: 5 },
         'Skull': { scaleX: 1, scaleY: 1.49, offsetX: 0, offsetY: -20, opacity: 1, zIndex: 5 },
         'Horizontal': { scaleX: 1, scaleY: 1.67, offsetX: 0, offsetY: -37.5, opacity: 1, zIndex: 5 },
         'Fence': { scaleX: 1, scaleY: 1.85, offsetX: 0, offsetY: -55, opacity: 1, zIndex: 5 },
@@ -497,9 +497,9 @@ export const ENV_TILE_RENDER_DATA = {
         'Wall': { scaleX: 1, scaleY: 1.8, offsetX: 0, offsetY: -51, opacity: 1, zIndex: 5 },
         'Wall2': { scaleX: 1, scaleY: 1.8, offsetX: 0, offsetY: -51, opacity: 1, zIndex: 5 },
         'Fence': { scaleX: 1, scaleY: 1.85, offsetX: 0, offsetY: -55, opacity: 1, zIndex: 5 },
-        'Crate': [1*1.1, 1.63*1.1, -5, -50, 1, 5],
+        'Crate': { scaleX: 1.1, scaleY: 1.793, offsetX: -5, offsetY: -50, opacity: 1, zIndex: 5 },
         'Cactus': { scaleX: 1.15, scaleY: 1.8, offsetX: -9, offsetY: -48, opacity: 1, zIndex: 5.5 },
-        'Skull': [1*1.1, 1.59*1.1, -5, -42.5, 1, 5],
+        'Skull': { scaleX: 1.1, scaleY: 1.749, offsetX: -5, offsetY: -42.5, opacity: 1, zIndex: 5 },
         'B0001': { scaleX: 1 / 1.39, scaleY: 1.39 / 1.39, offsetX: 15, offsetY: -28, opacity: 1, zIndex: 5 },
         'B0010': { scaleX: 1, scaleY: 1.85, offsetX: 0, offsetY: -55, opacity: 1, zIndex: 5 },
         'B0011': { scaleX: 1 / 1.2, scaleY: 1.85, offsetX: 17, offsetY: -55, opacity: 1, zIndex: 5 },
@@ -546,7 +546,7 @@ export const ENV_TILE_RENDER_DATA = {
     Bandstand:{
         'Wall': { scaleX: 1, scaleY: 1.8, offsetX: 0, offsetY: -51, opacity: 1, zIndex: 5 },
         'Wall2': { scaleX: 1, scaleY: 1.8, offsetX: 0, offsetY: -51, opacity: 1, zIndex: 5 },
-        'Skull': [1*1.1, 1.59*1.1, -5, -42.5, 1, 5],
+        'Skull': { scaleX: 1.1, scaleY: 1.749, offsetX: -5, offsetY: -42.5, opacity: 1, zIndex: 5 },
         '0001': { scaleX: 1/1.39, scaleY: 1.39/1.39, offsetX: 15, offsetY: -28, opacity: 1, zIndex: 5 },
         '0010': { scaleX: 1, scaleY: 1.85, offsetX: 0, offsetY: -55, opacity: 1, zIndex: 5 },
         '0011': { scaleX: 0.85, scaleY: 1.85, offsetX: 15, offsetY: -55, opacity: 1, zIndex: 5 },
@@ -563,7 +563,7 @@ export const ENV_TILE_RENDER_DATA = {
         'Horizontal': { scaleX: 1.05, scaleY: 1.323, offsetX: -2.5, offsetY: -15, opacity: 1, zIndex: 5 },
         'Wall': { scaleX: 1, scaleY: 1.8, offsetX: 0, offsetY: -51, opacity: 1, zIndex: 5 },
         'Wall2': { scaleX: 1, scaleY: 1.8, offsetX: 0, offsetY: -51, opacity: 1, zIndex: 5 },
-        'Skull': [1*1.1, 1.22*1.1, -5, -30, 1, 5]
+        'Skull': { scaleX: 1.1, scaleY: 1.342, offsetX: -5, offsetY: -30, opacity: 1, zIndex: 5 }
     },
     Scrapyard: {
         'Cactus': { scaleX: 1, scaleY: 1.79, offsetX: 0, offsetY: -51, opacity: 1, zIndex: 5 },
@@ -607,9 +607,9 @@ export const ENV_TILE_RENDER_DATA = {
         'Post_T': { scaleX: 1, scaleY: 2.4, offsetX: 0, offsetY: -120, opacity: 1, zIndex: 5 },
     },
     Wild_West: {
-        'Wall': [1*1.1, 1.63*1.1, -5, -50, 1, 5],
-        'Wall2': [1*1.1, 1.63*1.1, -5, -50, 1, 5],
-        'Skull': [1*1.1, 1.22*1.1, -5, -5, 1, 5]
+        'Wall': { scaleX: 1.1, scaleY: 1.793, offsetX: -5, offsetY: -50, opacity: 1, zIndex: 5 },
+        'Wall2': { scaleX: 1.1, scaleY: 1.793, offsetX: -5, offsetY: -50, opacity: 1, zIndex: 5 },
+        'Skull': { scaleX: 1.1, scaleY: 1.342, offsetX: -5, offsetY: -5, opacity: 1, zIndex: 5 }
     },
     Water_Park: {
         'Wall': { scaleX: 1, scaleY: 1.8, offsetX: 0, offsetY: -51, opacity: 1, zIndex: 5 },
@@ -665,21 +665,21 @@ export const ENV_TILE_RENDER_DATA = {
         'Bush': { scaleX: 1, scaleY: 1.75, offsetX: 0, offsetY: -50, opacity: 1, zIndex: 5 },
         'Skull': { scaleX: 1, scaleY: 1.7, offsetX: 0, offsetY: -49, opacity: 1, zIndex: 5 },
         'Barrel': { scaleX: 1, scaleY: 1.75, offsetX: 0, offsetY: -50, opacity: 1, zIndex: 5 },
-        'Post': [1*0.6, 2.83*0.6, 20, -50, 1, 5],
-        'Post_TR': [1*1.15, 1.87*1.15, 20, -95, 1, 5],
-        'Post_R': [1*1.15, 1.48*1.15, 20, -50, 1, 5],
-        'Post_T': [1*0.6, 3.58*0.6, 20, -95, 1, 5],
+        'Post': { scaleX: 0.6, scaleY: 1.698, offsetX: 20, offsetY: -50, opacity: 1, zIndex: 5 },
+        'Post_TR': { scaleX: 1.15, scaleY: 2.1505, offsetX: 20, offsetY: -95, opacity: 1, zIndex: 5 },
+        'Post_R': { scaleX: 1.15, scaleY: 1.702, offsetX: 20, offsetY: -50, opacity: 1, zIndex: 5 },
+        'Post_T': { scaleX: 0.6, scaleY: 2.148, offsetX: 20, offsetY: -95, opacity: 1, zIndex: 5 },
         'Fence': { scaleX: 1, scaleY: 1.7, offsetX: 0, offsetY: -47.5, opacity: 1, zIndex: 5 },
         '0001': { scaleX: 1/1.39, scaleY: 1.39/1.39, offsetX: 15, offsetY: -28, opacity: 1, zIndex: 5 },
         '0010': { scaleX: 1, scaleY: 1.7, offsetX: 0, offsetY: -47.5, opacity: 1, zIndex: 5 },
-        '0011': [1*0.875, 2*0.85, 15.25, -48, 1, 5],
+        '0011': { scaleX: 0.875, scaleY: 1.7, offsetX: 15.25, offsetY: -48, opacity: 1, zIndex: 5 },
         '0100': { scaleX: 1, scaleY: 1.7, offsetX: 0, offsetY: -47.5, opacity: 1, zIndex: 5 },
-        '0101': [1*0.875, 2*0.85, 0, -48, 1, 5],
+        '0101': { scaleX: 0.875, scaleY: 1.7, offsetX: 0, offsetY: -48, opacity: 1, zIndex: 5 },
         '0110': { scaleX: 1, scaleY: 1.75, offsetX: 0, offsetY: -50, opacity: 1, zIndex: 5 },
         '1000': { scaleX: 1/1.39, scaleY: 1.83/1.39, offsetX: 15, offsetY: -30, opacity: 1, zIndex: 5 },
         '1001': { scaleX: 1/1.39, scaleY: 1.44/1.39, offsetX: 15, offsetY: -30, opacity: 1, zIndex: 5 },
-        '1010': [1*0.875, 2.47*0.85, 15.25, -87.5, 1, 5],
-        '1100': [1*0.875, 2.47*0.85, 0, -87.5, 1, 5],
+        '1010': { scaleX: 0.875, scaleY: 2.0995, offsetX: 15.25, offsetY: -87.5, opacity: 1, zIndex: 5 },
+        '1100': { scaleX: 0.875, scaleY: 2.0995, offsetX: 0, offsetY: -87.5, opacity: 1, zIndex: 5 },
     },
     Biodome: {
         'Barrel': { scaleX: 1, scaleY: 1.81, offsetX: 0, offsetY: -51, opacity: 1, zIndex: 5 },
