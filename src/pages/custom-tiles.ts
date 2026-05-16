@@ -712,15 +712,13 @@ function initStudioControls() {
                     if (gridOverlay) gridOverlay.style.pointerEvents = 'none';
                     if (snapToGridCheck) snapToGridCheck.checked = false;
                     
-                    // Center crop box based on grid size
-                    const gw = parseInt(gridSizeWInput?.value || '32');
-                    const gh = parseInt(gridSizeHInput?.value || '32');
-                    const canvasData = cropperInstance.getCanvasData();
-                    cropperInstance.setData({
-                        x: (canvasData.naturalWidth - gw) / 2,
-                        y: (canvasData.naturalHeight - gh) / 2,
-                        width: gw,
-                        height: gh
+                    // Fixed 128x128 crop box in the center of the viewport
+                    const containerData = cropperInstance.getContainerData();
+                    cropperInstance.setCropBoxData({
+                        left: (containerData.width - 128) / 2,
+                        top: (containerData.height - 128) / 2,
+                        width: 128,
+                        height: 128
                     });
                 } else if (currentCropMode === 'manual') {
                     cropperInstance.setAspectRatio(NaN);
@@ -736,7 +734,7 @@ function initStudioControls() {
                     cropperInstance.setOptions({
                         cropBoxMovable: true,
                         cropBoxResizable: true,
-                        dragMode: 'move' // Allow panning while clicking grid
+                        dragMode: 'move'
                     });
                     if (gridOverlay) gridOverlay.style.pointerEvents = 'auto';
                     if (snapToGridCheck) snapToGridCheck.checked = true;
@@ -815,15 +813,11 @@ function initStudioControls() {
                 const activeTile = CORE_TILES.find(t => t.id === selectedTileKey);
                 
                 if (ghostRef && activeTile && cropperInstance) {
-                    const cropBoxData = cropperInstance.getCropBoxData();
                     ghostRef.style.display = (currentCropMode === 'ghost') ? 'flex' : 'none';
                     
-                    // Match the size of the ghost box to the crop box on screen
-                    ghostRef.style.width = cropBoxData.width + 'px';
-                    ghostRef.style.height = cropBoxData.height + 'px';
-                    
-                    // Position ghost in the middle of the viewport (workspace)
-                    // CSS transform handles the centering, we just ensure it's displayed
+                    // Fixed 128x128 ghost (matches CSS and fixed crop box)
+                    ghostRef.style.width = '128px';
+                    ghostRef.style.height = '128px';
                     
                     if (ghostImg) {
                         ghostImg.dataset.noTheme = 'true';
@@ -993,20 +987,21 @@ function initStudioControls() {
                     if (isSnapping || !cropperInstance)
                         return;
 
-                    // Ghost mode: fix crop box in the center of the viewport
+                    // Ghost mode: fix crop box at exactly 128x128 in the center
                     if (currentCropMode === 'ghost') {
                         const containerData = cropperInstance.getContainerData();
                         const cropBoxData = cropperInstance.getCropBoxData();
                         
-                        const centerX = (containerData.width - cropBoxData.width) / 2;
-                        const centerY = (containerData.height - cropBoxData.height) / 2;
+                        const centerX = (containerData.width - 128) / 2;
+                        const centerY = (containerData.height - 128) / 2;
 
-                        // Only force if it's not centered (allow slight deviation)
-                        if (Math.abs(cropBoxData.left - centerX) > 1 || Math.abs(cropBoxData.top - centerY) > 1) {
+                        if (Math.abs(cropBoxData.left - centerX) > 0.5 || Math.abs(cropBoxData.top - centerY) > 0.5 || Math.abs(cropBoxData.width - 128) > 0.5) {
                             isSnapping = true;
                             cropperInstance.setCropBoxData({
                                 left: centerX,
-                                top: centerY
+                                top: centerY,
+                                width: 128,
+                                height: 128
                             });
                             setTimeout(() => { isSnapping = false; }, 50);
                         }
