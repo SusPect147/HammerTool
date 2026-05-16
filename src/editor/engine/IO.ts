@@ -96,7 +96,8 @@ async saveMap() {
             const gamemode = document.getElementById('gamemode').value;
             const environment = document.getElementById('environment').value;
 
-            const author = user.user_metadata.full_name || 'Anonymous';
+            // Robust author detection matching other site modules
+            const author = user.user_metadata.full_name || user.user_metadata.display_name || user.user_metadata.name || 'Anonymous';
 
             const isPublic = document.getElementById('isPublicToggle')?.checked ?? true;
 
@@ -128,13 +129,15 @@ async saveMap() {
                 savedMapId = this.loadedMapId;
             } else {
                 console.info(`[HammerTool] Attempting database INSERT for new map clone.`);
+                // Standardizing to .single() and selecting only 'id' to minimize payload and avoid RLS/PostgREST 400 issues with large columns
                 const { data, error } = await supabase
                     .from('maps')
-                    .insert([payload])
-                    .select();
+                    .insert(payload)
+                    .select('id')
+                    .single();
                 
                 if (error) throw error;
-                savedMapId = data?.[0]?.id;
+                savedMapId = data?.id;
             }
 
             const mapLinkElement = document.getElementById('mapLink');
@@ -146,8 +149,9 @@ async saveMap() {
 
             alert(this.loadedMapId ? window.ht_translate('Map updated successfully in secure database!') : window.ht_translate('Map saved successfully to Supabase database!'));
         } catch (error) {
-            console.error('Error saving map:', error);
-            alert(`${window.ht_translate('Failed to save map:')} ${error.message || 'Unknown error'}`);
+            console.error('[HammerTool] Error saving map:', error);
+            const detail = error.details || error.hint || '';
+            alert(`${window.ht_translate('Failed to save map:')} ${error.message}${detail ? ' (' + detail + ')' : ''}`);
         }
     },
 
