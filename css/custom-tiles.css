@@ -649,19 +649,31 @@
     box-sizing: border-box;
     box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
     overflow: hidden;
+    position: absolute;
+    pointer-events: none;
+    z-index: 100;
+    display: none;
+    transform-origin: top left;
+    mix-blend-mode: overlay;
 }
 
 #ghostImg {
     filter: drop-shadow(0 0 5px rgba(0, 210, 255, 0.5));
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0.6;
 }
 
 #ghostHitbox {
     border: 2px dashed #ff4b4b;
-    background: rgba(255, 75, 75, 0.1);
+    background: rgba(255, 75, 75, 0.15);
     box-shadow: 0 0 10px rgba(255, 75, 75, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
+    position: absolute;
+    box-sizing: border-box;
 }
 
 #ghostHitbox::after {
@@ -671,6 +683,26 @@
     font-weight: 800;
     letter-spacing: 0.1em;
     opacity: 0.8;
+}
+
+/* Checkerboard Background for Transparency */
+.cropping-area-bg {
+    background-image: 
+        linear-gradient(45deg, #15151e 25%, transparent 25%), 
+        linear-gradient(-45deg, #15151e 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, #15151e 75%), 
+        linear-gradient(-45deg, transparent 75%, #15151e 75%) !important;
+    background-size: 20px 20px !important;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px !important;
+    background-color: #0a0a10 !important;
+}
+
+/* Fix "Doubled Grid" - hide default cropper grid if ours is visible */
+.cropper-grid, .cropper-view-box {
+    outline: none !important;
+}
+.cropper-line, .cropper-point {
+    background-color: var(--primary-color) !important;
 }
 
 .slicing-grid-overlay::before {

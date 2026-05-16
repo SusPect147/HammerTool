@@ -793,15 +793,16 @@ function initStudioControls() {
                 const ghostHitbox = document.getElementById('ghostHitbox');
                 const activeTile = CORE_TILES.find(t => t.id === selectedTileKey);
 
-                if (ghostRef && activeTile) {
+                if (ghostRef && activeTile && cropperInstance) {
                     const cropData = cropperInstance.getData();
                     const canvasData = cropperInstance.getCanvasData();
+                    const cropBoxData = cropperInstance.getCropBoxData();
                     
                     ghostRef.style.display = 'block';
-                    ghostRef.style.width = (cropData.width * scale) + 'px';
-                    ghostRef.style.height = (cropData.height * scale) + 'px';
-                    ghostRef.style.left = (canvasData.left + (cropData.x * scale)) + 'px';
-                    ghostRef.style.top = (canvasData.top + (cropData.y * scale)) + 'px';
+                    ghostRef.style.width = cropBoxData.width + 'px';
+                    ghostRef.style.height = cropBoxData.height + 'px';
+                    ghostRef.style.left = cropBoxData.left + 'px';
+                    ghostRef.style.top = cropBoxData.top + 'px';
                     
                     if (ghostImg) ghostImg.src = activeTile.src;
                     
@@ -891,12 +892,18 @@ function initStudioControls() {
 
             cropperInstance = new Cropper(croppingSource, {
                 aspectRatio: isAspectRatioLocked ? 1 : NaN, 
-                viewMode: 1,
-                background: true, // Show checkerboard for transparency
+                viewMode: 0, // Allow crop box to exceed image boundaries for centering
+                background: false, // We'll handle our own checkerboard
                 zoomable: true,
                 scalable: true,
                 movable: true,
-                guides: true,
+                zoomOnWheel: true,
+                wheelZoomRatio: 0.1,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: true,
+                guides: false, // Turn off default guides to fix "doubling"
+                center: false,
+                highlight: false,
                 responsive: true,
                 checkOrientation: true,
                 ready() {
