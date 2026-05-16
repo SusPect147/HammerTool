@@ -173,14 +173,29 @@
                     
                     <div class="divider" style="width: 1px; height: 20px; background: rgba(255,255,255,0.1); margin: 0 0.5rem;"></div>
                     
-                    <label style="font-size: 0.75rem; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 0.4rem; cursor: pointer; user-select: none;">
-                        <input type="checkbox" id="showGridCheck" style="margin: 0;"> Grid
+                    <label title="Show/Hide grid" style="font-size: 0.75rem; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 0.4rem; cursor: pointer; user-select: none;">
+                        <input type="checkbox" id="showGridCheck" checked style="margin: 0;"> Grid
                     </label>
-                    <label style="font-size: 0.75rem; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 0.4rem; cursor: pointer; user-select: none;">
-                        <input type="checkbox" id="snapToGridCheck" style="margin: 0;"> Snap
+                    <label title="Snap selection to cells" style="font-size: 0.75rem; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 0.4rem; cursor: pointer; user-select: none;">
+                        <input type="checkbox" id="snapToGridCheck" checked style="margin: 0;"> Snap
                     </label>
-                    <input type="number" id="gridSizeInput" value="32" min="8" max="256" step="8" 
-                           style="width: 50px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #fff; font-size: 0.75rem; padding: 2px 4px;">
+                    
+                    <div style="display: flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.03); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                        <span style="font-size: 0.65rem; opacity: 0.5;">Size:</span>
+                        <input type="number" id="gridSizeWInput" value="32" min="8" max="512" style="width: 42px; background: none; border: none; border-bottom: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 0.75rem; padding: 0; text-align: center;" title="Width">
+                        <span style="font-size: 0.6rem; opacity: 0.3;">×</span>
+                        <input type="number" id="gridSizeHInput" value="32" min="8" max="512" style="width: 42px; background: none; border: none; border-bottom: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 0.75rem; padding: 0; text-align: center;" title="Height">
+                        
+                        <span style="width: 8px;"></span>
+                        
+                        <span style="font-size: 0.65rem; opacity: 0.5;">Margin:</span>
+                        <input type="number" id="gridMarginInput" value="0" min="0" style="width: 35px; background: none; border: none; border-bottom: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 0.75rem; padding: 0; text-align: center;" title="Margin (offset from top-left)">
+                        
+                        <span style="width: 8px;"></span>
+                        
+                        <span style="font-size: 0.65rem; opacity: 0.5;">Space:</span>
+                        <input type="number" id="gridSpacingInput" value="0" min="0" style="width: 35px; background: none; border: none; border-bottom: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 0.75rem; padding: 0; text-align: center;" title="Spacing between cells">
+                    </div>
                 </div>
                 <div style="display: flex; gap: 0.5rem;">
                     <button class="cancel-btn" id="cancelCropBtn">Cancel</button>

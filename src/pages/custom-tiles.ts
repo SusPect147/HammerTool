@@ -706,10 +706,16 @@ function initStudioControls() {
     const cropRotateBtn = document.getElementById('cropRotateBtn');
     const cropAspectBtn = document.getElementById('cropAspectBtn');
     const croppingSource = document.getElementById('croppingSource');
-    const showGridCheck = document.getElementById('showGridCheck');
-    const snapToGridCheck = document.getElementById('snapToGridCheck');
-    const gridSizeInput = document.getElementById('gridSizeInput');
-    const gridOverlay = document.getElementById('slicing-grid-overlay');
+    const showGridCheck = document.getElementById('showGridCheck') as HTMLInputElement;
+    const snapToGridCheck = document.getElementById('snapToGridCheck') as HTMLInputElement;
+    
+    // Advanced Grid Inputs
+    const gridSizeWInput = document.getElementById('gridSizeWInput') as HTMLInputElement;
+    const gridSizeHInput = document.getElementById('gridSizeHInput') as HTMLInputElement;
+    const gridMarginInput = document.getElementById('gridMarginInput') as HTMLInputElement;
+    const gridSpacingInput = document.getElementById('gridSpacingInput') as HTMLInputElement;
+    
+    const gridOverlay = document.getElementById('slicingGridOverlay');
 
     // Open main studio modal
     openBtn.onclick = () => {
@@ -759,7 +765,6 @@ function initStudioControls() {
             const updateSlicingGrid = () => {
                 if (!cropperInstance || !gridOverlay) return;
                 const canvasData = cropperInstance.getCanvasData();
-                const containerData = cropperInstance.getContainerData();
                 
                 // Position the overlay to match the image canvas exactly
                 gridOverlay.style.width = canvasData.width + 'px';
@@ -767,10 +772,19 @@ function initStudioControls() {
                 gridOverlay.style.left = canvasData.left + 'px';
                 gridOverlay.style.top = canvasData.top + 'px';
                 
-                // Update CSS variable for grid lines
-                const currentGrid = parseInt(gridSizeInput?.value || '32');
+                // Update CSS variables for grid lines
+                const gw = parseInt(gridSizeWInput?.value || '32');
+                const gh = parseInt(gridSizeHInput?.value || '32');
+                const gm = parseInt(gridMarginInput?.value || '0');
+                const gs = parseInt(gridSpacingInput?.value || '0');
+                
                 const scale = canvasData.width / canvasData.naturalWidth;
-                gridOverlay.style.setProperty('--grid-size', (currentGrid * scale) + 'px');
+                
+                gridOverlay.style.setProperty('--grid-w', (gw * scale) + 'px');
+                gridOverlay.style.setProperty('--grid-h', (gh * scale) + 'px');
+                gridOverlay.style.setProperty('--grid-m', (gm * scale) + 'px');
+                gridOverlay.style.setProperty('--grid-s', (gs * scale) + 'px');
+                
                 gridOverlay.style.display = showGridCheck?.checked ? 'block' : 'none';
             };
 
@@ -779,22 +793,72 @@ function initStudioControls() {
                 if (!container) return;
                 
                 let isRightDragging = false;
+                let lastX = 0;
+                let lastY = 0;
+
                 container.oncontextmenu = (e) => e.preventDefault();
                 
-                container.onmousedown = (e) => {
+                container.addEventListener('mousedown', (e: MouseEvent) => {
                     if (e.button === 2) { // Right click
                         isRightDragging = true;
-                        cropperInstance.setDragMode('move');
+                        lastX = e.clientX;
+                        lastY = e.clientY;
+                        container.style.cursor = 'grabbing';
                     }
-                };
+                }, true);
                 
-                window.onmouseup = () => {
+                window.addEventListener('mousemove', (e: MouseEvent) => {
+                    if (isRightDragging && cropperInstance) {
+                        const dx = e.clientX - lastX;
+                        const dy = e.clientY - lastY;
+                        cropperInstance.move(dx, dy);
+                        lastX = e.clientX;
+                        lastY = e.clientY;
+                    }
+                });
+                
+                window.addEventListener('mouseup', () => {
                     if (isRightDragging) {
                         isRightDragging = false;
-                        cropperInstance.setDragMode('crop');
+                        container.style.cursor = '';
+                    }
+                });
+            };
+
+            // Click-to-Snap on Grid Overlay
+            if (gridOverlay) {
+                gridOverlay.onclick = (e) => {
+                    if (!cropperInstance) return;
+                    const rect = gridOverlay.getBoundingClientRect();
+                    const canvasData = cropperInstance.getCanvasData();
+                    
+                    // Click relative to the image natural pixels
+                    const scale = canvasData.naturalWidth / canvasData.width;
+                    const clickX = (e.clientX - rect.left) * scale;
+                    const clickY = (e.clientY - rect.top) * scale;
+                    
+                    const gw = parseInt(gridSizeWInput?.value || '32');
+                    const gh = parseInt(gridSizeHInput?.value || '32');
+                    const gm = parseInt(gridMarginInput?.value || '0');
+                    const gs = parseInt(gridSpacingInput?.value || '0');
+                    
+                    // Find which tile index we clicked
+                    const tileX = Math.floor((clickX - gm) / (gw + gs));
+                    const tileY = Math.floor((clickY - gm) / (gh + gs));
+                    
+                    if (tileX >= 0 && tileY >= 0) {
+                        const snapX = gm + tileX * (gw + gs);
+                        const snapY = gm + tileY * (gh + gs);
+                        
+                        cropperInstance.setData({
+                            x: snapX,
+                            y: snapY,
+                            width: gw,
+                            height: gh
+                        });
                     }
                 };
-            };
+            }
 
             cropperInstance = new Cropper(croppingSource, {
                 aspectRatio: isAspectRatioLocked ? 1 : NaN, 
@@ -818,31 +882,42 @@ function initStudioControls() {
                     
                     if (isSnapping || !snapToGridCheck?.checked) return;
                     
-                    const g = parseInt(gridSizeInput?.value || '32');
+                    const gw = parseInt(gridSizeWInput?.value || '32');
+                    const gh = parseInt(gridSizeHInput?.value || '32');
+                    const gm = parseInt(gridMarginInput?.value || '0');
+                    const gs = parseInt(gridSpacingInput?.value || '0');
+                    
                     const d = event.detail;
                     
-                    // Snap coordinates and dimensions to grid
-                    const rx = Math.round(d.x / g) * g;
-                    const ry = Math.round(d.y / g) * g;
-                    const rw = Math.round(d.width / g) * g;
-                    const rh = Math.round(d.height / g) * g;
+                    // Advanced Snap Logic (Tiled-compatible)
+                    const tileX = Math.round((d.x - gm) / (gw + gs));
+                    const tileY = Math.round((d.y - gm) / (gh + gs));
                     
-                    // Prevent jitter loop
-                    if (Math.abs(d.x - rx) > 0.1 || Math.abs(d.y - ry) > 0.1 || 
-                        Math.abs(d.width - rw) > 0.1 || Math.abs(d.height - rh) > 0.1) {
+                    const rx = gm + tileX * (gw + gs);
+                    const ry = gm + tileY * (gh + gs);
+                    
+                    // Round width/height to multiples of size? 
+                    // Usually we just snap top-left and use fixed size if aspect is locked.
+                    const rw = Math.round(d.width / (gw + gs)) * (gw + gs) || gw;
+                    const rh = Math.round(d.height / (gh + gs)) * (gh + gs) || gh;
+                    
+                    if (Math.abs(d.x - rx) > 0.1 || Math.abs(d.y - ry) > 0.1) {
                         isSnapping = true;
                         cropperInstance.setData({
                             x: rx,
                             y: ry,
-                            width: Math.max(g, rw),
-                            height: Math.max(g, rh)
+                            // width: rw, // Don't force width/height if user is resizing, 
+                            // but maybe snap to nearest full tile? 
+                            // For simplicity, we just snap the top-left for now.
                         });
                         setTimeout(() => { isSnapping = false; }, 10);
                     }
                 }
             });
 
-            if (gridSizeInput) gridSizeInput.oninput = updateSlicingGrid;
+            [gridSizeWInput, gridSizeHInput, gridMarginInput, gridSpacingInput].forEach(inp => {
+                if (inp) inp.oninput = updateSlicingGrid;
+            });
             if (showGridCheck) showGridCheck.onchange = updateSlicingGrid;
         };
         reader.readAsDataURL(file);
@@ -878,11 +953,12 @@ function initStudioControls() {
     applyCropBtn.onclick = () => {
         if (!cropperInstance) return;
 
-        // Get canvas forced at small tile resolution for database protection!
+        // Adaptive Quality Strategy:
+        // 1. Get high-res crop first to preserve natural detail
+        const naturalData = cropperInstance.getData();
         const canvas = cropperInstance.getCroppedCanvas({
-            width: 128,
-            height: 128,
-            imageSmoothingEnabled: true,
+            // For tiny sources (pixel art), we avoid smoothing to keep it crisp
+            imageSmoothingEnabled: naturalData.width > 128,
             imageSmoothingQuality: 'high'
         });
 
@@ -891,11 +967,24 @@ function initStudioControls() {
             return;
         }
 
+        // 2. Final optimization to 128x128 with specialized interpolation
+        const finalCanvas = document.createElement('canvas');
+        finalCanvas.width = 128;
+        finalCanvas.height = 128;
+        const ctx = finalCanvas.getContext('2d');
+        if (ctx) {
+            // If the source was already near 128px, it's likely pixel art -> Nearest Neighbor
+            // If it was large, use high-quality Lanczos-like scaling
+            ctx.imageSmoothingEnabled = naturalData.width >= 128;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(canvas, 0, 0, 128, 128);
+        }
+
         // Generate visual UI preview
-        const dataUrl = canvas.toDataURL('image/png');
+        const dataUrl = finalCanvas.toDataURL('image/png');
         const cell = document.querySelector(`.tile-edit-cell[data-id="${selectedTileKey}"]`);
         if(cell) {
-            cell.querySelector('.tile-cell-img').src = dataUrl;
+            (cell.querySelector('.tile-cell-img') as HTMLImageElement).src = dataUrl;
             cell.classList.add('customized');
             if (!cell.querySelector('.customized-badge')) {
                 const b = document.createElement('div');
@@ -904,10 +993,9 @@ function initStudioControls() {
             }
         }
 
-        // Compress canvas to PNG Blob to minimize bandwidth and storage usage in database!
-        canvas.toBlob((blob) => {
+        // 3. Compress canvas to high-quality PNG Blob
+        finalCanvas.toBlob((blob) => {
             if (blob) {
-                // Store optimization result blob in dictionary
                 editedTileFiles[selectedTileKey] = blob;
             }
             cleanupAndCloseCrop();
