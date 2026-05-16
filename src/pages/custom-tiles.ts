@@ -698,6 +698,14 @@ function initStudioControls() {
         isRightDragging = false;
         isDraggingGrid = false;
         gridDragDistance = 0;
+        
+        // Reset mode and overlay state to prevent stuck "plus" cursor or blocked UI
+        currentCropMode = 'ghost';
+        if (gridOverlay) {
+            gridOverlay.style.pointerEvents = 'none';
+            gridOverlay.style.display = 'none';
+        }
+
         document.body.style.cursor = 'default';
         const container = document.querySelector('.cropper-container') as HTMLElement;
         if (container) container.style.cursor = '';
