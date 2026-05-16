@@ -334,7 +334,7 @@ async function initGlobalAuth() {
     if (session && session.user) {
         // === ПОЛЬЗОВАТЕЛЬ ВОШЕЛ ===
         const user = session.user;
-        const avatar = user.user_metadata.avatar_url || './Resources/Additional/Icons/Compass.webp';
+        const avatar = user.user_metadata.avatar_url || './Resources/Additional/Icons/compass.png';
         const name = user.user_metadata.full_name || 'User';
         
         // Сохраняем в локал для старого кода

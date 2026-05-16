@@ -104,7 +104,7 @@ function displayNextBatch() {
                 container.appendChild(card);
             })
             .catch(() => {
-                const card = createOwnerCard(map, 'Resources/Additional/Icons/Compass.webp');
+                const card = createOwnerCard(map, 'Resources/Additional/Icons/compass.png');
                 container.appendChild(card);
             });
     });
