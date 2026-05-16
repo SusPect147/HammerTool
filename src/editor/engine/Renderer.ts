@@ -787,7 +787,7 @@ export const RendererMixin = {
         this.selectionCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         // Selection highlight
-        const useRed = this.isErasing && this.selectionMode !== 'select';
+        const useRed = (this.isErasing || this.showErrors) && this.selectionMode !== 'select';
         this.selectionCtx.fillStyle = useRed ? 'rgba(255, 0, 0, 0.4)' : 'rgba(255, 255, 0, 0.4)';
 
         // If still drawing, show full rectangle/area as before

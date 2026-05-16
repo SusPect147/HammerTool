@@ -98,6 +98,7 @@ async saveMap() {
 
             // Robust author detection matching other site modules
             const author = user.user_metadata.full_name || user.user_metadata.display_name || user.user_metadata.name || 'Anonymous';
+            const isPublic = (document.getElementById('isPublicToggle') as HTMLInputElement)?.checked ?? true;
 
             let finalEnvironment = environment;
             const galleryToggle = document.getElementById('showThemeInGalleryToggle') as HTMLInputElement;
