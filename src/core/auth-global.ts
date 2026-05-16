@@ -107,6 +107,11 @@ window.getThemedAsset = function(standardPath, parentEnvironment = null, forceBy
             }
         } else {
             const isEditor = window.location.pathname.includes('editor.html');
+            const isStudio = window.location.pathname.includes('custom-tiles.html');
+
+            // Critical Isolation: Automatically bypass active themes in the Studio to prevent "infection" during creation
+            if (isStudio) return standardPath;
+
             const editorSkin = isEditor ? localStorage.getItem('editor_active_skin') : null;
             const activeThemesStr = localStorage.getItem('equipped_themes');
             
@@ -140,6 +145,24 @@ window.getThemedAsset = function(standardPath, parentEnvironment = null, forceBy
             return forcedPackId ? extractionPath : standardPath;
         }
         
+        // 1.5 ENVIRONMENT ISOLATION: Only apply Desert-based custom themes to Desert or Global assets.
+        // This prevents a "Jungle" or "Mine" environment from being "infected" by Desert-based custom textures.
+        const normalizedExt = extractionPath.replace(/\\/g, '/');
+        const isDesertAsset = normalizedExt.includes('/Desert/') || parentEnvironment === 'Desert';
+        const isGlobalAsset = normalizedExt.includes('/Global/') || 
+                             normalizedExt.includes('/Additional/') ||
+                             normalizedExt.includes('/Icons/') ||
+                             normalizedExt.endsWith('Unbreakable.png') ||
+                             normalizedExt.endsWith('HealPad.png') ||
+                             normalizedExt.endsWith('SpeedTile.png') ||
+                             normalizedExt.endsWith('SlowTile.png') ||
+                             normalizedExt.endsWith('Spikes.png');
+
+        // If we are NOT forcing a pack ID (via CUSTOM_ prefix in path) AND it's not a Desert/Global asset, abort.
+        if (!forcedPackId && !isDesertAsset && !isGlobalAsset) {
+            return standardPath;
+        }
+
         // 2. MATCHING ENGINE: Parse the extraction path to isolate asset key
         let assetKey = null;
         let isFloorDark = false;

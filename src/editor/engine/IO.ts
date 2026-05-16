@@ -442,7 +442,12 @@ async exportMap() {
         if (!includeTheme) window.cp_bypassTheme = true;
         
         try {
-            if (targetEnv !== originalEnv) {
+            if (targetEnv !== originalEnv || !includeTheme) {
+                // Purge caches to force the theme interceptor to re-evaluate with the new bypass state
+                this.tileImages = {};
+                this.tileImagePaths = {};
+                this.goalImageCache = {};
+
                 this.environment = targetEnv;
                 await this.loadTileImages();
                 await this.loadEnvironmentBackgrounds();
@@ -450,7 +455,11 @@ async exportMap() {
 
             const dataUrl = await this.createMapPNG();
 
-            if (targetEnv !== originalEnv) {
+            if (targetEnv !== originalEnv || !includeTheme) {
+                this.tileImages = {};
+                this.tileImagePaths = {};
+                this.goalImageCache = {};
+
                 this.environment = originalEnv;
                 await this.loadTileImages();
                 await this.loadEnvironmentBackgrounds();

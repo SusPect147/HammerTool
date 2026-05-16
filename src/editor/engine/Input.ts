@@ -16,9 +16,10 @@ export const InputMixin = {
         const guidesBtn = document.getElementById('guidesBtn');
 
         // Mirror checkboxes
-        const mirrorVertical = document.getElementById('mirrorVertical');
-        const mirrorHorizontal = document.getElementById('mirrorHorizontal');
         const mirrorDiagonal = document.getElementById('mirrorDiagonal');
+        const showThemeInDownloadToggle = document.getElementById('showThemeInDownloadToggle');
+        const showThemeInGalleryToggle = document.getElementById('showThemeInGalleryToggle');
+        const isPublicToggle = document.getElementById('isPublicToggle');
         // const hideZoom = document.getElementById('hideZoomBtn'); // Removed
 
         // Map settings
@@ -73,6 +74,20 @@ export const InputMixin = {
         if (mirrorVertical) mirrorVertical.addEventListener('change', (e) => this.mirrorVertical = e.target.checked);
         if (mirrorHorizontal) mirrorHorizontal.addEventListener('change', (e) => this.mirrorHorizontal = e.target.checked);
         if (mirrorDiagonal) mirrorDiagonal.addEventListener('change', (e) => this.mirrorDiagonal = e.target.checked);
+
+        // Theme and Export setting listeners
+        if (showThemeInDownloadToggle) {
+            showThemeInDownloadToggle.addEventListener('change', (e) => {
+                window.cp_bypassTheme = !e.target.checked;
+                // Force cache purge and reload to show/hide theme in real-time
+                this.tileImages = {};
+                this.tileImagePaths = {};
+                this.goalImageCache = {};
+                this.loadTileImages();
+                this.loadEnvironmentBackgrounds();
+                this.draw();
+            });
+        }
         // if (hideZoom) hideZoom.addEventListener('change', () => this.toggleHideZoom()); // Removed
 
         // Map setting listeners
