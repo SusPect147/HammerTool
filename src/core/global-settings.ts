@@ -1,6 +1,6 @@
 // @ts-nocheck
 /**
- * HammerTool — Global Visual Themes & Localization Engine
+ * Compass — Global Visual Themes & Localization Engine
  * Injects controls, manages state, monkey-patches Canvas contexts, and handles i18n.
  */
 
@@ -79,7 +79,7 @@ const TRANSLATIONS = {
         'NOT AFFILIATED WITH SUPERCELL': 'НЕ СВЯЗАНО С SUPERCELL',
         'Area Select Tools:': 'Инструменты выделения:',
         '🌍 Public': '🌍 Публичная',
-        'The best map-making tool.': '<span class="accent">Лучший</span> молоток<br>создания карт.',
+        'The best map-making tool.': '<span class="accent">Лучший</span> инструмент<br>создания карт.',
         'Precision tile editor with 50+ environments, smart mirroring, real-time error detection, and every game mode supported. Build maps that dominate the competition.': 'Точный редактор плиток, 50+ окружений, зеркалирование, детекция ошибок и поддержка всех игровых режимов.',
         'Create, rate, win!': 'Создавай, оценивай,<br><span class="accent">побеждай!</span>',
         'Design your dream map, share it with the community, and climb to the top. Integrated gallery, one-click export, and powerful editing tools - all in your browser.': 'Спроектируйте карту мечты, делитесь ей с сообществом и поднимайтесь вверх. Встроенная галерея и экспорт в один клик.',
@@ -240,13 +240,35 @@ const TRANSLATIONS = {
         'Free Form': 'Свободно',
 
         // SIZES
-        'Regular': 'Обычный'
+        'Regular': 'Обычный',
+        'Showdown': 'Шоудаун',
+        'Brawl Arena': 'Арена',
+        'Siege': 'Осада',
+        'Volley Brawl': 'Волейбой',
+        'Basket Brawl': 'Баскетбой',
+
+        // EDITOR TOGGLES
+        'Show Theme in Gallery': 'Показывать тему в галерее',
+        'Include Theme in PNG': 'Включать тему в PNG',
+        'Show your custom theme to others in the gallery': 'Показывать вашу кастомную тему другим в галерее',
+        'Include custom theme assets when downloading the map image': 'Включать кастомные ассеты при скачивании карты',
+        'Public': 'Публичная',
+        'Private': 'Приватная',
+
+        // GALLERY FILTERS
+        'Search maps by name...': 'Поиск карт по названию...',
+        'All Gamemodes': 'Все режимы',
+        'All Environments': 'Все окружения',
+        'All Sizes': 'Все размеры',
+        'Sort By...': 'Сортировать...',
+        'Best Rating': 'Лучший рейтинг',
+        'Most Votes': 'Больше голосов'
     }
 };
 
 // 🌍 GLOBAL TRANSLATE HELPER (For Dynamic JavaScript Strings!)
-window.ht_translate = function (key) {
-    const currentLang = localStorage.getItem('ht_app_lang') || 'en';
+window.cp_translate = function (key) {
+    const currentLang = localStorage.getItem('cp_app_lang') || 'en';
     if (currentLang === 'en') return key;
     const dict = TRANSLATIONS[currentLang];
     return (dict && dict[key]) ? dict[key] : key;
@@ -506,8 +528,8 @@ function translateDOM(lang) {
 
 // ⚙️ UI & SETTINGS CORE
 export function initializeGlobalSettings() {
-    const currentTheme = localStorage.getItem('ht_app_theme') || 'space';
-    const currentLang = localStorage.getItem('ht_app_lang') || 'en';
+    const currentTheme = localStorage.getItem('cp_app_theme') || 'space';
+    const currentLang = localStorage.getItem('cp_app_lang') || 'en';
 
     // 1. Set up initial theme
     if (currentTheme !== 'space') {
@@ -910,7 +932,7 @@ function injectSettingsUI(activeTheme, activeLang) {
             dropdown.querySelectorAll('.theme-pill-btn').forEach(r => r.classList.remove('active'));
             rowBtn.classList.add('active');
 
-            localStorage.setItem('ht_app_theme', selected);
+            localStorage.setItem('cp_app_theme', selected);
 
             if (selected === 'space') {
                 document.documentElement.removeAttribute('data-theme');
@@ -931,7 +953,7 @@ function injectSettingsUI(activeTheme, activeLang) {
     dropdown.querySelectorAll('.lang-btn[data-lang]').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const selected = btn.getAttribute('data-lang');
-            localStorage.setItem('ht_app_lang', selected);
+            localStorage.setItem('cp_app_lang', selected);
             window.location.reload(); // Clean refresh to re-translate and apply
         });
     });

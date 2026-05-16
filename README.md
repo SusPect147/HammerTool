@@ -1,7 +1,7 @@
 <div align="center">
-  <img src="Resources/Additional/Icons/HammerTool.webp" alt="HammerTool Logo" width="120"/>
+  <img src="Resources/Additional/Icons/Compass.webp" alt="Compass Logo" width="120"/>
   
-  # HammerTool
+  # Compass
   
   **A next-generation Interactive Map Editor & Skin Studio.**
   
@@ -15,7 +15,7 @@
 
 ## ✨ Overview
 
-**HammerTool** delivers a premium, state-of-the-art visual experience for building, sharing, and styling custom map layouts. Featuring a gorgeous **Neon Midnight** glassmorphism UI, dynamic particle backgrounds, and a complete marketplace for custom tile textures, it serves as a next-gen toolkit for map creators.
+**Compass** delivers a premium, state-of-the-art visual experience for building, sharing, and styling custom map layouts. Featuring a gorgeous **Neon Midnight** glassmorphism UI, dynamic particle backgrounds, and a complete marketplace for custom tile textures, it serves as a next-gen toolkit for map creators.
 
 ## 🚀 Key Features
 
@@ -47,7 +47,7 @@
 > **Design & Code Inspiration:**
 > The core design and UX concepts of this map maker—specifically the **editor layout, tile handling logic, and UI flow**—were inspired by **[atlas-horizon](https://github.com/She-Fairy/atlas-horizon)**, a project by **[She-Fairy](https://github.com/She-Fairy)**. Some **PNG tile textures** were also sourced directly from that repository.
 >
-> Additionally, as a solo developer inspired by the elegant solutions in that project, **some code fragments** in HammerTool may bear resemblance to those in `atlas-horizon`. These similarities stem from creative inspiration, learning, and adaptation—not from direct copying. All original rights to the referenced design concepts, assets, and code belong to their respective author.
+> Additionally, as a solo developer inspired by the elegant solutions in that project, **some code fragments** in Compass may bear resemblance to those in `atlas-horizon`. These similarities stem from creative inspiration, learning, and adaptation—not from direct copying. All original rights to the referenced design concepts, assets, and code belong to their respective author.
 >
 > Big thanks to **She-Fairy** for creating such an inspiring project and pushing the boundaries of community tools! 🙌
 

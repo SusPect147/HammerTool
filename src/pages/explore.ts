@@ -15,7 +15,7 @@ injectPremiumCardStyles();
 async function initializeGallery() {
     try {
         const loadingMsg = document.getElementById('mapsGrid');
-        if (loadingMsg) loadingMsg.innerHTML = `<div style="padding: 2rem; text-align:center; opacity:0.7;">${window.ht_translate('Connecting to database...')}</div>`;
+        if (loadingMsg) loadingMsg.innerHTML = `<div style="padding: 2rem; text-align:center; opacity:0.7;">${window.cp_translate('Connecting to database...')}</div>`;
 
         // 1. Получаем текущего пользователя для учета лайков
         const { data: { session } } = await supabase.auth.getSession();
@@ -53,11 +53,11 @@ async function initializeGallery() {
         
     } catch (err) {
         console.error('Error loading gallery:', err);
-        showEmptyState(window.ht_translate('Error connecting to secure database.'));
+        showEmptyState(window.cp_translate('Error connecting to secure database.'));
     }
 }
 
-function showEmptyState(msg = window.ht_translate('No public maps found.')) {
+function showEmptyState(msg = window.cp_translate('No public maps found.')) {
     const container = document.getElementById('mapsGrid');
     if (!container) return;
     container.innerHTML = `
@@ -96,7 +96,7 @@ function applyFilters() {
     if (container) container.innerHTML = '';
 
     if (filteredMaps.length === 0) {
-        showEmptyState(window.ht_translate('No matching maps found.'));
+        showEmptyState(window.cp_translate('No matching maps found.'));
     } else {
         displayNextBatch();
     }
@@ -133,12 +133,13 @@ async function displayNextBatch() {
                 task.map.map_data, 
                 task.map.size, 
                 task.map.gamemode, 
-                task.map.environment
+                task.map.environment,
+                task.map.theme_options
             );
             task.img.src = pngDataUrl;
             task.img.style.opacity = '1';
         } catch (error) {
-            console.warn("[HammerTool] Skipping dynamic card visual render:", error);
+            console.warn("[Compass] Skipping dynamic card visual render:", error);
             task.img.style.opacity = '1';
         }
     }
@@ -166,12 +167,12 @@ function createPremiumCard(map, image) {
     card.innerHTML = `
         <div class="card-image-wrapper" onclick="window.location.href = './view.html?id=${encodeURIComponent(map.id)}'">
             <img src="${image}" alt="Map" loading="lazy">
-            <div class="card-overlay"><span>${window.ht_translate('View Map')}</span></div>
+            <div class="card-overlay"><span>${window.cp_translate('View Map')}</span></div>
         </div>
         <div class="card-content">
             <div class="card-meta">
                 <h3 class="card-title">${safeName}</h3>
-                <p class="card-author">${window.ht_translate('by')} ${safeAuthor}</p>
+                <p class="card-author">${window.cp_translate('by')} ${safeAuthor}</p>
             </div>
             <div class="card-actions">
                 <button class="like-btn ${isLiked ? 'liked' : ''}" data-id="${map.id}">
@@ -196,7 +197,7 @@ function createPremiumCard(map, image) {
 
 async function toggleLike(mapId, buttonElement) {
     if (!currentUserId) {
-        alert(window.ht_translate("⚠️ Please Sign in with Discord to like maps!"));
+        alert(window.cp_translate("⚠️ Please Sign in with Discord to like maps!"));
         return;
     }
 
@@ -250,7 +251,7 @@ function updateLoadMoreButton() {
 
     if (displayedCount < filteredMaps.length) {
         const btn = document.createElement('button');
-        btn.textContent = window.ht_translate('Load More');
+        btn.textContent = window.cp_translate('Load More');
         btn.classList.add('load-more-btn');
         btn.onclick = displayNextBatch;
         loadMoreContainer.appendChild(btn);

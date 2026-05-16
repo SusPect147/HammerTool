@@ -16,11 +16,17 @@ const sharedResources = {
 };
 
 export async function drawStaticMapPreview(mapData, size = 'regular', gamemode = 'Gem_Grab', environment = 'Desert', themeOptions = null) {
-  // Prefetch theme configuration from database if rendering a shared custom-skinned map!
-  if (typeof environment === 'string' && environment.startsWith('CUSTOM_') && typeof window.ensureThemeLoaded === 'function') {
-    const packId = environment.replace('CUSTOM_', '');
-    await window.ensureThemeLoaded(packId, themeOptions);
-  }
+  // Bypass the global theme interceptor to ensure we see the base reference or author's theme only!
+  window.cp_bypassTheme = true;
+  
+  try {
+    // Prefetch theme configuration from database if rendering a shared custom-skinned map!
+    if (typeof environment === 'string' && environment.startsWith('CUSTOM_') && typeof window.ensureThemeLoaded === 'function') {
+      const packId = environment.replace('CUSTOM_', '');
+      // If ensureThemeLoaded returns a theme, we temporarily re-enable the interceptor for its resources!
+      const loadedTheme = await window.ensureThemeLoaded(packId, themeOptions);
+      if (loadedTheme) window.cp_bypassTheme = false;
+    }
 
   // Get actual map dimensions from mapData
   // CRITICAL: mapData structure is mapData[layer][y][x]
@@ -257,7 +263,10 @@ export async function drawStaticMapPreview(mapData, size = 'regular', gamemode =
     );
   }
 
-  return canvas.toDataURL('image/png');
+    return canvas.toDataURL('image/png');
+  } finally {
+    window.cp_bypassTheme = false;
+  }
 }
 
 function waitForImage(img) {

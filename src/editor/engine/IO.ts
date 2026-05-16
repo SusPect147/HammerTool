@@ -13,7 +13,7 @@ async loadMap(mapId) {
             if (error) throw error;
             if (!data) throw new Error('Map not found');
 
-            console.log(`[HammerTool] Successfully loaded map details for ID: ${mapId}`);
+            console.log(`[Compass] Successfully loaded map details for ID: ${mapId}`);
 
             const { data: { user } } = await supabase.auth.getUser();
             const urlParams = new URLSearchParams(window.location.search);
@@ -22,7 +22,7 @@ async loadMap(mapId) {
             // 1. Configure UI values
             const nameInput = document.getElementById('mapName');
             if (isDirectEdit && user && data.user_id === user.id) {
-                console.info(`[HammerTool] Activating DIRECT EDIT mode on loaded map ID: ${mapId}`);
+                console.info(`[Compass] Activating DIRECT EDIT mode on loaded map ID: ${mapId}`);
                 this.loadedMapId = mapId;
                 if (nameInput) nameInput.value = data.name || 'Untitled Map';
             } else {
@@ -77,8 +77,8 @@ async loadMap(mapId) {
             });
 
         } catch (error) {
-            console.error('[HammerTool] Critical failure loading map payload:', error);
-            alert(`${window.ht_translate('❌ Critical Failure: Could not retrieve map from secure database!')} (${error.message})`);
+            console.error('[Compass] Critical failure loading map payload:', error);
+            alert(`${window.cp_translate('❌ Critical Failure: Could not retrieve map from secure database!')} (${error.message})`);
         }
     },
 
@@ -87,7 +87,7 @@ async saveMap() {
             const { data: { user }, error: userError } = await supabase.auth.getUser();
             
             if (userError || !user) {
-                alert(window.ht_translate("❌ You must be logged in with Discord to save maps! Go to the Home page to log in."));
+                alert(window.cp_translate("❌ You must be logged in with Discord to save maps! Go to the Home page to log in."));
                 return;
             }
 
@@ -103,10 +103,9 @@ async saveMap() {
             const galleryToggle = document.getElementById('showThemeInGalleryToggle') as HTMLInputElement;
             const galleryEnabled = galleryToggle?.checked ?? true;
 
-            // Logic: If custom theme is disabled for gallery, prompt for a standard fallback environment
+            // Logic: If custom theme is disabled for gallery, fall back to Desert automatically
             if (!galleryEnabled && environment.startsWith('CUSTOM_')) {
-                const fallback = prompt(window.ht_translate('Select a standard environment for gallery preview:') + "\n(Desert, Wasteland, Mine, Grassy_Field, Mortuary, etc.)", "Desert");
-                if (fallback) finalEnvironment = fallback;
+                finalEnvironment = 'Desert';
             }
 
             const payload = { 
@@ -126,7 +125,7 @@ async saveMap() {
 
             let savedMapId = null;
             if (this.loadedMapId) {
-                console.info(`[HammerTool] Attempting database UPDATE on existing Map ID: ${this.loadedMapId}`);
+                console.info(`[Compass] Attempting database UPDATE on existing Map ID: ${this.loadedMapId}`);
                 const { error } = await supabase
                     .from('maps')
                     .update(payload)
@@ -136,7 +135,7 @@ async saveMap() {
                 if (error) throw error;
                 savedMapId = this.loadedMapId;
             } else {
-                console.info(`[HammerTool] Attempting database INSERT for new map clone.`);
+                console.info(`[Compass] Attempting database INSERT for new map clone.`);
                 // Standardizing to .single() and selecting only 'id' to minimize payload and avoid RLS/PostgREST 400 issues with large columns
                 const { data, error } = await supabase
                     .from('maps')
@@ -155,9 +154,9 @@ async saveMap() {
                 mapLinkElement.href = `${currentLoc}?id=${savedMapId}`;
             }
 
-            alert(this.loadedMapId ? window.ht_translate('Map updated successfully in secure database!') : window.ht_translate('Map saved successfully to Supabase database!'));
+            alert(this.loadedMapId ? window.cp_translate('Map updated successfully in secure database!') : window.cp_translate('Map saved successfully to Supabase database!'));
         } catch (error) {
-            console.error('[HammerTool] Error saving map:', error);
+            console.error('[Compass] Error saving map:', error);
             let errorMessage = error.message || 'Unknown error';
             let detail = error.details || error.hint || '';
             
@@ -166,7 +165,7 @@ async saveMap() {
                 detail += ' | HINT: Please add the "theme_options" JSONB column to your Supabase "maps" table.';
             }
 
-            alert(`${window.ht_translate('Failed to save map:')} ${errorMessage}${detail ? '\n\nDetails: ' + detail : ''}`);
+            alert(`${window.cp_translate('Failed to save map:')} ${errorMessage}${detail ? '\n\nDetails: ' + detail : ''}`);
         }
     },
 
@@ -434,28 +433,34 @@ async exportMap() {
         let targetEnv = this.environment;
 
         // Handle disabled theme download
+        // If theme is disabled and we have a custom theme environment, fall back to Desert automatically for clean exports
         if (!includeTheme && targetEnv.startsWith('CUSTOM_')) {
-            const fallback = prompt(window.ht_translate('Select a standard environment for the PNG image:') + "\n(Desert, Wasteland, Mine, Grassy_Field, Mortuary, etc.)", "Desert");
-            targetEnv = fallback || "Desert";
+            targetEnv = "Desert";
         }
 
-        if (targetEnv !== originalEnv) {
-            this.environment = targetEnv;
-            await this.loadTileImages();
-            await this.loadEnvironmentBackgrounds();
+        if (!includeTheme) window.cp_bypassTheme = true;
+        
+        try {
+            if (targetEnv !== originalEnv) {
+                this.environment = targetEnv;
+                await this.loadTileImages();
+                await this.loadEnvironmentBackgrounds();
+            }
+
+            const dataUrl = await this.createMapPNG();
+
+            if (targetEnv !== originalEnv) {
+                this.environment = originalEnv;
+                await this.loadTileImages();
+                await this.loadEnvironmentBackgrounds();
+            }
+
+            const link = document.createElement('a');
+            link.download = `${mapName}.png`;
+            link.href = dataUrl;
+            link.click();
+        } finally {
+            window.cp_bypassTheme = false;
         }
-
-        const dataUrl = await this.createMapPNG();
-
-        if (targetEnv !== originalEnv) {
-            this.environment = originalEnv;
-            await this.loadTileImages();
-            await this.loadEnvironmentBackgrounds();
-        }
-
-        const link = document.createElement('a');
-        link.download = `${mapName}.png`;
-        link.href = dataUrl;
-        link.click();
     }
 };

@@ -192,7 +192,7 @@ function triggerEquipPrompt(pack) {
         const keys = Object.keys(data);
         
         if (keys.length === 0) {
-            gridDisplay.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:2rem; opacity:0.5;">${window.ht_translate('No customized tiles in this pack.')}</div>`;
+            gridDisplay.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:2rem; opacity:0.5;">${window.cp_translate('No customized tiles in this pack.')}</div>`;
         } else {
             keys.forEach(k => {
                 const src = data[k];
@@ -214,12 +214,12 @@ function triggerEquipPrompt(pack) {
     // Tweak confirmation button states based on active equipping stack
     if (confirmBtn) {
         if (isAlreadyEquipped) {
-            confirmBtn.textContent = window.ht_translate('Equipped');
+            confirmBtn.textContent = window.cp_translate('Equipped');
             confirmBtn.disabled = true;
             confirmBtn.style.opacity = "0.5";
             confirmBtn.style.cursor = "default";
         } else {
-            confirmBtn.textContent = window.ht_translate('Equip Theme');
+            confirmBtn.textContent = window.cp_translate('Equip Theme');
             confirmBtn.disabled = false;
             confirmBtn.style.opacity = "";
             confirmBtn.style.cursor = "";
@@ -550,7 +550,7 @@ async function togglePrivacy(packId, isCurrentlyPublic, button) {
         
     } catch (e) {
         console.error("Privacy patch failed:", e);
-        alert(window.ht_translate("Failed to update privacy settings."));
+        alert(window.cp_translate("Failed to update privacy settings."));
         button.disabled = false;
     }
 }
@@ -603,12 +603,12 @@ async function handleDeletePack(packId, packName, button) {
             }
         } catch(e) { console.warn("LocalStorage clean failed", e); }
 
-        alert(`${window.ht_translate('✅ Tile pack')} "${packName}" ${window.ht_translate('has been successfully deleted!')}`);
+        alert(`${window.cp_translate('✅ Tile pack')} "${packName}" ${window.cp_translate('has been successfully deleted!')}`);
         await loadPacks(); // Fully reload listings silently
         
     } catch (err) {
         console.error("Failed to delete pack:", err);
-        alert(`${window.ht_translate('❌ Delete operation failed:')} ${err.message}`);
+        alert(`${window.cp_translate('❌ Delete operation failed:')} ${err.message}`);
         button.disabled = false;
         button.textContent = orig;
     }
@@ -619,7 +619,7 @@ async function handleDeletePack(packId, packName, button) {
  */
 async function handleLikeClick(packId, button) {
     if (!currentUserId) {
-        alert(window.ht_translate('Please sign in to like tile packs!'));
+        alert(window.cp_translate('Please sign in to like tile packs!'));
         return;
     }
     
@@ -719,7 +719,7 @@ function initStudioControls() {
     if (openBtn) {
         openBtn.onclick = () => {
             if (!currentUserId) {
-                alert(window.ht_translate("Please sign in via Discord to create custom tile packs!"));
+                alert(window.cp_translate("Please sign in via Discord to create custom tile packs!"));
                 return;
             }
             resetStudio();
@@ -913,7 +913,7 @@ function initStudioControls() {
         if (!file || !selectedTileKey) return;
         
         if (file.size > 5 * 1024 * 1024) {
-            alert(window.ht_translate("Original file size too large! Max limit 5MB."));
+            alert(window.cp_translate("Original file size too large! Max limit 5MB."));
             return;
         }
         
@@ -1054,13 +1054,13 @@ function renderStudioPresets() {
 async function handleStudioSubmit() {
     const nameInput = (document.getElementById('packNameInput') as HTMLInputElement).value.trim();
     if(!nameInput) {
-        alert(window.ht_translate('Please give your Tile Pack a name!'));
+        alert(window.cp_translate('Please give your Tile Pack a name!'));
         return;
     }
     
     const modifiedCount = Object.keys(editedTileFiles).length;
     if(modifiedCount === 0) {
-        alert(window.ht_translate('Customize at least one tile before saving!'));
+        alert(window.cp_translate('Customize at least one tile before saving!'));
         return;
     }
     
@@ -1124,12 +1124,12 @@ async function handleStudioSubmit() {
         loader.classList.remove('active');
         document.getElementById('studioModal').classList.remove('active');
         
-        alert(window.ht_translate('Tile Pack safely deployed and published! ✨'));
+        alert(window.cp_translate('Tile Pack safely deployed and published! ✨'));
         await (window as any).loadPacks();
         
     } catch (err) {
         console.error("Publishing failed:", err);
-        alert(`${window.ht_translate('Deployment failed. Verify your internet or Supabase SQL script implementation! Details:')} ${err.message || err}`);
+        alert(`${window.cp_translate('Deployment failed. Verify your internet or Supabase SQL script implementation! Details:')} ${err.message || err}`);
     } finally {
         // Restore interactivity and clean overlay
         loader.classList.remove('active');

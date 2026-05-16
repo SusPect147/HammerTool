@@ -108,11 +108,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 
                             if (error) throw error;
                             
-                            alert(window.ht_translate("✅ Map deleted successfully!"));
+                            alert(window.cp_translate("✅ Map deleted successfully!"));
                             window.location.href = "./dashboard.html";
                         } catch (deleteErr) {
                             console.error("Delete failed:", deleteErr);
-                            alert(window.ht_translate("❌ Failed to delete map:") + " " + deleteErr.message);
+                            alert(window.cp_translate("❌ Failed to delete map:") + " " + deleteErr.message);
                             deleteBtn.disabled = false;
                         }
                     }
@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (likeBtn) {
             likeBtn.onclick = async () => {
                 if (!currentUserId) {
-                    alert(window.ht_translate("⚠️ Please log in with Discord to like maps!"));
+                    alert(window.cp_translate("⚠️ Please log in with Discord to like maps!"));
                     return;
                 }
                 likeBtn.disabled = true;
@@ -249,7 +249,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         shareBtn.style.color = '';
                     }, 2000);
                 } catch (e) {
-                    alert(window.ht_translate('Link:') + ' ' + window.location.href);
+                    alert(window.cp_translate('Link:') + ' ' + window.location.href);
                 }
             };
         }
@@ -495,7 +495,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Robust Comment Voting Logic (Fixes 409 unique constraint violation!)
         async function handleVoteComment(commentId, voteType) {
             if (!currentUserId) {
-                alert(window.ht_translate("⚠️ Please sign in via Discord to vote on comments!"));
+                alert(window.cp_translate("⚠️ Please sign in via Discord to vote on comments!"));
                 return;
             }
 
@@ -543,7 +543,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             } catch (err) {
                 console.error("Comment vote error:", err);
-                alert(window.ht_translate("Failed to cast vote:") + " " + err.message);
+                alert(window.cp_translate("Failed to cast vote:") + " " + err.message);
             }
         }
 
@@ -561,7 +561,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await loadComments();
             } catch (err) {
                 console.error(err);
-                alert(window.ht_translate("Delete failed:") + " " + err.message);
+                alert(window.cp_translate("Delete failed:") + " " + err.message);
             }
         }
 
@@ -612,7 +612,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (!content) return;
 
                 if (content.length > 2500) {
-                    alert(window.ht_translate("Comment too long! Max 2500 characters allowed."));
+                    alert(window.cp_translate("Comment too long! Max 2500 characters allowed."));
                     return;
                 }
 
@@ -664,7 +664,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 } catch (err) {
                     console.error(err);
-                    alert(window.ht_translate("Failed to post comment:") + " " + err.message);
+                    alert(window.cp_translate("Failed to post comment:") + " " + err.message);
                 } finally {
                     submitBtn.disabled = false;
                     submitBtn.innerText = oldText;

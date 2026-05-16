@@ -1,6 +1,6 @@
 // @ts-nocheck
 /**
- * HammerTool MapEditor - Configuration Constants and Defs
+ * Compass MapEditor - Configuration Constants and Defs
  */
 
 export const FENCE_LOGIC_TYPES = {

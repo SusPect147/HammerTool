@@ -290,12 +290,12 @@ if (targetCanvas) {
     const mapId = urlParams.get('id');
 
     window.mapEditor = new MapEditor('mapCanvas', false, !!mapId);
-    console.info('[HammerTool] Clean Modularized MapEditor initialized successfully.');
+    console.info('[Compass] Clean Modularized MapEditor initialized successfully.');
     
     if (mapId) {
-        console.info(`[HammerTool] Initiating auto-load routine for shared Map ID: ${mapId}`);
+        console.info(`[Compass] Initiating auto-load routine for shared Map ID: ${mapId}`);
         window.mapEditor.loadMap(mapId);
     }
 } else {
-    console.debug('[HammerTool] Skipped MapEditor constructor (running headless for renderer).');
+    console.debug('[Compass] Skipped MapEditor constructor (running headless for renderer).');
 }

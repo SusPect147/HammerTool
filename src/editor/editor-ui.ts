@@ -185,15 +185,15 @@
     if (hideBtn && showBtn) {
         hideBtn.onclick = () => {
             document.body.classList.add('top-bar-hidden');
-            localStorage.setItem('ht_topbar_hidden', 'true');
+            localStorage.setItem('cp_topbar_hidden', 'true');
         };
         
         showBtn.onclick = () => {
             document.body.classList.remove('top-bar-hidden');
-            localStorage.removeItem('ht_topbar_hidden');
+            localStorage.removeItem('cp_topbar_hidden');
         };
         
-        if (localStorage.getItem('ht_topbar_hidden') === 'true') {
+        if (localStorage.getItem('cp_topbar_hidden') === 'true') {
             document.body.classList.add('top-bar-hidden');
         }
     }

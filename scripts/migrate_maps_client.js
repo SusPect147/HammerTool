@@ -1,4 +1,4 @@
-﻿// Client-side one-off migration script
+// Client-side one-off migration script
 // How to use: open the mapmaker page while logged in (so `window.mapMaker` exists),
 // paste this file's contents into the browser console (or include it in the page),
 // then call `runMigration()`.
@@ -48,7 +48,7 @@
 
     // If oldGrid already has different orientation, try to normalise
     if (!oldGrid || !Array.isArray(oldGrid) || oldGrid.length !== height) {
-      // try to transpose or fallback вЂ” but keep original in layer 2
+      // try to transpose or fallback — but keep original in layer 2
       newMap[defaultTileLayer] = JSON.parse(JSON.stringify(oldGrid));
       return newMap;
     }
@@ -95,7 +95,7 @@
         });
         console.log('Derived tile layer map from window.mapMaker, entries:', Object.keys(tileLayerMap).length);
       } else {
-        console.warn('window.mapMaker.tileDefinitions not found вЂ” conversion will not relocate tiles to their designated layers. Run this on the mapmaker page for full relocation.');
+        console.warn('window.mapMaker.tileDefinitions not found — conversion will not relocate tiles to their designated layers. Run this on the mapmaker page for full relocation.');
       }
 
       const users = await window.Firebase.readDataOnce('users');

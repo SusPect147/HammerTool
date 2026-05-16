@@ -222,6 +222,12 @@ window.getThemedAsset = function(standardPath, parentEnvironment = null) {
             
             // Only inspect valid asset string strings (skipping external URLs, base64 payloads, blobs)
             if (typeof value === 'string' && value.length > 3 && !value.startsWith('data:') && !value.startsWith('blob:') && !value.startsWith('http')) {
+                // EXEMPTION: Respect explicit data-no-theme flag or global bypass to ensure base references!
+                if (this.dataset.noTheme === 'true' || window.cp_bypassTheme) {
+                    originalSrcDescriptor.set.call(this, value);
+                    return;
+                }
+
                 // Pass parent environment context to the interceptor to secure biome boundaries!
                 processedVal = window.getThemedAsset(value, this.parentEnvironment);
             }
@@ -269,10 +275,10 @@ function activateBanOverlay(reason) {
         overlay.id = 'banOverlay';
         overlay.innerHTML = `
             <div class="ban-skull">☠️</div>
-            <div class="ban-title">${window.ht_translate('Oops, Access Denied')}</div>
-            <div style="font-size: 1.2rem; margin-bottom: 1rem;">${window.ht_translate('It seems you are on the blacklist.')}</div>
+            <div class="ban-title">${window.cp_translate('Oops, Access Denied')}</div>
+            <div style="font-size: 1.2rem; margin-bottom: 1rem;">${window.cp_translate('It seems you are on the blacklist.')}</div>
             <div class="ban-reason-box">
-                <strong>${window.ht_translate('Reason from the Great Hammer147:')}</strong><br><br>
+                <strong>${window.cp_translate('Reason from the Great Hammer147:')}</strong><br><br>
                 "${reason}"
             </div>
         `;
@@ -281,8 +287,8 @@ function activateBanOverlay(reason) {
     }
     document.body.style.overflow = 'hidden';
     document.body.style.pointerEvents = 'none'; 
-    localStorage.setItem('ht_system_ban_marker', 'active');
-    localStorage.setItem('ht_system_ban_reason', reason);
+    localStorage.setItem('cp_system_ban_marker', 'active');
+    localStorage.setItem('cp_system_ban_reason', reason);
     throw new Error("ACCES_DENIED_BY_BLACKLIST");
 }
 
@@ -291,9 +297,9 @@ function activateBanOverlay(reason) {
  */
 async function initGlobalAuth() {
     // 0. PERSISTENT LOCAL STORAGE TRAP (Fastest check)
-    const storedBan = localStorage.getItem('ht_system_ban_marker');
+    const storedBan = localStorage.getItem('cp_system_ban_marker');
     if (storedBan === 'active') {
-        activateBanOverlay(localStorage.getItem('ht_system_ban_reason') || "Device ban.");
+        activateBanOverlay(localStorage.getItem('cp_system_ban_reason') || "Device ban.");
     }
 
     // 1. Calculate current device fingerprint
@@ -340,7 +346,7 @@ async function initGlobalAuth() {
     if (session && session.user) {
         // === ПОЛЬЗОВАТЕЛЬ ВОШЕЛ ===
         const user = session.user;
-        const avatar = user.user_metadata.avatar_url || './Resources/Additional/Icons/HammerTool.webp';
+        const avatar = user.user_metadata.avatar_url || './Resources/Additional/Icons/Compass.webp';
         const name = user.user_metadata.full_name || 'User';
         
         // Сохраняем в локал для старого кода
@@ -369,7 +375,7 @@ async function initGlobalAuth() {
                 <img src="${avatar}" alt="PFP" class="user-pic">
                 <span class="user-name">${safeName}</span>
             </div>
-            <a href="#" class="user-logout-btn" title="${window.ht_translate('Log Out')}">
+            <a href="#" class="user-logout-btn" title="${window.cp_translate('Log Out')}">
                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
             </a>
         `;
@@ -420,7 +426,7 @@ async function initGlobalAuth() {
             profileStub.className = "login-menu-btn";
             profileStub.style.opacity = "0.4";
             profileStub.style.cursor = "default";
-            profileStub.innerHTML = window.ht_translate("Profile");
+            profileStub.innerHTML = window.cp_translate("Profile");
             profileStub.onclick = (e) => e.preventDefault(); // Ничего не делает!
             navContainer.appendChild(profileStub);
         }

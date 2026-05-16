@@ -13,12 +13,12 @@ injectPremiumCardStyles();
 async function loadMyMaps() {
     try {
         const grid = document.getElementById('mapsGrid');
-        if (grid) grid.innerHTML = `<div style="padding:2rem; text-align:center; opacity:0.7;">${window.ht_translate('Accessing your vault...')}</div>`;
+        if (grid) grid.innerHTML = `<div style="padding:2rem; text-align:center; opacity:0.7;">${window.cp_translate('Accessing your vault...')}</div>`;
 
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session || !session.user) {
-            showEmptyState(window.ht_translate('Please sign in via Discord to view your private maps.'), '🔒');
+            showEmptyState(window.cp_translate('Please sign in via Discord to view your private maps.'), '🔒');
             return;
         }
         currentUserId = session.user.id;
@@ -51,18 +51,18 @@ async function loadMyMaps() {
 
     } catch (err) {
         console.error('Error loading your maps:', err);
-        showEmptyState(window.ht_translate('Connection lost.'), '📡');
+        showEmptyState(window.cp_translate('Connection lost.'), '📡');
     }
 }
 
-function showEmptyState(msg = window.ht_translate('You have not saved any maps yet.'), icon = '🗺️') {
+function showEmptyState(msg = window.cp_translate('You have not saved any maps yet.'), icon = '🗺️') {
     const container = document.getElementById('mapsGrid');
     if (!container) return;
     container.innerHTML = `
         <div style="grid-column: 1/-1; text-align:center; padding: 5rem 1rem; opacity:0.6;">
             <div style="font-size: 2.5rem; margin-bottom: 1.2rem; opacity:0.6;">${icon}</div>
             <p style="font-size:1.1rem; margin-bottom:0.5rem; font-weight: 600;">${msg}</p>
-            <p style="font-size:0.85rem;">${window.ht_translate('Start building in the Map Maker to fill your gallery.')}</p>
+            <p style="font-size:0.85rem;">${window.cp_translate('Start building in the Map Maker to fill your gallery.')}</p>
         </div>`;
 }
 
@@ -85,7 +85,7 @@ function applyFilters() {
     if (grid) grid.innerHTML = '';
 
     if (filteredMaps.length === 0) {
-        showEmptyState(allMaps.length > 0 ? window.ht_translate('No matches found in your storage.') : undefined);
+        showEmptyState(allMaps.length > 0 ? window.cp_translate('No matches found in your storage.') : undefined);
     } else {
         displayNextBatch();
     }
@@ -104,7 +104,7 @@ function displayNextBatch() {
                 container.appendChild(card);
             })
             .catch(() => {
-                const card = createOwnerCard(map, 'Resources/Additional/Icons/HammerTool.webp');
+                const card = createOwnerCard(map, 'Resources/Additional/Icons/Compass.webp');
                 container.appendChild(card);
             });
     });
@@ -135,7 +135,7 @@ function createOwnerCard(map, image) {
     card.innerHTML = `
         <div class="card-image-wrapper" onclick="window.location.href = './view.html?id=${encodeURIComponent(map.id)}'">
             <img src="${image}" alt="Map" loading="lazy">
-            <div class="card-overlay"><span>${window.ht_translate('Edit Details')}</span></div>
+            <div class="card-overlay"><span>${window.cp_translate('Edit Details')}</span></div>
         </div>
         <div class="card-content">
             <div class="card-meta">
@@ -152,7 +152,7 @@ function createOwnerCard(map, image) {
             
             <div class="owner-controls" style="display: flex; gap: 8px; flex-shrink:0; align-items: center;">
                  <button class="visibility-btn ${isPublic ? 'pub' : 'priv'}" data-id="${map.id}" data-public="${isPublic}">
-                     ${isPublic ? window.ht_translate('🌍 Public') : window.ht_translate('🔒 Private')}
+                     ${isPublic ? window.cp_translate('🌍 Public') : window.cp_translate('🔒 Private')}
                  </button>
                  <button class="delete-card-btn" title="Delete Map Permanently">
                      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -186,7 +186,7 @@ function createOwnerCard(map, image) {
 }
 
 async function triggerMapDeletion(mapId, card) {
-    const confirmMsg = window.ht_translate("🗑️ Are you absolutely sure you want to delete this map forever?\n\nThis action CANNOT be undone.");
+    const confirmMsg = window.cp_translate("🗑️ Are you absolutely sure you want to delete this map forever?\n\nThis action CANNOT be undone.");
     if (!confirm(confirmMsg)) return;
 
     try {
@@ -217,7 +217,7 @@ async function triggerMapDeletion(mapId, card) {
 
     } catch (err) {
         console.error("Map deletion error:", err);
-        alert(window.ht_translate("Delete operation failed:") + " " + (err.message || "Unknown error."));
+        alert(window.cp_translate("Delete operation failed:") + " " + (err.message || "Unknown error."));
     }
 }
 
@@ -241,7 +241,7 @@ async function toggleMapVisibility(mapId, button) {
         // Обновляем визуальное состояние кнопки
         button.setAttribute('data-public', String(nextState));
         button.className = `visibility-btn ${nextState ? 'pub' : 'priv'}`;
-        button.textContent = nextState ? window.ht_translate('🌍 Public') : window.ht_translate('🔒 Private');
+        button.textContent = nextState ? window.cp_translate('🌍 Public') : window.cp_translate('🔒 Private');
         
         // Обновляем локальные данные, чтобы не слетало при рефильтрации
         const idx = allMaps.findIndex(m => m.id === mapId);
@@ -249,8 +249,8 @@ async function toggleMapVisibility(mapId, button) {
 
     } catch (e) {
         console.error("Failed to flip privacy:", e);
-        button.textContent = isCurrentlyPublic ? window.ht_translate('🌍 Public') : window.ht_translate('🔒 Private');
-        alert(window.ht_translate("Server could not save privacy update. Try again."));
+        button.textContent = isCurrentlyPublic ? window.cp_translate('🌍 Public') : window.cp_translate('🔒 Private');
+        alert(window.cp_translate("Server could not save privacy update. Try again."));
     } finally {
         button.disabled = false;
     }
@@ -258,7 +258,7 @@ async function toggleMapVisibility(mapId, button) {
 
 async function toggleMapLike(mapId, button) {
     if (!currentUserId) {
-        alert(window.ht_translate("⚠️ Please log in to like maps!"));
+        alert(window.cp_translate("⚠️ Please log in to like maps!"));
         return;
     }
 
@@ -321,7 +321,7 @@ function updateLoadMore() {
     if (displayedCount < filteredMaps.length) {
         const btn = document.createElement('button');
         btn.className = 'load-more-btn';
-        btn.textContent = window.ht_translate('Load More');
+        btn.textContent = window.cp_translate('Load More');
         btn.onclick = displayNextBatch;
         container.appendChild(btn);
     }

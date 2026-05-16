@@ -1,7 +1,7 @@
 {
   "name": "atlas-horizon-main",
   "version": "2.0.0",
-  "description": "<div align=\"center\">\r   <img src=\"Resources/Additional/Icons/HammerTool.webp\" alt=\"HammerTool Logo\" width=\"120\"/>",
+  "description": "<div align=\"center\">\r   <img src=\"Resources/Additional/Icons/Compass.webp\" alt=\"Compass Logo\" width=\"120\"/>",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -10,16 +10,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SusPect147/HammerTool.git"
+    "url": "git+https://github.com/SusPect147/Compass.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "bugs": {
-    "url": "https://github.com/SusPect147/HammerTool/issues"
+    "url": "https://github.com/SusPect147/Compass/issues"
   },
-  "homepage": "https://github.com/SusPect147/HammerTool#readme",
+  "homepage": "https://github.com/SusPect147/Compass#readme",
   "devDependencies": {
     "@types/node": "^25.8.0",
     "typescript": "^6.0.3"

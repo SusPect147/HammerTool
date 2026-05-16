@@ -95,7 +95,7 @@ function startCooldownTimer(msRemaining) {
     let remainingSec = Math.ceil(msRemaining / 1000);
     
     const updateUI = () => {
-        cooldownDisplay.innerText = `${window.ht_translate('Cooldown:')} ${remainingSec}s`;
+        cooldownDisplay.innerText = `${window.cp_translate('Cooldown:')} ${remainingSec}s`;
         if (remainingSec <= 0) {
             clearInterval(cooldownInterval);
             cooldownDisplay.style.display = 'none';
@@ -127,7 +127,7 @@ async function loadMessages() {
         sortAndRenderMessages();
     } catch (err) {
         console.error("Failed to fetch forum messages:", err);
-        messagesFeed.innerHTML = `<div class="empty-feed" style="color:#ff6b6b">${window.ht_translate('Failed to load messages. Please try again later.')}</div>`;
+        messagesFeed.innerHTML = `<div class="empty-feed" style="color:#ff6b6b">${window.cp_translate('Failed to load messages. Please try again later.')}</div>`;
     }
 }
 
@@ -155,7 +155,7 @@ function sortAndRenderMessages() {
 
 function renderMessages(messages) {
     if (!messages || messages.length === 0) {
-        messagesFeed.innerHTML = `<div class="empty-feed">${window.ht_translate('The community wall is silent. Be the first to break the silence!')}</div>`;
+        messagesFeed.innerHTML = `<div class="empty-feed">${window.cp_translate('The community wall is silent. Be the first to break the silence!')}</div>`;
         return;
     }
 
@@ -182,11 +182,11 @@ function renderMessages(messages) {
         msgEl.innerHTML = `
             <div class="message-meta">
                 <div class="message-author-info">
-                    <span class="message-author ${isMsgAdmin ? 'admin' : ''}">${escapeHTML(msg.author_name || window.ht_translate('Anonymous'))}</span>
+                    <span class="message-author ${isMsgAdmin ? 'admin' : ''}">${escapeHTML(msg.author_name || window.cp_translate('Anonymous'))}</span>
                     <span class="message-time">${postDate}</span>
                 </div>
                 <div class="message-actions">
-                    <button class="delete-msg-btn" data-id="${msg.id}" title="${window.ht_translate('Delete Message')}" style="display: ${isAdmin ? 'block' : 'none'};">
+                    <button class="delete-msg-btn" data-id="${msg.id}" title="${window.cp_translate('Delete Message')}" style="display: ${isAdmin ? 'block' : 'none'};">
                         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     </button>
                 </div>
@@ -231,7 +231,7 @@ function renderMessages(messages) {
 // Voting action handler (Robust, dynamic & 409-proof!)
 async function handleVoteMessage(messageId, voteType) {
     if (!currentUserId) {
-        alert(window.ht_translate("⚠️ Please sign in via Discord to vote on messages!"));
+        alert(window.cp_translate("⚠️ Please sign in via Discord to vote on messages!"));
         return;
     }
 
@@ -282,7 +282,7 @@ async function handleVoteMessage(messageId, voteType) {
 
     } catch (err) {
         console.error("Vote error:", err);
-        alert(window.ht_translate("Failed to cast vote:") + " " + err.message);
+        alert(window.cp_translate("Failed to cast vote:") + " " + err.message);
     }
 }
 
@@ -292,12 +292,12 @@ async function handleSendMessage() {
 
     const content = forumInput.value.trim();
     if (!content) {
-        alert(window.ht_translate("Cannot send an empty message."));
+        alert(window.cp_translate("Cannot send an empty message."));
         return;
     }
 
     if (content.length > 2500) {
-        alert(window.ht_translate("Message too long! Max 2500 characters allowed."));
+        alert(window.cp_translate("Message too long! Max 2500 characters allowed."));
         return;
     }
 
@@ -306,11 +306,11 @@ async function handleSendMessage() {
     isSubmitting = true;
     submitMsgBtn.disabled = true;
     const originalBtnHTML = submitMsgBtn.innerHTML;
-    submitMsgBtn.innerHTML = `<span>⏳</span> ${window.ht_translate('⏳ Sending...')}`;
+    submitMsgBtn.innerHTML = `<span>⏳</span> ${window.cp_translate('⏳ Sending...')}`;
 
     try {
         const isAnon = anonCheck.checked;
-        let authorName = window.ht_translate('Anonymous');
+        let authorName = window.cp_translate('Anonymous');
         let userId = null;
 
         if (!isAnon && currentSession && currentSession.user) {
@@ -338,7 +338,7 @@ async function handleSendMessage() {
 
     } catch (err) {
         console.error("Failed to send message:", err);
-        alert(window.ht_translate("Failed to send message:") + " " + (err.message || "Server error."));
+        alert(window.cp_translate("Failed to send message:") + " " + (err.message || "Server error."));
     } finally {
         isSubmitting = false;
         submitMsgBtn.innerHTML = originalBtnHTML;
@@ -349,7 +349,7 @@ async function handleSendMessage() {
 async function handleDeleteMessage(msgId) {
     if (!isAdmin) return;
     
-    const confirmDel = confirm(window.ht_translate("Are you absolutely sure you want to delete this message?"));
+    const confirmDel = confirm(window.cp_translate("Are you absolutely sure you want to delete this message?"));
     if (!confirmDel) return;
 
     try {
@@ -361,7 +361,7 @@ async function handleDeleteMessage(msgId) {
         if (error) throw error;
     } catch (err) {
         console.error("Failed to delete message:", err);
-        alert(window.ht_translate("Failed to delete:") + " " + (err.message || "Database restrictions."));
+        alert(window.cp_translate("Failed to delete:") + " " + (err.message || "Database restrictions."));
     }
 }
 
