@@ -684,78 +684,72 @@ function initStudioControls() {
     const cropModeSelect = document.getElementById('cropModeSelect');
 
     let isSnapping = false;
+    let updatePending = false;
+    let offscreenCanvas: HTMLCanvasElement | null = null;
 
     const updateSlicingGrid = () => {
-        if (!cropperInstance || !gridOverlay) return;
+        if (!cropperInstance || !gridOverlay || updatePending) return;
         
-        const cropperContainer = document.querySelector('.cropper-container');
-        if (cropperContainer && gridOverlay.parentElement !== cropperContainer) {
-            cropperContainer.appendChild(gridOverlay);
-        }
+        updatePending = true;
+        requestAnimationFrame(() => {
+            updatePending = false;
+            if (!cropperInstance || !gridOverlay) return;
 
-        const canvasData = cropperInstance.getCanvasData();
-        gridOverlay.style.width = canvasData.width + 'px';
-        gridOverlay.style.height = canvasData.height + 'px';
-        gridOverlay.style.left = canvasData.left + 'px';
-        gridOverlay.style.top = canvasData.top + 'px';
-    
-        const gw = parseInt(gridSizeWInput?.value || '32');
-        const gh = parseInt(gridSizeHInput?.value || '32');
-        const gm = parseInt(gridMarginInput?.value || '0');
-        const gs = parseInt(gridSpacingInput?.value || '0');
-        const scale = canvasData.width / canvasData.naturalWidth;
+            const cropperContainer = document.querySelector('.cropper-container');
+            if (cropperContainer && gridOverlay.parentElement !== cropperContainer) {
+                cropperContainer.appendChild(gridOverlay);
+            }
+
+            const canvasData = cropperInstance.getCanvasData();
+            gridOverlay.style.width = canvasData.width + 'px';
+            gridOverlay.style.height = canvasData.height + 'px';
+            gridOverlay.style.left = canvasData.left + 'px';
+            gridOverlay.style.top = canvasData.top + 'px';
         
-        gridOverlay.style.setProperty('--grid-w', (gw * scale) + 'px');
-        gridOverlay.style.setProperty('--grid-h', (gh * scale) + 'px');
-        gridOverlay.style.setProperty('--grid-m', (gm * scale) + 'px');
-        gridOverlay.style.setProperty('--grid-s', (gs * scale) + 'px');
-        gridOverlay.style.display = showGridCheck?.checked ? 'block' : 'none';
+            const gw = parseInt(gridSizeWInput?.value || '32');
+            const gh = parseInt(gridSizeHInput?.value || '32');
+            const gm = parseInt(gridMarginInput?.value || '0');
+            const gs = parseInt(gridSpacingInput?.value || '0');
+            const scale = canvasData.width / canvasData.naturalWidth;
+            
+            gridOverlay.style.setProperty('--grid-w', (gw * scale) + 'px');
+            gridOverlay.style.setProperty('--grid-h', (gh * scale) + 'px');
+            gridOverlay.style.setProperty('--grid-m', (gm * scale) + 'px');
+            gridOverlay.style.setProperty('--grid-s', (gs * scale) + 'px');
+            gridOverlay.style.display = showGridCheck?.checked ? 'block' : 'none';
 
-        const ghostRef = document.getElementById('ghostReference');
-        const ghostImg = document.getElementById('ghostImg') as HTMLImageElement;
-        const ghostHitbox = document.getElementById('ghostHitbox');
-        const activeTile = CORE_TILES.find(t => t.id === selectedTileKey);
+            const ghostRef = document.getElementById('ghostReference');
+            const ghostImg = document.getElementById('ghostImg') as HTMLImageElement;
+            const ghostHitbox = document.getElementById('ghostHitbox');
+            const activeTile = CORE_TILES.find(t => t.id === selectedTileKey);
 
-        if (ghostRef && activeTile && cropperInstance) {
-            ghostRef.style.display = (currentCropMode === 'ghost') ? 'flex' : 'none';
-            if (ghostImg) {
-                const targetW = 128;
-                const targetH = 128;
-                ghostRef.style.width = targetW + 'px';
-                ghostRef.style.height = targetH + 'px';
-                
-                if (currentCropMode === 'ghost') {
-                    const containerData = cropperInstance.getContainerData();
-                    const centerX = (containerData.width - targetW) / 2;
-                    const centerY = (containerData.height - targetH) / 2;
-                    isSnapping = true;
-                    cropperInstance.setCropBoxData({
-                        left: centerX,
-                        top: centerY,
-                        width: targetW,
-                        height: targetH
-                    });
-                    setTimeout(() => { isSnapping = false; }, 50);
+            if (ghostRef && activeTile && cropperInstance) {
+                ghostRef.style.display = (currentCropMode === 'ghost') ? 'flex' : 'none';
+                if (ghostImg) {
+                    const targetW = 128;
+                    const targetH = 128;
+                    ghostRef.style.width = targetW + 'px';
+                    ghostRef.style.height = targetH + 'px';
+                }
+                if (ghostImg) {
+                    ghostImg.dataset.noTheme = 'true';
+                    let desertSrc = activeTile.src;
+                    if (desertSrc.includes('/Resources/') && !desertSrc.includes('/Desert/') && !desertSrc.includes('/Global/')) {
+                        desertSrc = desertSrc.replace(/\/Resources\/[^/]+\//, '/Resources/Desert/');
+                    }
+                    ghostImg.src = desertSrc;
+                }
+                if (activeTile.hitbox && ghostHitbox) {
+                    ghostHitbox.style.display = 'block';
+                    ghostHitbox.style.top = (activeTile.hitbox.y * 100) + '%';
+                    ghostHitbox.style.left = '0';
+                    ghostHitbox.style.width = '100%';
+                    ghostHitbox.style.height = (activeTile.hitbox.h * 100) + '%';
+                } else if (ghostHitbox) {
+                    ghostHitbox.style.display = 'none';
                 }
             }
-            if (ghostImg) {
-                ghostImg.dataset.noTheme = 'true';
-                let desertSrc = activeTile.src;
-                if (desertSrc.includes('/Resources/') && !desertSrc.includes('/Desert/') && !desertSrc.includes('/Global/')) {
-                    desertSrc = desertSrc.replace(/\/Resources\/[^/]+\//, '/Resources/Desert/');
-                }
-                ghostImg.src = desertSrc;
-            }
-            if (activeTile.hitbox && ghostHitbox) {
-                ghostHitbox.style.display = 'block';
-                ghostHitbox.style.top = (activeTile.hitbox.y * 100) + '%';
-                ghostHitbox.style.left = '0';
-                ghostHitbox.style.width = '100%';
-                ghostHitbox.style.height = (activeTile.hitbox.h * 100) + '%';
-            } else if (ghostHitbox) {
-                ghostHitbox.style.display = 'none';
-            }
-        }
+        });
     };
 
     const initRightClickPan = () => {
@@ -814,8 +808,8 @@ function initStudioControls() {
             background: false,
             zoomable: true,
             movable: true,
-            cropBoxMovable: (currentCropMode !== 'ghost'),
-            cropBoxResizable: (currentCropMode !== 'ghost'),
+            cropBoxMovable: (currentCropMode === 'manual'),
+            cropBoxResizable: (currentCropMode === 'manual'),
             dragMode: (currentCropMode === 'manual') ? 'crop' : 'move',
             guides: false,
             center: false,
@@ -918,9 +912,20 @@ function initStudioControls() {
         
         const reader = new FileReader();
         reader.onload = (evt) => {
-            croppingSource.src = evt.target?.result as string;
-            cropModal?.classList.add('active');
+            const result = evt.target?.result as string;
             
+            // Initialize persistent offscreen canvas for fast pixel processing
+            croppingSource.onload = () => {
+                offscreenCanvas = document.createElement('canvas');
+                offscreenCanvas.width = croppingSource.naturalWidth;
+                offscreenCanvas.height = croppingSource.naturalHeight;
+                const ctx = offscreenCanvas.getContext('2d', { willReadFrequently: true });
+                ctx?.drawImage(croppingSource, 0, 0);
+            };
+            
+            croppingSource.src = result;
+            cropModal?.classList.add('active');
+
             if (cropModeSelect) {
                 cropModeSelect.querySelectorAll('.mode-btn-v2').forEach(b => {
                     b.classList.toggle('active', (b as HTMLElement).dataset.mode === currentCropMode);
@@ -945,7 +950,8 @@ function initStudioControls() {
                 movable: true,
                 zoomOnWheel: true,
                 wheelZoomRatio: 0.1,
-                cropBoxResizable: true,
+                cropBoxMovable: (currentCropMode === 'manual'),
+                cropBoxResizable: (currentCropMode === 'manual'),
                 toggleDragModeOnDblclick: true,
                 guides: false,
                 center: false,
@@ -1056,14 +1062,8 @@ function initStudioControls() {
                         const snapY = gm + tileY * (gh + gs);
                         if (snapX < 0 || snapX >= canvasData.naturalWidth || snapY < 0 || snapY >= canvasData.naturalHeight) return;
 
-                        if (currentCropMode === 'smart') {
-                            const tempCanvas = document.createElement('canvas');
-                            tempCanvas.width = canvasData.naturalWidth;
-                            tempCanvas.height = canvasData.naturalHeight;
-                            const ctx = tempCanvas.getContext('2d', { willReadFrequently: true });
-                            ctx?.drawImage(croppingSource, 0, 0);
-                            
-                            const bounds = getTrimmedBounds(tempCanvas, snapX, snapY, gw, gh);
+                        if (currentCropMode === 'smart' && offscreenCanvas) {
+                            const bounds = getTrimmedBounds(offscreenCanvas, snapX, snapY, gw, gh);
                             isSnapping = true;
                             if (bounds) {
                                 cropperInstance.setData(bounds);
