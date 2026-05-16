@@ -15,11 +15,11 @@ const sharedResources = {
   backgrounds: {}, // backgrounds[env] = { bgDark, bgLight }
 };
 
-export async function drawStaticMapPreview(mapData, size = 'regular', gamemode = 'Gem_Grab', environment = 'Desert') {
+export async function drawStaticMapPreview(mapData, size = 'regular', gamemode = 'Gem_Grab', environment = 'Desert', themeOptions = null) {
   // Prefetch theme configuration from database if rendering a shared custom-skinned map!
   if (typeof environment === 'string' && environment.startsWith('CUSTOM_') && typeof window.ensureThemeLoaded === 'function') {
     const packId = environment.replace('CUSTOM_', '');
-    await window.ensureThemeLoaded(packId);
+    await window.ensureThemeLoaded(packId, themeOptions);
   }
 
   // Get actual map dimensions from mapData

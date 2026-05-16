@@ -77,6 +77,9 @@ let selectedTileKey = null;
 let editedTileFiles = {}; // Map of key -> File/Blob object
 let cropperInstance = null;
 let isAspectRatioLocked = true; // Control free form vs locked aspect ratio
+let gridSize = 32; // Default grid size for snapping
+let isGridVisible = true;
+let isSnapEnabled = true;
 
 document.addEventListener('DOMContentLoaded', async () => {
     initStudioControls();
@@ -701,10 +704,12 @@ function initStudioControls() {
     const cancelCropBtn = document.getElementById('cancelCropBtn');
     const applyCropBtn = document.getElementById('applyCropBtn');
     const cropRotateBtn = document.getElementById('cropRotateBtn');
-    const cropZoomInBtn = document.getElementById('cropZoomInBtn');
-    const cropZoomOutBtn = document.getElementById('cropZoomOutBtn');
     const cropAspectBtn = document.getElementById('cropAspectBtn');
     const croppingSource = document.getElementById('croppingSource');
+    const showGridCheck = document.getElementById('showGridCheck');
+    const snapToGridCheck = document.getElementById('snapToGridCheck');
+    const gridSizeInput = document.getElementById('gridSizeInput');
+    const gridOverlay = document.getElementById('slicing-grid-overlay');
 
     // Open main studio modal
     openBtn.onclick = () => {
@@ -750,10 +755,51 @@ function initStudioControls() {
             
             // Launch Cropper with reactive Pixel Grid triggers
             let isSnapping = false;
+
+            const updateSlicingGrid = () => {
+                if (!cropperInstance || !gridOverlay) return;
+                const canvasData = cropperInstance.getCanvasData();
+                const containerData = cropperInstance.getContainerData();
+                
+                // Position the overlay to match the image canvas exactly
+                gridOverlay.style.width = canvasData.width + 'px';
+                gridOverlay.style.height = canvasData.height + 'px';
+                gridOverlay.style.left = canvasData.left + 'px';
+                gridOverlay.style.top = canvasData.top + 'px';
+                
+                // Update CSS variable for grid lines
+                const currentGrid = parseInt(gridSizeInput?.value || '32');
+                const scale = canvasData.width / canvasData.naturalWidth;
+                gridOverlay.style.setProperty('--grid-size', (currentGrid * scale) + 'px');
+                gridOverlay.style.display = showGridCheck?.checked ? 'block' : 'none';
+            };
+
+            const initRightClickPan = () => {
+                const container = document.querySelector('.cropper-container');
+                if (!container) return;
+                
+                let isRightDragging = false;
+                container.oncontextmenu = (e) => e.preventDefault();
+                
+                container.onmousedown = (e) => {
+                    if (e.button === 2) { // Right click
+                        isRightDragging = true;
+                        cropperInstance.setDragMode('move');
+                    }
+                };
+                
+                window.onmouseup = () => {
+                    if (isRightDragging) {
+                        isRightDragging = false;
+                        cropperInstance.setDragMode('crop');
+                    }
+                };
+            };
+
             cropperInstance = new Cropper(croppingSource, {
-                aspectRatio: isAspectRatioLocked ? 1 : NaN, // Keep dynamic
+                aspectRatio: isAspectRatioLocked ? 1 : NaN, 
                 viewMode: 1,
-                background: false,
+                background: true, // Show checkerboard for transparency
                 zoomable: true,
                 scalable: true,
                 movable: true,
@@ -761,37 +807,43 @@ function initStudioControls() {
                 responsive: true,
                 checkOrientation: true,
                 ready() {
-                    updatePixelGridState();
+                    updateSlicingGrid();
+                    initRightClickPan();
                 },
                 zoom() {
-                    updatePixelGridState();
+                    updateSlicingGrid();
                 },
                 crop(event) {
-                    updatePixelGridState();
+                    updateSlicingGrid();
                     
-                    // Enforce Snap-to-Grid (whole integer natural pixels)
-                    if (isSnapping) return;
+                    if (isSnapping || !snapToGridCheck?.checked) return;
                     
+                    const g = parseInt(gridSizeInput?.value || '32');
                     const d = event.detail;
-                    const rx = Math.round(d.x);
-                    const ry = Math.round(d.y);
-                    const rw = Math.round(d.width);
-                    const rh = Math.round(d.height);
                     
-                    // If data drifts from integer pixel coordinates, snap it!
-                    if (Math.abs(d.x - rx) > 0.01 || Math.abs(d.y - ry) > 0.01 || Math.abs(d.width - rw) > 0.01 || Math.abs(d.height - rh) > 0.01) {
+                    // Snap coordinates and dimensions to grid
+                    const rx = Math.round(d.x / g) * g;
+                    const ry = Math.round(d.y / g) * g;
+                    const rw = Math.round(d.width / g) * g;
+                    const rh = Math.round(d.height / g) * g;
+                    
+                    // Prevent jitter loop
+                    if (Math.abs(d.x - rx) > 0.1 || Math.abs(d.y - ry) > 0.1 || 
+                        Math.abs(d.width - rw) > 0.1 || Math.abs(d.height - rh) > 0.1) {
                         isSnapping = true;
                         cropperInstance.setData({
                             x: rx,
                             y: ry,
-                            width: rw,
-                            height: rh
+                            width: Math.max(g, rw),
+                            height: Math.max(g, rh)
                         });
-                        // Clear execution lock on next execution frame to allow future drag snaps
-                        setTimeout(() => { isSnapping = false; }, 15);
+                        setTimeout(() => { isSnapping = false; }, 10);
                     }
                 }
             });
+
+            if (gridSizeInput) gridSizeInput.oninput = updateSlicingGrid;
+            if (showGridCheck) showGridCheck.onchange = updateSlicingGrid;
         };
         reader.readAsDataURL(file);
     };
@@ -821,8 +873,6 @@ function initStudioControls() {
 
     // Transforms
     cropRotateBtn.onclick = () => cropperInstance?.rotate(90);
-    cropZoomInBtn.onclick = () => cropperInstance?.zoom(0.1);
-    cropZoomOutBtn.onclick = () => cropperInstance?.zoom(-0.1);
 
     // APPLY CROP & OPTIMIZE TO 128x128!
     applyCropBtn.onclick = () => {

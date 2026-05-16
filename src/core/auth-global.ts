@@ -11,10 +11,18 @@ initializeGlobalSettings();
 // ==========================================================
 window.globalThemeCache = {}; // { packId: { name, user_name, tile_data } }
 
-window.ensureThemeLoaded = async function(packId) {
-    if (!packId) return null;
-    if (window.globalThemeCache[packId]) return window.globalThemeCache[packId];
+window.ensureThemeLoaded = async function (packId, themeOptions = null) {
+    if (!packId)
+        return null;
+    if (window.globalThemeCache[packId])
+        return window.globalThemeCache[packId];
     
+    // If the map author has explicitly disabled theme visibility in the gallery, we respect it
+    if (themeOptions && themeOptions.gallery === false) {
+        console.info(`[ThemeLoader] Theme ${packId} is hidden for this map view by the author.`);
+        return null;
+    }
+
     try {
         console.info(`[ThemeLoader] Fetching dynamically active map theme: ${packId}`);
         const { data, error } = await supabase
@@ -23,7 +31,9 @@ window.ensureThemeLoaded = async function(packId) {
             .eq('id', packId)
             .maybeSingle();
             
-        if (error) throw error;
+        if (error)
+            throw error;
+            
         if (data && data.tile_data) {
             window.globalThemeCache[packId] = {
                 name: data.name || 'Custom Theme',
@@ -31,8 +41,14 @@ window.ensureThemeLoaded = async function(packId) {
                 tile_data: data.tile_data
             };
             return window.globalThemeCache[packId];
+        } else if (themeOptions && themeOptions.gallery === true) {
+            // Note: If data is null here, it means RLS blocked it (private theme).
+            // To support "private themes visible in gallery", a Supabase RPC (e.g. get_theme_bypass_rls)
+            // would be required on the backend to verify map->theme permission.
+            console.warn(`[ThemeLoader] Theme ${packId} is private. Ensure it is either public or accessible via RPC.`);
         }
-    } catch (e) {
+    }
+    catch (e) {
         console.warn("[ThemeLoader] Failed fetching remote pack payload:", e);
     }
     return null;

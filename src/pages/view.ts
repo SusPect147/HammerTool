@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         // Generate Image (Larger rendering for quality)
-        const pngDataUrl = await drawStaticMapPreview(data.map_data, data.size, data.gamemode, data.environment);
+        const pngDataUrl = await drawStaticMapPreview(data.map_data, data.size, data.gamemode, data.environment, data.theme_options);
         
         // Handle rendering
         const mapImg = document.getElementById('mapImage');
