@@ -704,19 +704,19 @@ function initStudioControls() {
                 const gridOverlay = document.getElementById('slicingGridOverlay');
                 if (currentCropMode === 'ghost') {
                     cropperInstance.setAspectRatio(NaN);
+                    cropperInstance.setDragMode('move');
                     cropperInstance.setOptions({
                         cropBoxMovable: false,
-                        cropBoxResizable: false,
-                        dragMode: 'move'
+                        cropBoxResizable: false
                     });
                     if (gridOverlay) gridOverlay.style.pointerEvents = 'none';
                     if (snapToGridCheck) snapToGridCheck.checked = false;
                 } else if (currentCropMode === 'manual') {
                     cropperInstance.setAspectRatio(NaN);
+                    cropperInstance.setDragMode('crop');
                     cropperInstance.setOptions({
                         cropBoxMovable: true,
-                        cropBoxResizable: true,
-                        dragMode: 'crop'
+                        cropBoxResizable: true
                     });
                     if (gridOverlay) gridOverlay.style.pointerEvents = 'none';
                     if (snapToGridCheck) snapToGridCheck.checked = false;
@@ -731,10 +731,10 @@ function initStudioControls() {
                     });
                 } else if (currentCropMode === 'smart') {
                     cropperInstance.setAspectRatio(NaN);
+                    cropperInstance.setDragMode('move');
                     cropperInstance.setOptions({
                         cropBoxMovable: true,
-                        cropBoxResizable: true,
-                        dragMode: 'move'
+                        cropBoxResizable: true
                     });
                     if (gridOverlay) {
                         gridOverlay.style.pointerEvents = 'auto';
@@ -817,16 +817,9 @@ function initStudioControls() {
                 
                 if (ghostRef && activeTile && cropperInstance) {
                     ghostRef.style.display = (currentCropMode === 'ghost') ? 'flex' : 'none';
-                    
-                    // Dynamic ghost sizing to match asset aspect ratio
-                    const canvasData = cropperInstance.getCanvasData();
-                    const scale = canvasData.width / canvasData.naturalWidth;
-                    
-                    // We need the natural dimensions of the GHOST image
-                    const gImg = ghostImg as HTMLImageElement;
-                    if (gImg.naturalWidth > 0) {
-                        const targetW = gImg.naturalWidth * scale;
-                        const targetH = gImg.naturalHeight * scale;
+                    if (ghostImg) {
+                        const targetW = 128; // Fixed size on screen for stability
+                        const targetH = 128;
                         ghostRef.style.width = targetW + 'px';
                         ghostRef.style.height = targetH + 'px';
 
@@ -835,7 +828,6 @@ function initStudioControls() {
                             const containerData = cropperInstance.getContainerData();
                             const centerX = (containerData.width - targetW) / 2;
                             const centerY = (containerData.height - targetH) / 2;
-                            
                             isSnapping = true;
                             cropperInstance.setCropBoxData({
                                 left: centerX,
@@ -930,12 +922,14 @@ function initStudioControls() {
             if (gridOverlay) {
                 let isDraggingGrid = false;
                 let lastGridX = 0, lastGridY = 0;
-
-                gridOverlay.onmousedown = (e) => {
+                let gridDragDistance = 0;
+                
+                (gridOverlay as HTMLElement).onmousedown = (e) => {
                     if (currentCropMode === 'smart') {
                         isDraggingGrid = true;
                         lastGridX = e.clientX;
                         lastGridY = e.clientY;
+                        gridDragDistance = 0;
                     }
                 };
 
@@ -943,6 +937,7 @@ function initStudioControls() {
                     if (isDraggingGrid && cropperInstance && currentCropMode === 'smart') {
                         const dx = e.clientX - lastGridX;
                         const dy = e.clientY - lastGridY;
+                        gridDragDistance += Math.sqrt(dx * dx + dy * dy);
                         cropperInstance.move(dx, dy);
                         lastGridX = e.clientX;
                         lastGridY = e.clientY;
@@ -950,14 +945,11 @@ function initStudioControls() {
                 });
 
                 window.addEventListener('mouseup', () => {
-                    isDraggingGrid = false;
+                    setTimeout(() => { isDraggingGrid = false; }, 10);
                 });
 
-                gridOverlay.onclick = (e) => {
-                    if (!cropperInstance || isSnapping || isDraggingGrid) return;
-                    
-                    // If user moved more than 5px, don't trigger click (it was a drag)
-                    // (Implementation detail: we could track distance, but let's keep it simple)
+                (gridOverlay as HTMLElement).onclick = (e) => {
+                    if (!cropperInstance || isSnapping || gridDragDistance > 5) return;
                     
                     e.preventDefault();
                     e.stopImmediatePropagation();
