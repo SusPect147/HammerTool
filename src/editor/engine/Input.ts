@@ -34,7 +34,7 @@ export const InputMixin = {
             radio.addEventListener('change', (e) => {
                 this.selectionMode = e.target.value;
                 document.getElementById('selectedAreaToolsDiv').style.display = 'none';
-                document.getElementById('lastDivider').style.display = selectBtn.checked ? 'block' : 'none';
+                document.getElementById('lastDivider').style.display = 'none';
 
                 if (this.selectionMode === 'select' && this.isErasing) {
                     this.toggleEraseMode(false);
