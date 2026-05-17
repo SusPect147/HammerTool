@@ -218,7 +218,7 @@ pc {
 }
 
 .right-panel {
-    right: 2.5rem;
+    right: 4.5rem;
 }
 
 .controls-bar {
@@ -1967,7 +1967,7 @@ body.top-bar-hidden .mapmaker-container {
     /* Push right panel lower so it never collides with the collapsed settings float */
     .right-panel {
         top: 1.5rem !important; 
-        right: 200px !important;
+        right: 280px !important;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 }
