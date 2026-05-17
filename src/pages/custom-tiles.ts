@@ -709,6 +709,8 @@ function initStudioControls() {
         // Force a global cursor reset to clear any stuck 'move' or 'plus' cursors
         document.body.style.cursor = 'default';
         document.documentElement.style.cursor = 'default';
+        document.body.style.pointerEvents = '';
+        document.documentElement.style.pointerEvents = '';
         
         const studioWorkspace = document.getElementById('studioWorkspace');
         if (studioWorkspace) studioWorkspace.style.cursor = 'default';
@@ -1101,11 +1103,11 @@ function initStudioControls() {
     }
 
     const cleanupAndCloseCrop = () => {
-        resetStudioStates();
         if (cropperInstance) {
             cropperInstance.destroy();
             cropperInstance = null;
         }
+        resetStudioStates();
         const ghostRef = document.getElementById('ghostReference');
         if (ghostRef) ghostRef.style.display = 'none';
         
