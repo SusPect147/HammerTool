@@ -1108,7 +1108,7 @@ label[for='correctMirroringBtn'], label[for='hideZoomBtn'] {
 /* Default stays stacked (your current setup) */
 
 /* On wide screens, switch to row layout */
-@media (min-width: 1500px) {
+@media (min-width: 1025px) {
   .center-panel {
     height: 70vh;
     min-height: 0;
