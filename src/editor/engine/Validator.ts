@@ -36,26 +36,67 @@ export const ValidatorMixin = {
         // Skip block tiles
         if (this.isBlock(tileId)) return false;
 
-        // Get 8 neighbors in clockwise order (starting top-left)
+        const isRealBlockAt = (nx, ny) => {
+            if (nx < 0 || nx >= this.mapWidth || ny < 0 || ny >= this.mapHeight) return false;
+            return this.isBlock(this.tileGrid[this.defaultTileLayer][ny][nx]);
+        };
+
+        // Check for cardinal squeezes
+        // A horizontal pair requires that if one side is the border, the opposite block must be part of a wall (not a 1x1 island)
+        let horizontalPair = false;
+        if (this.isBlockAt(x - 1, y) && this.isBlockAt(x + 1, y)) {
+            const leftBorder = x - 1 < 0;
+            const rightBorder = x + 1 >= this.mapWidth;
+            if (leftBorder) {
+                horizontalPair = this.isBlockAt(x + 1, y - 1) || this.isBlockAt(x + 1, y + 1);
+            } else if (rightBorder) {
+                horizontalPair = this.isBlockAt(x - 1, y - 1) || this.isBlockAt(x - 1, y + 1);
+            } else {
+                horizontalPair = true;
+            }
+        }
+
+        let verticalPair = false;
+        if (this.isBlockAt(x, y - 1) && this.isBlockAt(x, y + 1)) {
+            const topBorder = y - 1 < 0;
+            const bottomBorder = y + 1 >= this.mapHeight;
+            if (topBorder) {
+                verticalPair = this.isBlockAt(x - 1, y + 1) || this.isBlockAt(x + 1, y + 1);
+            } else if (bottomBorder) {
+                verticalPair = this.isBlockAt(x - 1, y - 1) || this.isBlockAt(x + 1, y - 1);
+            } else {
+                verticalPair = true;
+            }
+        }
+
+        // Diagonal block corners squeezing against a flat wall or border
+        const horizontalSqueezeLeft = this.isBlockAt(x - 1, y) && isRealBlockAt(x + 1, y - 1) && isRealBlockAt(x + 1, y + 1);
+        const horizontalSqueezeRight = this.isBlockAt(x + 1, y) && isRealBlockAt(x - 1, y - 1) && isRealBlockAt(x - 1, y + 1);
+        const verticalSqueezeTop = this.isBlockAt(x, y - 1) && isRealBlockAt(x - 1, y + 1) && isRealBlockAt(x + 1, y + 1);
+        const verticalSqueezeBottom = this.isBlockAt(x, y + 1) && isRealBlockAt(x - 1, y - 1) && isRealBlockAt(x + 1, y - 1);
+
+        const cornerSqueeze = horizontalSqueezeLeft || horizontalSqueezeRight || verticalSqueezeTop || verticalSqueezeBottom;
+
+        // Standard diagonal-to-diagonal opposite blocks
+        const diagonalPair = (this.isBlockAt(x - 1, y - 1) && this.isBlockAt(x + 1, y + 1) && !this.isBlockAt(x - 1, y) && !this.isBlockAt(x + 1, y) && !this.isBlockAt(x, y - 1) && !this.isBlockAt(x, y + 1)) ||
+                             (this.isBlockAt(x + 1, y - 1) && this.isBlockAt(x - 1, y + 1) && !this.isBlockAt(x - 1, y) && !this.isBlockAt(x + 1, y) && !this.isBlockAt(x, y - 1) && !this.isBlockAt(x, y + 1));
+
+        const isSqueezed = verticalPair || horizontalPair || cornerSqueeze || diagonalPair;
+
+        // Fall back to transition/cluster detection for dense walled areas or fully enclosed cells
         const directions = [
-            { dx: -1, dy: -1 }, // top-left
-            { dx: 0, dy: -1 },  // top
-            { dx: 1, dy: -1 },  // top-right
-            { dx: 1, dy: 0 },   // right
-            { dx: 1, dy: 1 },   // bottom-right
-            { dx: 0, dy: 1 },   // bottom
-            { dx: -1, dy: 1 },  // bottom-left
-            { dx: -1, dy: 0 },  // left
+            { dx: -1, dy: -1 },
+            { dx: 0, dy: -1 },
+            { dx: 1, dy: -1 },
+            { dx: 1, dy: 0 },
+            { dx: 1, dy: 1 },
+            { dx: 0, dy: 1 },
+            { dx: -1, dy: 1 },
+            { dx: -1, dy: 0 },
         ];
 
-        // Create circular array of block booleans
-        const neighborBlocks = directions.map(dir => {
-            const nx = x + dir.dx;
-            const ny = y + dir.dy;
-            return this.isBlockAt(nx, ny);
-        });
+        const neighborBlocks = directions.map(dir => this.isBlockAt(x + dir.dx, y + dir.dy));
 
-        // Shift starting point to avoid false positives from block lines
         let startIndex = 0;
         for (let i = 0; i < 7; i++) {
             if (neighborBlocks[i] !== neighborBlocks[(i + 1) % 8]) {
@@ -64,7 +105,6 @@ export const ValidatorMixin = {
             }
         }
 
-        // Count transitions and total blocks
         let transitions = -1;
         let blockCount = 0;
         for (let i = 0; i < 8; i++) {
@@ -74,27 +114,10 @@ export const ValidatorMixin = {
             if (next) blockCount++;
         }
 
-        // Special case for certain connectivity patterns
-        if (transitions > 1 && blockCount === 2) {
-            const trueIndexes = neighborBlocks
-                .map((val, index) => val ? index : -1)
-                .filter(index => index !== -1);
-
-            if (trueIndexes.every(a => a % 2 === 0) && trueIndexes[1] % 4 - trueIndexes[0] % 4 === 2) {
-                return false; // Valid pattern
-            }
-        }
-
-        // Extra helper check for vertical/horizontal aligned blocks
-        const verticalPair = this.isBlockAt(x, y - 1) && this.isBlockAt(x, y + 1);
-        const horizontalPair = this.isBlockAt(x - 1, y) && this.isBlockAt(x + 1, y);
-
         const fullySurrounded = transitions === 0 && neighborBlocks[startIndex];
-        const disconnected = transitions >= 2;
         const denseCluster = transitions === 1 && blockCount > 5;
-        const specialCase = transitions === 1 && blockCount === 5 && (verticalPair || horizontalPair);
 
-        return (fullySurrounded || disconnected || denseCluster || specialCase);
+        return (fullySurrounded || denseCluster || isSqueezed);
     },
 
     toggleShowErrors() {
