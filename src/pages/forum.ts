@@ -14,6 +14,9 @@ let cooldownInterval = null;
 let allMessages = [];
 let currentSort = 'newest';
 
+// Selected media state
+let selectedPhotos = [];
+let selectedVideos = [];
 
 // DOM ELEMENTS
 const forumInput = document.getElementById('forumInput');
@@ -21,6 +24,13 @@ const anonCheck = document.getElementById('anonCheck');
 const submitMsgBtn = document.getElementById('submitMsgBtn');
 const messagesFeed = document.getElementById('messagesFeed');
 const cooldownDisplay = document.getElementById('cooldownDisplay');
+
+// Attachment DOM elements
+const attachPhotoBtn = document.getElementById('attachPhotoBtn');
+const photoFileInput = document.getElementById('photoFileInput');
+const attachVideoBtn = document.getElementById('attachVideoBtn');
+const videoFileInput = document.getElementById('videoFileInput');
+const attachmentsPreview = document.getElementById('attachmentsPreview');
 
 async function initForum() {
     // 1. Get user session & check admin state
@@ -56,6 +66,29 @@ async function initForum() {
         });
     }
 
+    // Bind File Attachments UI triggers
+    if (attachPhotoBtn && photoFileInput) {
+        attachPhotoBtn.addEventListener('click', () => {
+            if (!currentUserId) {
+                alert(window.cp_translate("Please sign in via Discord to attach media!"));
+                return;
+            }
+            photoFileInput.click();
+        });
+        photoFileInput.addEventListener('change', handlePhotoSelection);
+    }
+
+    if (attachVideoBtn && videoFileInput) {
+        attachVideoBtn.addEventListener('click', () => {
+            if (!currentUserId) {
+                alert(window.cp_translate("Please sign in via Discord to attach media!"));
+                return;
+            }
+            videoFileInput.click();
+        });
+        videoFileInput.addEventListener('change', handleVideoSelection);
+    }
+
     // Initial cooldown check
     checkCooldown();
 
@@ -69,6 +102,115 @@ async function initForum() {
             loadMessages(); // Refresh UI when votes are cast
         })
         .subscribe();
+}
+
+// Media Selection Handlers
+function handlePhotoSelection(e) {
+    const files = Array.from(e.target.files || []);
+    
+    for (const file of files) {
+        if (selectedPhotos.length >= 5) {
+            alert(window.cp_translate("Max 5 photos allowed."));
+            break;
+        }
+        // Validate size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert(`${file.name}: ${window.cp_translate("Original file size too large! Max limit 5MB for cropping.").replace("for cropping", "")}`);
+            continue;
+        }
+        selectedPhotos.push(file);
+    }
+    
+    photoFileInput.value = '';
+    renderAttachmentPreviews();
+}
+
+function handleVideoSelection(e) {
+    const files = Array.from(e.target.files || []);
+    
+    for (const file of files) {
+        if (selectedVideos.length >= 2) {
+            alert(window.cp_translate("Max 2 videos allowed."));
+            break;
+        }
+        // Validate size (max 15MB)
+        if (file.size > 15 * 1024 * 1024) {
+            alert(`${file.name}: ${window.cp_translate("Original file size too large! Max limit 5MB for cropping.").replace("5MB", "15MB").replace("for cropping", "")}`);
+            continue;
+        }
+        selectedVideos.push(file);
+    }
+    
+    videoFileInput.value = '';
+    renderAttachmentPreviews();
+}
+
+// Render attachment previews in composer
+function renderAttachmentPreviews() {
+    if (!attachmentsPreview) return;
+    
+    attachmentsPreview.innerHTML = '';
+    
+    if (selectedPhotos.length === 0 && selectedVideos.length === 0) {
+        attachmentsPreview.style.display = 'none';
+        if (attachPhotoBtn) attachPhotoBtn.innerHTML = `<span>📸</span> ${window.cp_translate('Attach Photo (max 5)')}`;
+        if (attachVideoBtn) attachVideoBtn.innerHTML = `<span>🎥</span> ${window.cp_translate('Attach Video (max 2)')}`;
+        return;
+    }
+    
+    attachmentsPreview.style.display = 'grid';
+
+    // Photos
+    selectedPhotos.forEach((file, index) => {
+        const item = document.createElement('div');
+        item.className = 'preview-item';
+        
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        item.appendChild(img);
+
+        const remBtn = document.createElement('button');
+        remBtn.type = 'button';
+        remBtn.className = 'remove-btn';
+        remBtn.innerHTML = '&times;';
+        remBtn.addEventListener('click', () => {
+            selectedPhotos.splice(index, 1);
+            renderAttachmentPreviews();
+        });
+        item.appendChild(remBtn);
+        attachmentsPreview.appendChild(item);
+    });
+
+    // Videos
+    selectedVideos.forEach((file, index) => {
+        const item = document.createElement('div');
+        item.className = 'preview-item';
+        
+        const icon = document.createElement('span');
+        icon.className = 'video-icon';
+        icon.innerHTML = '🎬';
+        item.appendChild(icon);
+
+        const label = document.createElement('span');
+        label.style.cssText = 'position:absolute; bottom:4px; font-size:0.6rem; color:rgba(255,255,255,0.7); max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;';
+        label.innerText = file.name;
+        item.appendChild(label);
+
+        const remBtn = document.createElement('button');
+        remBtn.type = 'button';
+        remBtn.className = 'remove-btn';
+        remBtn.innerHTML = '&times;';
+        remBtn.addEventListener('click', () => {
+            selectedVideos.splice(index, 1);
+            renderAttachmentPreviews();
+        });
+        item.appendChild(remBtn);
+        attachmentsPreview.appendChild(item);
+    });
+
+    // Update buttons
+    if (attachPhotoBtn) attachPhotoBtn.innerHTML = `<span>📸</span> ${window.cp_translate('Attach Photo')} (${selectedPhotos.length}/5)`;
+    if (attachVideoBtn) attachVideoBtn.innerHTML = `<span>🎥</span> ${window.cp_translate('Attach Video')} (${selectedVideos.length}/2)`;
 }
 
 // Check for active cooldown in localStorage
@@ -110,6 +252,7 @@ function startCooldownTimer(msRemaining) {
 
 // Helper to escape HTML and prevent XSS
 function escapeHTML(text) {
+    if (!text) return '';
     const div = document.createElement('div');
     div.innerText = text;
     return div.innerHTML;
@@ -162,7 +305,6 @@ function renderMessages(messages) {
     messagesFeed.innerHTML = ''; // Clear container
 
     messages.forEach(msg => {
-
         const isMsgAdmin = msg.user_id === ADMIN_UUID || msg.author_name === 'hammer147' || msg.author_name?.includes('hammer147');
         const postDate = new Date(msg.created_at).toLocaleString();
 
@@ -176,13 +318,84 @@ function renderMessages(messages) {
         const isLiked = userVote?.vote_type === 'like';
         const isDisliked = userVote?.vote_type === 'dislike';
 
+        // 1. Status Badges Logic
+        const statusVal = msg.status || 'unresolved';
+        const isResolved = statusVal === 'resolved';
+        const statusText = window.cp_translate(isResolved ? 'Resolved' : 'Unresolved');
+        
+        let statusBadgeHTML = '';
+        if (isAdmin) {
+            statusBadgeHTML = `
+                <button class="status-badge ${statusVal} admin-toggle" data-id="${msg.id}" data-status="${statusVal}" title="${window.cp_translate('Toggle Status')}">
+                    ${statusText} 🔄
+                </button>
+            `;
+        } else {
+            statusBadgeHTML = `
+                <span class="status-badge ${statusVal}">
+                    ${statusText}
+                </span>
+            `;
+        }
+
+        // 2. Photos Grid Layout
+        let photosGridHTML = '';
+        if (msg.photos && msg.photos.length > 0) {
+            photosGridHTML = `
+                <div class="message-photos-grid count-${msg.photos.length}">
+                    ${msg.photos.map(url => `
+                        <div class="photo-thumbnail">
+                            <img src="${url}" class="forum-zoomable-img" alt="Attachment Image" data-url="${url}">
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // 3. Videos List Layout
+        let videosListHTML = '';
+        if (msg.videos && msg.videos.length > 0) {
+            videosListHTML = `
+                <div class="message-videos-list">
+                    ${msg.videos.map(url => `
+                        <div class="video-container">
+                            <video src="${url}" controls preload="metadata"></video>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // 4. Admin Reply Layout
+        let adminReplyHTML = '';
+        if (msg.admin_reply) {
+            adminReplyHTML = `
+                <div class="admin-reply-box" id="adminReplyBox-${msg.id}">
+                    <div class="reply-header">
+                        <span class="admin-name">👑 ${window.cp_translate('Response from Hammer147')}</span>
+                        ${isAdmin ? `<button class="edit-reply-btn" data-id="${msg.id}" data-current="${escapeHTML(msg.admin_reply)}">${window.cp_translate('Edit Reply')}</button>` : ''}
+                    </div>
+                    <div class="reply-content">${escapeHTML(msg.admin_reply)}</div>
+                </div>
+            `;
+        } else if (isAdmin) {
+            adminReplyHTML = `
+                <div class="admin-reply-box empty-admin-reply" id="adminReplyBox-${msg.id}">
+                    <button class="add-reply-btn" data-id="${msg.id}" data-current="">💬 ${window.cp_translate('Add Reply')}</button>
+                </div>
+            `;
+        }
+
         const msgEl = document.createElement('div');
         msgEl.className = 'message-item';
         
         msgEl.innerHTML = `
             <div class="message-meta">
                 <div class="message-author-info">
-                    <span class="message-author ${isMsgAdmin ? 'admin' : ''}">${escapeHTML(msg.author_name || window.cp_translate('Anonymous'))}</span>
+                    <div>
+                        <span class="message-author ${isMsgAdmin ? 'admin' : ''}">${escapeHTML(msg.author_name || window.cp_translate('Anonymous'))}</span>
+                        ${statusBadgeHTML}
+                    </div>
                     <span class="message-time">${postDate}</span>
                 </div>
                 <div class="message-actions">
@@ -192,6 +405,10 @@ function renderMessages(messages) {
                 </div>
             </div>
             <div class="message-content">${escapeHTML(msg.content)}</div>
+            
+            ${photosGridHTML}
+            ${videosListHTML}
+            ${adminReplyHTML}
             
             <!-- Message Footer with Votes -->
             <div class="message-footer">
@@ -207,6 +424,40 @@ function renderMessages(messages) {
                 </div>
             </div>
         `;
+
+        // 5. Admin Status Toggle Binding
+        if (isAdmin) {
+            const toggleBtn = msgEl.querySelector('.status-badge.admin-toggle');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', async () => {
+                    const mId = toggleBtn.getAttribute('data-id');
+                    const curStatus = toggleBtn.getAttribute('data-status');
+                    const nextStatus = curStatus === 'resolved' ? 'unresolved' : 'resolved';
+                    await handleToggleBugStatus(mId, nextStatus);
+                });
+            }
+
+            const commentBtns = msgEl.querySelectorAll('.add-reply-btn, .edit-reply-btn');
+            commentBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const mId = btn.getAttribute('data-id');
+                    const curText = btn.getAttribute('data-current') || '';
+                    const box = document.getElementById(`adminReplyBox-${mId}`);
+                    if (box) {
+                        showAdminReplyEditor(mId, curText, box);
+                    }
+                });
+            });
+        }
+
+        // 6. Lightbox Zoom Binding
+        const zoomImages = msgEl.querySelectorAll('.forum-zoomable-img');
+        zoomImages.forEach(img => {
+            img.addEventListener('click', () => {
+                const url = img.getAttribute('data-url');
+                openLightbox(url);
+            });
+        });
 
         // Delete action binding
         const delBtn = msgEl.querySelector('.delete-msg-btn');
@@ -226,6 +477,87 @@ function renderMessages(messages) {
 
         messagesFeed.appendChild(msgEl);
     });
+}
+
+// Admin toggle bug status
+async function handleToggleBugStatus(messageId, nextStatus) {
+    try {
+        const { error } = await supabase
+            .from('forum_messages')
+            .update({ status: nextStatus })
+            .eq('id', messageId);
+            
+        if (error) throw error;
+        await loadMessages();
+    } catch (err) {
+        console.error("Status toggle error:", err);
+        alert(window.cp_translate("Failed to update privacy settings.") + " " + err.message);
+    }
+}
+
+// Show Admin Inline Reply Editor
+function showAdminReplyEditor(messageId, currentText, container) {
+    container.innerHTML = `
+        <div class="reply-editor-wrapper">
+            <textarea class="admin-reply-textarea" placeholder="${window.cp_translate('Write admin reply...')}">${currentText}</textarea>
+            <div class="editor-buttons">
+                <button class="save-reply-btn">${window.cp_translate('Save Reply')}</button>
+                <button class="cancel-reply-btn">${window.cp_translate('Cancel')}</button>
+            </div>
+        </div>
+    `;
+    
+    container.querySelector('.cancel-reply-btn').addEventListener('click', () => {
+        loadMessages(); // Redraw whole feed to dismiss editor
+    });
+    
+    container.querySelector('.save-reply-btn').addEventListener('click', async () => {
+        const text = container.querySelector('.admin-reply-textarea').value.trim();
+        await handleSaveAdminReply(messageId, text);
+    });
+}
+
+// Save Admin Comment
+async function handleSaveAdminReply(messageId, text) {
+    try {
+        const { error } = await supabase
+            .from('forum_messages')
+            .update({ admin_reply: text || null })
+            .eq('id', messageId);
+            
+        if (error) throw error;
+        await loadMessages();
+    } catch (err) {
+        console.error("Save reply error:", err);
+        alert(window.cp_translate("Failed to send message:") + " " + err.message);
+    }
+}
+
+// Lightbox Open Handler
+function openLightbox(url) {
+    let overlay = document.getElementById('lightboxOverlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'lightboxOverlay';
+        overlay.className = 'lightbox-overlay';
+        overlay.innerHTML = `
+            <div class="lightbox-close">&times;</div>
+            <img class="lightbox-img" src="" alt="Zoomed Bug Image">
+        `;
+        document.body.appendChild(overlay);
+        
+        overlay.querySelector('.lightbox-close').addEventListener('click', () => {
+            overlay.classList.remove('active');
+        });
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.classList.remove('active');
+            }
+        });
+    }
+    const img = overlay.querySelector('.lightbox-img');
+    img.src = url;
+    overlay.classList.add('active');
 }
 
 // Voting action handler (Robust, dynamic & 409-proof!)
@@ -319,17 +651,73 @@ async function handleSendMessage() {
             userId = currentSession.user.id;
         }
 
+        // Upload media attachments first if any are selected
+        const uploadedPhotos = [];
+        const uploadedVideos = [];
+
+        if (selectedPhotos.length > 0 || selectedVideos.length > 0) {
+            submitMsgBtn.innerHTML = `<span>⏳</span> ${window.cp_translate('⏳ Sending...')} (${window.cp_translate('Uploading attachments')}...)`;
+            
+            // Upload photos to custom_tiles bucket under /forum_attachments
+            for (let i = 0; i < selectedPhotos.length; i++) {
+                const file = selectedPhotos[i];
+                const timestamp = Date.now();
+                const fileExt = file.name.split('.').pop() || 'png';
+                const uploadPath = `forum_attachments/${userId || 'anonymous'}/${timestamp}_photo_${i}.${fileExt}`;
+                
+                const { error: sError } = await supabase.storage
+                    .from('custom_tiles')
+                    .upload(uploadPath, file, { upsert: true });
+                
+                if (sError) throw sError;
+                
+                const { data: { publicUrl } } = supabase.storage
+                    .from('custom_tiles')
+                    .getPublicUrl(uploadPath);
+                
+                uploadedPhotos.push(publicUrl);
+            }
+
+            // Upload videos to custom_tiles bucket under /forum_attachments
+            for (let i = 0; i < selectedVideos.length; i++) {
+                const file = selectedVideos[i];
+                const timestamp = Date.now();
+                const fileExt = file.name.split('.').pop() || 'mp4';
+                const uploadPath = `forum_attachments/${userId || 'anonymous'}/${timestamp}_video_${i}.${fileExt}`;
+                
+                const { error: sError } = await supabase.storage
+                    .from('custom_tiles')
+                    .upload(uploadPath, file, { upsert: true });
+                
+                if (sError) throw sError;
+                
+                const { data: { publicUrl } } = supabase.storage
+                    .from('custom_tiles')
+                    .getPublicUrl(uploadPath);
+                
+                uploadedVideos.push(publicUrl);
+            }
+        }
+
         const { error } = await supabase
             .from('forum_messages')
             .insert([{
                 content: content,
                 author_name: authorName,
-                user_id: userId
+                user_id: userId,
+                photos: uploadedPhotos,
+                videos: uploadedVideos,
+                status: 'unresolved'
             }]);
 
         if (error) throw error;
 
+        // Clear input and attachments state
         forumInput.value = '';
+        selectedPhotos = [];
+        selectedVideos = [];
+        renderAttachmentPreviews();
+
         localStorage.setItem('hammer_forum_last_post', Date.now().toString());
         startCooldownTimer(FORUM_COOLDOWN_MS);
 

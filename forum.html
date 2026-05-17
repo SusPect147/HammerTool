@@ -32,13 +32,29 @@
     <!-- Forum Container -->
     <main class="forum-container">
         <div class="forum-header">
-            <h1>Community Wall</h1>
-            <p>Say hello, share feedback, or just chat with other editors.</p>
+            <h1>Bug Board</h1>
+            <p>Report bugs, suggest improvements, and discuss issues with the editor.</p>
         </div>
 
         <!-- Composer Card -->
         <div class="composer-card">
-            <textarea id="forumInput" class="composer-textarea" placeholder="Write something to the community... (HTML/Scripts are stripped)"></textarea>
+            <textarea id="forumInput" class="composer-textarea" placeholder="Describe the bug in detail... (HTML/Scripts are stripped)"></textarea>
+            
+            <!-- Attachment Control -->
+            <div class="composer-attachments-bar">
+                <button type="button" id="attachPhotoBtn" class="attach-media-btn">
+                    <span>📸</span> Attach Photo (0/5)
+                </button>
+                <button type="button" id="attachVideoBtn" class="attach-media-btn">
+                    <span>🎥</span> Attach Video (0/2)
+                </button>
+                <input type="file" id="photoFileInput" accept="image/*" multiple style="display: none;">
+                <input type="file" id="videoFileInput" accept="video/*" multiple style="display: none;">
+            </div>
+            
+            <!-- Attachment Previews -->
+            <div id="attachmentsPreview" class="attachments-preview-grid" style="display: none;"></div>
+
             <div class="composer-footer">
                 <div class="composer-options">
                     <label class="anon-toggle">
