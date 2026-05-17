@@ -42,32 +42,8 @@ export const ValidatorMixin = {
         };
 
         // Check for cardinal squeezes
-        // A horizontal pair requires that if one side is the border, the opposite block must be part of a wall (not a 1x1 island)
-        let horizontalPair = false;
-        if (this.isBlockAt(x - 1, y) && this.isBlockAt(x + 1, y)) {
-            const leftBorder = x - 1 < 0;
-            const rightBorder = x + 1 >= this.mapWidth;
-            if (leftBorder) {
-                horizontalPair = this.isBlockAt(x + 1, y - 1) || this.isBlockAt(x + 1, y + 1);
-            } else if (rightBorder) {
-                horizontalPair = this.isBlockAt(x - 1, y - 1) || this.isBlockAt(x - 1, y + 1);
-            } else {
-                horizontalPair = true;
-            }
-        }
-
-        let verticalPair = false;
-        if (this.isBlockAt(x, y - 1) && this.isBlockAt(x, y + 1)) {
-            const topBorder = y - 1 < 0;
-            const bottomBorder = y + 1 >= this.mapHeight;
-            if (topBorder) {
-                verticalPair = this.isBlockAt(x - 1, y + 1) || this.isBlockAt(x + 1, y + 1);
-            } else if (bottomBorder) {
-                verticalPair = this.isBlockAt(x - 1, y - 1) || this.isBlockAt(x + 1, y - 1);
-            } else {
-                verticalPair = true;
-            }
-        }
+        const horizontalPair = this.isBlockAt(x - 1, y) && this.isBlockAt(x + 1, y);
+        const verticalPair = this.isBlockAt(x, y - 1) && this.isBlockAt(x, y + 1);
 
         // Diagonal block corners squeezing against a flat wall or border
         const horizontalSqueezeLeft = this.isBlockAt(x - 1, y) && isRealBlockAt(x + 1, y - 1) && isRealBlockAt(x + 1, y + 1);
