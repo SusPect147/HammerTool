@@ -1025,6 +1025,7 @@ function initStudioControls() {
     const closeModal = () => modal?.classList.remove('active');
     if (closeBtn) closeBtn.onclick = closeModal;
     if (cancelBtn) cancelBtn.onclick = closeModal;
+    if (saveBtn) saveBtn.onclick = handleStudioSubmit;
 
     fileInput.onchange = (e) => {
         const file = (e.target as HTMLInputElement).files?.[0];
@@ -1178,7 +1179,7 @@ function resetStudio() {
     const nameInput = document.getElementById('packNameInput') as HTMLInputElement;
     const publicCheck = document.getElementById('packPublicCheck') as HTMLInputElement;
     if (nameInput) nameInput.value = '';
-    if (publicCheck) publicCheck.checked = true;
+    if (publicCheck) publicCheck.checked = false;
     document.getElementById('studioLoader')?.classList.remove('active');
     renderStudioPresets();
 }
