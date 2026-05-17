@@ -448,6 +448,8 @@ pc {
     justify-content: center;
     align-items: center;
     min-height: 70vh;
+    padding-right: 130px;
+    box-sizing: border-box;
 }
 
 .map-editor {
@@ -462,6 +464,8 @@ pc {
     border-radius: var(--radius-lg, 16px);
     box-shadow: 0 4px 40px rgba(0,0,0,0.6), inset 0 0 60px rgba(0,0,0,0.3);
     cursor: crosshair;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
 }
 
 .map-container {
@@ -478,24 +482,9 @@ pc {
 
 
 
-/* Ensure scrollbars are always visible */
+/* Hide scrollbar but keep functionality */
 .map-editor::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
-}
-
-.map-editor::-webkit-scrollbar-track {
-    background: var(--surface-color);
-}
-
-.map-editor::-webkit-scrollbar-thumb {
-    background-color: var(--border-color);
-    border-radius: 6px;
-    border: 3px solid var(--surface-color);
-}
-
-.map-editor::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(255,255,255,0.3);
+    display: none; /* Chrome, Safari and Opera */
 }
 
 .tool-section {
@@ -1279,6 +1268,16 @@ label[for='correctMirroringBtn'], label[for='hideZoomBtn'] {
     .map-wrapper {
         width: 100% !important;
         min-height: 65vh;
+        padding-right: 0 !important;
+    }
+
+    .scroll-navigation-lane {
+        display: none !important;
+    }
+
+    .zoom-controls-floating {
+        right: 1rem !important;
+        top: 1rem !important;
     }
 
     .map-editor {
@@ -1600,16 +1599,26 @@ label[for='correctMirroringBtn'], label[for='hideZoomBtn'] {
 .tiles-section,
 .selections-section,
 .toolbar,
-.below-map {
+.below-map,
+.zoom-controls-floating {
     opacity: var(--panel-opacity, 0.8);
-    transition: opacity 0.3s ease, box-shadow 0.3s;
+    transition: opacity 0.3s ease, box-shadow 0.3s, border-color 0.3s;
 }
 .controls-bar:hover,
 .tiles-section:hover,
 .selections-section:hover,
 .toolbar:hover,
-.below-map:hover {
+.below-map:hover,
+.zoom-controls-floating:hover {
     opacity: 1;
+}
+body.opacity-adjusting .controls-bar,
+body.opacity-adjusting .tiles-section,
+body.opacity-adjusting .selections-section,
+body.opacity-adjusting .toolbar,
+body.opacity-adjusting .below-map,
+body.opacity-adjusting .zoom-controls-floating {
+    opacity: var(--panel-opacity, 0.8) !important;
 }
 
 /* ── Draggable panels ── */
@@ -1820,6 +1829,202 @@ body.top-bar-hidden .mapmaker-container {
 }
 
 .collapse-topbar-btn:hover,
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.6rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.panel-drag-handle:active { cursor: grabbing; }
+.panel-drag-handle h3,
+.panel-drag-handle h4,
+.panel-drag-handle h5,
+.panel-drag-handle .panel-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: rgba(255,255,255,0.5);
+    margin: 0;
+}
+.panel-drag-handle::before {
+    content: '⋮⋮';
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.15);
+    margin-right: 0.5rem;
+    letter-spacing: 2px;
+}
+
+/* Reset button */
+.reset-panels-btn {
+    position: fixed;
+    bottom: 1.2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: rgba(6,6,10,0.85);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    color: rgba(255,255,255,0.4);
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 0.45rem 1rem;
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+    transition: all 0.3s;
+    font-family: 'Inter', sans-serif;
+    display: none;
+}
+.reset-panels-btn:hover {
+    color: rgba(255,255,255,0.8);
+    border-color: rgba(255,255,255,0.15);
+    background: rgba(12,12,18,0.95);
+}
+.reset-panels-btn.visible { display: block; }
+
+/* ==========================================
+   DESKTOP COLLAPSE & WORKSPACE MAXIMIZER
+   ========================================== */
+@media (min-width: 1025px) {
+    /* Make Settings Header visible on Desktop PC */
+    .controls-bar .mobile-panel-toggle {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.8rem 1.25rem;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.02);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: background 0.2s;
+    }
+    .controls-bar .mobile-panel-toggle:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+    .controls-bar .chevron-icon {
+        transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Transitions for collapsing inline height */
+    .controls-bar {
+        transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+    }
+    .controls-bar.collapsed .chevron-icon {
+        transform: rotate(-90deg);
+    }
+    .controls-bar.collapsed .controls-content {
+        max-height: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none;
+        overflow: hidden;
+    }
+
+    /* TUCK COLLAPSED INFO COMPACTLY INTO CORNER & ENABLE DRAGGING VISUALS */
+    .controls-bar.collapsed {
+        position: fixed;
+        top: calc(56px + 1rem); /* Dynamic base top */
+        left: calc(50% - 110px); /* Mathematically centered! */
+        width: 220px;
+        z-index: 999;
+        border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.7);
+        background: color-mix(in srgb, var(--bg-elevated, #0f0f17) 95%, transparent);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        transition: none; /* Force instantaneous positional changes while dragging! */
+    }
+    
+    .controls-bar.collapsed .mobile-panel-toggle {
+        cursor: grab !important;
+        user-select: none;
+    }
+    .controls-bar.collapsed .mobile-panel-toggle:active {
+        cursor: grabbing !important;
+    }
+
+    /* Expand Map Containers to fully utilize stretched heights */
+    .center-panel {
+        align-items: stretch !important;
+        transition: min-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .map-wrapper {
+        min-height: 0 !important;
+        align-items: stretch !important;
+    }
+    .map-editor {
+        max-height: none !important;
+        min-height: 0 !important;
+        height: 100%;
+        flex-grow: 1;
+    }
+
+    /* Push workspace down to offer neat visual spacing for tools */
+    .controls-bar:not(.collapsed) {
+        margin-bottom: 1.5rem;
+    }
+
+    /* Push right panel lower so it never collides with the collapsed settings float */
+    .right-panel {
+        top: 1.5rem !important; 
+        right: 140px !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+}
+
+/* Navbar Auto-Collapse & Height-Collapse Mechanics */
+.top-bar {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.3s linear, 
+                height 0.3s ease, 
+                padding 0.3s ease, 
+                margin 0.3s ease;
+    overflow: hidden;
+    height: 56px;
+}
+body.top-bar-hidden .top-bar {
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+    height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+}
+body.top-bar-hidden .mapmaker-container {
+    min-height: 100vh;
+}
+
+.topbar-collapse-btn:hover {
+    color: #ffffff !important;
+    background: rgba(255,255,255,0.05) !important;
+}
+
+/* Centralized Topbar Controls */
+.collapse-topbar-btn,
+.restore-topbar-btn {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background: color-mix(in srgb, var(--bg-elevated, #0f0f17) 90%, transparent);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    color: rgba(255, 255, 255, 0.5);
+    padding: 0.35rem 1.5rem;
+    cursor: pointer;
+    z-index: 1010;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, color 0.2s;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.collapse-topbar-btn:hover,
 .restore-topbar-btn:hover {
     color: #ffffff;
     background: var(--bg-elevated, #0f0f17);
@@ -1844,4 +2049,150 @@ body.top-bar-hidden .restore-topbar-btn {
     opacity: 1;
     pointer-events: auto;
 }
+
+/* ── Floating Zoom controls ── */
+.zoom-controls-floating {
+    position: absolute;
+    top: 1rem;
+    right: calc(1rem + 140px);
+    z-index: 99;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: color-mix(in srgb, var(--bg-secondary) 85%, transparent);
+    backdrop-filter: blur(12px);
+    border: 1px solid color-mix(in srgb, var(--primary-color) 22%, transparent);
+    padding: 6px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    transition: opacity 0.3s ease, border-color 0.3s, box-shadow 0.3s; /* Smooth visual glow! */
+}
+
+.zoom-controls-floating:hover {
+    border-color: color-mix(in srgb, var(--primary-color) 45%, transparent);
+    box-shadow: 0 0 20px color-mix(in srgb, var(--primary-color) 15%, transparent), 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.zoom-controls-floating .panel-drag-handle {
+    width: 100%;
+    height: 12px;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2px;
+    opacity: 0.35;
+    transition: opacity 0.2s;
+}
+
+.zoom-controls-floating .panel-drag-handle:hover {
+    opacity: 0.85;
+}
+
+.zoom-controls-floating .panel-drag-handle::before {
+    content: '⋯';
+    font-weight: bold;
+    font-size: 14px;
+    letter-spacing: 1px;
+    color: var(--text-color, #fff);
+    line-height: 1;
+}
+
+.zoom-controls-floating .panel-drag-handle:active {
+    cursor: grabbing;
+}
+
+.zoom-btn-floating {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-color, rgba(255, 255, 255, 0.85));
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.zoom-btn-floating svg {
+    stroke: currentColor;
+    transition: transform 0.2s;
+}
+
+.zoom-btn-floating:hover {
+    background: color-mix(in srgb, var(--primary-color) 15%, transparent);
+    color: var(--primary-color) !important;
+}
+
+.zoom-btn-floating:hover svg {
+    transform: scale(1.15);
+}
+
+.zoom-btn-floating:active {
+    transform: scale(0.92);
+}
+
+.zoom-btn-floating.active {
+    background: var(--primary-color) !important;
+    color: var(--bg-primary, #0d1117) !important;
+    box-shadow: 0 0 10px color-mix(in srgb, var(--primary-color) 40%, transparent);
+}
+
+/* ── Dedicated Scroll Navigation Lane ── */
+.scroll-navigation-lane {
+    position: absolute;
+    right: 25px; /* Centered perfectly inside the 130px blank gutter gap */
+    top: 0;
+    bottom: 0;
+    width: 80px;
+    z-index: 5;
+    background: color-mix(in srgb, var(--bg-secondary) 25%, transparent);
+    backdrop-filter: blur(8px);
+    border: 1.5px dashed color-mix(in srgb, var(--text-color) 12%, transparent);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 6px;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: auto; /* Allow mouse hover to glow and change cursor! */
+    cursor: ns-resize; /* Professional scrolling cursor! */
+    user-select: none;
+}
+
+.scroll-navigation-lane:hover {
+    background: color-mix(in srgb, var(--bg-secondary) 45%, transparent);
+    border-color: color-mix(in srgb, var(--primary-color) 30%, transparent);
+    box-shadow: 0 0 25px color-mix(in srgb, var(--primary-color) 8%, transparent), inset 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.scroll-lane-text {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.2;
+    transition: color 0.3s;
+    color: color-mix(in srgb, var(--text-color) 25%, transparent);
+}
+
+.scroll-navigation-lane:hover .scroll-lane-text {
+    color: var(--primary-color);
+}
+
+.icon-btn.active-red {
+    background-color: rgba(255, 68, 68, 0.9) !important;
+    border-color: rgba(255, 68, 68, 0.9) !important;
+}
+
+.icon-btn.active-red img {
+    filter: brightness(0) invert(1) !important;
+}
+
 

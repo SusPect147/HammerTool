@@ -130,10 +130,20 @@ async loadEnvironmentBackgrounds() {
 
             // Handle errors by falling back to Desert environment
             this.bgDark.onerror = () => {
-                this.bgDark.src = 'Resources/Desert/BGDark.png';
+                const currentSrc = this.bgDark.getAttribute('src') || this.bgDark.src || '';
+                if (this.environment !== 'Desert' && !currentSrc.includes('Desert')) {
+                    this.bgDark.src = 'Resources/Desert/BGDark.png';
+                } else {
+                    onLoad();
+                }
             };
             this.bgLight.onerror = () => {
-                this.bgLight.src = 'Resources/Desert/BGLight.png';
+                const currentSrc = this.bgLight.getAttribute('src') || this.bgLight.src || '';
+                if (this.environment !== 'Desert' && !currentSrc.includes('Desert')) {
+                    this.bgLight.src = 'Resources/Desert/BGLight.png';
+                } else {
+                    onLoad();
+                }
             };
         });
     },
@@ -147,7 +157,7 @@ async loadTileImages() {
             const tileDefs = Object.entries(this.tileDefinitions);
             const relevantTiles = tileDefs.filter(([id, def]) => 
                 (def.img || def.getImg) &&
-                (!def.showInEnvironment || def.showInEnvironment.includes(this.environment))
+                (!def.showInEnvironment || def.showInEnvironment.includes(this.environment) || id === '45')
             );
     
             const totalImages = relevantTiles.length;
@@ -162,16 +172,22 @@ async loadTileImages() {
     
             relevantTiles.forEach(([id, def]) => {
                 let imgPath = null;
+                let envToUse = this.environment;
+                if (id === '45') {
+                    if (def.showInEnvironment && !def.showInEnvironment.includes(envToUse)) {
+                        envToUse = 'Tropical_Island';
+                    }
+                }
     
                 if (def.getImg) {
-                    const imgData = def.getImg(this.gamemode, 0, this.mapHeight, this.environment);
+                    const imgData = def.getImg(this.gamemode, 0, this.mapHeight, envToUse);
                     if (!imgData) {
                         onLoad();
                         return;
                     }
-                    imgPath = `Resources/${imgData.img.replace('${env}', this.environment)}`;
+                    imgPath = `Resources/${imgData.img.replace('${env}', envToUse)}`;
                 } else if (def.img) {
-                    imgPath = `Resources/${def.img.replace('${env}', this.environment)}`;
+                    imgPath = `Resources/${def.img.replace('${env}', envToUse)}`;
                 }
     
                 // Check if the same image was already loaded
@@ -181,14 +197,15 @@ async loadTileImages() {
                 }
     
                 const img = new Image();
-                img.parentEnvironment = this.environment; // Affix environment context to the tile image instance
+                img.parentEnvironment = envToUse; // Affix environment context to the tile image instance
                 img.onload = onLoad;
                 img.onerror = () => {
                     // Try fallback to 'Desert' environment if current fails and uses '${env}'
-                    if (this.environment !== 'Desert' && imgPath.includes(this.environment)) {
+                    const currentPath = this.tileImagePaths[id] || imgPath;
+                    if (this.environment !== 'Desert' && imgPath.includes(this.environment) && !currentPath.includes('Desert')) {
                         const fallbackPath = imgPath.replace(this.environment, 'Desert');
-                        img.src = fallbackPath;
                         this.tileImagePaths[id] = fallbackPath;
+                        img.src = fallbackPath;
                     } else {
                         onLoad();
                     }

@@ -32,12 +32,14 @@ updateCanvasSize() {
             mapContainer.style.display = 'flex';
             mapContainer.style.justifyContent = 'flex-start';
             mapContainer.style.alignItems = 'flex-start';
-            mapContainer.style.padding = `${vh}px ${vw}px`;
+            const paddingY = Math.max(300, Math.floor(vh * 0.45));
+            const paddingX = Math.max(400, Math.floor(vw * 0.50));
+            mapContainer.style.padding = `${paddingY}px ${paddingX}px`;
         } else if (mapContainer) {
             mapContainer.style.display = 'flex';
             mapContainer.style.justifyContent = 'flex-start';
             mapContainer.style.alignItems = 'flex-start';
-            mapContainer.style.padding = '600px 800px';
+            mapContainer.style.padding = '300px 400px';
         }
         this._errorsDirty = true;
     },

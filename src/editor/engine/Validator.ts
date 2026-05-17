@@ -104,6 +104,8 @@ export const ValidatorMixin = {
         const showErrorsBtn = document.getElementById('errorsBtn');
         if (showErrorsBtn) {
             showErrorsBtn.checked = this.showErrors;
+            showErrorsBtn.parentElement.classList.toggle('active', this.showErrors);
+            showErrorsBtn.parentElement.classList.toggle('active-red', this.showErrors);
         }
 
         // Clear error tiles if deactivated

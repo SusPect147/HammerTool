@@ -21,17 +21,17 @@ export const RendererMixin = {
             if (tileId === 8) {
                 tileType = "Water";
                 basePath = `Resources/${this.environment}/Water`;
-                cachePrefix = `${this.environment}/water_`;
+                cachePrefix = `${this.environment}_water_`;
             }
             else if (tileId === 69) {
                 tileType = "IceTile";
                 basePath = `Resources/Global/Special_Tiles/IceTile`;
-                cachePrefix = `global/icetile_`;
+                cachePrefix = `ice_`;
             }
             else if (tileId === 70) {
                 tileType = "SnowTile";
                 basePath = `Resources/Global/Special_Tiles/SnowTile`;
-                cachePrefix = `global/snowtile_`;
+                cachePrefix = `snow_`;
             }
 
             // Initialize the 8-bit code array
@@ -121,7 +121,12 @@ export const RendererMixin = {
                 this.tileData[tileType] ||
                 { scaleX: 1, scaleY: 1, offsetX: 0, offsetY: 0, opacity: 1, zIndex: 5 }; // default
 
-            const { scaleX, scaleY, offsetX, offsetY, opacity } = dimensions;
+            let scaleX, scaleY, offsetX, offsetY, opacity;
+            if (Array.isArray(dimensions)) {
+                [scaleX, scaleY, offsetX = 0, offsetY = 0, opacity = 1] = dimensions;
+            } else {
+                ({ scaleX = 1, scaleY = 1, offsetX = 0, offsetY = 0, opacity = 1 } = dimensions);
+            }
             const tileSize = this.tileSize;
 
             // Calculate position
@@ -205,16 +210,16 @@ export const RendererMixin = {
             }
 
         } else if (tileId === 45) {
-            // Robust check: Only try to draw BFence if allowed in this environment
+            // Safe fallback to Tropical_Island environment assets if current is unsupported
             const def = this.tileDefinitions[tileId];
-            if (!def.showInEnvironment || !def.showInEnvironment.includes(this.environment)) {
-                // Do not attempt to load or draw BFence if not supported in this environment
-                return;
+            let envToUse = this.environment;
+            if (def.showInEnvironment && !def.showInEnvironment.includes(envToUse)) {
+                envToUse = 'Tropical_Island';
             }
 
-            const imageName = this.fenceLogicHandler.getFenceImageName(x, y, this.tileGrid[this.defaultTileLayer], this.environment, false, true);
+            const imageName = this.fenceLogicHandler.getFenceImageName(x, y, this.tileGrid[this.defaultTileLayer], envToUse, false, true);
 
-            const imagePath = `Resources/${this.environment}/Fence_5v5/${imageName}.png`;
+            const imagePath = `Resources/${envToUse}/Fence_5v5/${imageName}.png`;
 
             img = this.tileImages[imagePath];
 
@@ -225,7 +230,7 @@ export const RendererMixin = {
                 img.onerror = () => {
                     console.error(`Failed to load border fence image: ${imagePath}`);
                     // Load fallback image
-                    img.src = `Resources/${this.environment}/Fence_5v5/BFence.png`;
+                    img.src = `Resources/${envToUse}/Fence_5v5/BFence.png`;
                 };
                 this.tileImages[imagePath] = img;
             }
@@ -345,7 +350,14 @@ export const RendererMixin = {
             const isBorder = tileId === 45;
             const isTrain = [73, 74, 75].includes(tileId);
             if (isFence || isRope || isBorder) {
-                const imageName = this.fenceLogicHandler.getFenceImageName(x, y, this.tileGrid[this.defaultTileLayer], this.environment, isFence, isBorder);
+                let envToUse = this.environment;
+                if (isBorder) {
+                    const bDef = this.tileDefinitions[45];
+                    if (bDef.showInEnvironment && !bDef.showInEnvironment.includes(envToUse)) {
+                        envToUse = 'Tropical_Island';
+                    }
+                }
+                const imageName = this.fenceLogicHandler.getFenceImageName(x, y, this.tileGrid[this.defaultTileLayer], envToUse, isFence, isBorder);
                 const ropeMapping = {
                     'T': 'Post_T',
                     'R': 'Post_R',
@@ -355,11 +367,11 @@ export const RendererMixin = {
                 const finalImageName = isBorder ? imageName : isFence ? imageName : (ropeMapping[imageName] || 'Post');
 
                 // First check environment-specific data
-                dimensions = this.environmentTileData[this.environment]?.[finalImageName] ||
+                dimensions = this.environmentTileData[envToUse]?.[finalImageName] ||
                     // Then check base tile data
                     this.tileData[finalImageName] ||
                     // Fall back to base fence/rope fence in environment data
-                    this.environmentTileData[this.environment]?.[isBorder ? 'BFence' : isFence ? 'Fence' : 'Rope Fence'] ||
+                    this.environmentTileData[envToUse]?.[isBorder ? 'BFence' : isFence ? 'Fence' : 'Rope Fence'] ||
                     // Finally fall back to base tile data
                     this.tileData[isBorder ? 'BFence' : isFence ? 'Fence' : 'Rope Fence'];
             } else if (isTrain) {
@@ -372,7 +384,12 @@ export const RendererMixin = {
         }
         if (!dimensions) return;
 
-        const { scaleX, scaleY, offsetX, offsetY, opacity } = dimensions;
+        let scaleX, scaleY, offsetX, offsetY, opacity;
+        if (Array.isArray(dimensions)) {
+            [scaleX, scaleY, offsetX = 0, offsetY = 0, opacity = 1] = dimensions;
+        } else {
+            ({ scaleX = 1, scaleY = 1, offsetX = 0, offsetY = 0, opacity = 1 } = dimensions);
+        }
         const tileSize = this.tileSize;
 
         // Calculate drawing dimensions
@@ -688,15 +705,15 @@ export const RendererMixin = {
             if (this._errorsDirty) {
                 this.recalculateErrors();
             }
-            this.ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+            this.ctx.fillStyle = 'rgba(255, 0, 0, 0.45)';
+            this.ctx.strokeStyle = 'rgba(255, 0, 0, 0.9)';
+            this.ctx.lineWidth = 2.5;
             for (const tilePos of this.errorTiles) {
                 const [x, y] = tilePos.split(',').map(Number);
-                this.ctx.fillRect(
-                    x * this.tileSize + this.canvasPadding,
-                    y * this.tileSize + this.canvasPadding,
-                    this.tileSize,
-                    this.tileSize
-                );
+                const rx = x * this.tileSize + this.canvasPadding;
+                const ry = y * this.tileSize + this.canvasPadding;
+                this.ctx.fillRect(rx, ry, this.tileSize, this.tileSize);
+                this.ctx.strokeRect(rx + 1, ry + 1, this.tileSize - 2, this.tileSize - 2);
             }
         }
 
@@ -781,14 +798,19 @@ export const RendererMixin = {
             this.selectionCanvas.width = this.canvas.width;
             this.selectionCanvas.height = this.canvas.height;
             this.selectionCtx = this.selectionCanvas.getContext('2d');
+        } else if (this.selectionCanvas.width !== this.canvas.width || this.selectionCanvas.height !== this.canvas.height) {
+            this.selectionCanvas.width = this.canvas.width;
+            this.selectionCanvas.height = this.canvas.height;
         }
 
         // Clear the selection canvas
         this.selectionCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         // Selection highlight
-        const useRed = (this.isErasing || this.showErrors) && this.selectionMode !== 'select';
-        this.selectionCtx.fillStyle = useRed ? 'rgba(255, 0, 0, 0.4)' : 'rgba(255, 255, 0, 0.4)';
+        const useRed = this.isErasing && this.selectionMode !== 'select';
+        this.selectionCtx.fillStyle = useRed ? 'rgba(255, 0, 0, 0.5)' : 'rgba(255, 240, 0, 0.7)';
+        this.selectionCtx.strokeStyle = useRed ? 'rgba(255, 0, 0, 0.95)' : 'rgba(255, 240, 0, 0.95)';
+        this.selectionCtx.lineWidth = 2.5;
 
         // If still drawing, show full rectangle/area as before
         if (this.isDrawing && (this.selectionMode === 'rectangle' || this.selectionMode === 'select')) {
@@ -798,12 +820,10 @@ export const RendererMixin = {
             const endY = Math.max(this.selectionStart.y, this.selectionEnd.y);
             for (let y = startY; y <= endY; y++) {
                 for (let x = startX; x <= endX; x++) {
-                    this.selectionCtx.fillRect(
-                        x * this.tileSize + this.canvasPadding,
-                        y * this.tileSize + this.canvasPadding,
-                        this.tileSize,
-                        this.tileSize
-                    );
+                    const rx = x * this.tileSize + this.canvasPadding;
+                    const ry = y * this.tileSize + this.canvasPadding;
+                    this.selectionCtx.fillRect(rx, ry, this.tileSize, this.tileSize);
+                    this.selectionCtx.strokeRect(rx + 1, ry + 1, this.tileSize - 2, this.tileSize - 2);
                 }
             }
         } else if (this.selectionMode === 'select' && this.activeToolBrushs.length > 0) {
@@ -828,12 +848,19 @@ export const RendererMixin = {
                         const isTrain = [73, 74, 75].includes(t.id);
 
                         if ((isFence || isRope || isBorder) && this.fenceLogicHandler) {
-                            const imageName = this.fenceLogicHandler.getFenceImageName(t.x, t.y, this.tileGrid[this.defaultTileLayer], this.environment, isFence, isBorder);
+                            let envToUse = this.environment;
+                            if (isBorder) {
+                                const bDef = this.tileDefinitions[45];
+                                if (bDef.showInEnvironment && !bDef.showInEnvironment.includes(envToUse)) {
+                                    envToUse = 'Tropical_Island';
+                                }
+                            }
+                            const imageName = this.fenceLogicHandler.getFenceImageName(t.x, t.y, this.tileGrid[this.defaultTileLayer], envToUse, isFence, isBorder);
                             const ropeMapping = { 'T': 'Post_T', 'R': 'Post_R', 'TR': 'Post_TR', 'Fence': 'Post' };
                             const finalImageName = isBorder ? imageName : isFence ? imageName : (ropeMapping[imageName] || 'Post');
-                            dimensions = this.environmentTileData[this.environment]?.[finalImageName] ||
+                            dimensions = this.environmentTileData[envToUse]?.[finalImageName] ||
                                 this.tileData[finalImageName] ||
-                                this.environmentTileData[this.environment]?.[isBorder ? 'BFence' : isFence ? 'Fence' : 'Rope Fence'] ||
+                                this.environmentTileData[envToUse]?.[isBorder ? 'BFence' : isFence ? 'Fence' : 'Rope Fence'] ||
                                 this.tileData[isBorder ? 'BFence' : isFence ? 'Fence' : 'Rope Fence'];
                         } else if (isTrain && this.fenceLogicHandler) {
                             const imageName = this.fenceLogicHandler.getFenceImageName(t.x, t.y, this.tileGrid[this.defaultTileLayer], 'Train');
@@ -847,10 +874,11 @@ export const RendererMixin = {
 
                 let scaleX = 1, scaleY = 1, offsetX = 0, offsetY = 0;
                 if (dimensions) {
-                    scaleX = dimensions[0];
-                    scaleY = dimensions[1];
-                    offsetX = dimensions[2];
-                    offsetY = dimensions[3];
+                    if (Array.isArray(dimensions)) {
+                        [scaleX = 1, scaleY = 1, offsetX = 0, offsetY = 0] = dimensions;
+                    } else {
+                        ({ scaleX = 1, scaleY = 1, offsetX = 0, offsetY = 0 } = dimensions);
+                    }
                 }
 
                 const size = def?.size || 1;
@@ -884,6 +912,7 @@ export const RendererMixin = {
                 }
 
                 this.selectionCtx.fillRect(drawX, drawY, width, height);
+                this.selectionCtx.strokeRect(drawX + 1, drawY + 1, width - 2, height - 2);
             }
         } else if (this.selectionMode === 'rectangle') {
             const startX = Math.min(this.selectionStart.x, this.selectionEnd.x);
@@ -892,31 +921,25 @@ export const RendererMixin = {
             const endY = Math.max(this.selectionStart.y, this.selectionEnd.y);
             for (let y = startY; y <= endY; y++) {
                 for (let x = startX; x <= endX; x++) {
-                    this.selectionCtx.fillRect(
-                        x * this.tileSize + this.canvasPadding,
-                        y * this.tileSize + this.canvasPadding,
-                        this.tileSize,
-                        this.tileSize
-                    );
+                    const rx = x * this.tileSize + this.canvasPadding;
+                    const ry = y * this.tileSize + this.canvasPadding;
+                    this.selectionCtx.fillRect(rx, ry, this.tileSize, this.tileSize);
+                    this.selectionCtx.strokeRect(rx + 1, ry + 1, this.tileSize - 2, this.tileSize - 2);
                 }
             }
         } else if (this.selectionMode === 'line') {
             for (const tilePos of this.hoveredTiles) {
                 const [x, y] = tilePos.split(',').map(Number);
-                this.selectionCtx.fillRect(
-                    x * this.tileSize + this.canvasPadding,
-                    y * this.tileSize + this.canvasPadding,
-                    this.tileSize,
-                    this.tileSize
-                );
+                const rx = x * this.tileSize + this.canvasPadding;
+                const ry = y * this.tileSize + this.canvasPadding;
+                this.selectionCtx.fillRect(rx, ry, this.tileSize, this.tileSize);
+                this.selectionCtx.strokeRect(rx + 1, ry + 1, this.tileSize - 2, this.tileSize - 2);
             }
         } else if (this.selectionMode === 'single' || this.selectionMode === 'fill') {
-            this.selectionCtx.fillRect(
-                this.selectionEnd.x * this.tileSize + this.canvasPadding,
-                this.selectionEnd.y * this.tileSize + this.canvasPadding,
-                this.tileSize,
-                this.tileSize
-            );
+            const rx = this.selectionEnd.x * this.tileSize + this.canvasPadding;
+            const ry = this.selectionEnd.y * this.tileSize + this.canvasPadding;
+            this.selectionCtx.fillRect(rx, ry, this.tileSize, this.tileSize);
+            this.selectionCtx.strokeRect(rx + 1, ry + 1, this.tileSize - 2, this.tileSize - 2);
         }
 
         // Draw the selection overlay on top of the main canvas
@@ -1077,12 +1100,19 @@ export const RendererMixin = {
             const isBorder = tileId === 45;
             const isTrain = [73, 74, 75].includes(tileId);
             if (isFence || isRope || isBorder) {
-                const imageName = this.fenceLogicHandler.getFenceImageName(x, y, this.tileGrid[this.defaultTileLayer], this.environment, isFence, isBorder);
+                let envToUse = this.environment;
+                if (isBorder) {
+                    const bDef = this.tileDefinitions[45];
+                    if (bDef.showInEnvironment && !bDef.showInEnvironment.includes(envToUse)) {
+                        envToUse = 'Tropical_Island';
+                    }
+                }
+                const imageName = this.fenceLogicHandler.getFenceImageName(x, y, this.tileGrid[this.defaultTileLayer], envToUse, isFence, isBorder);
                 const ropeMapping = { 'T': 'Post_T', 'R': 'Post_R', 'TR': 'Post_TR', 'Fence': 'Post' };
                 const finalImageName = isBorder ? imageName : isFence ? imageName : (ropeMapping[imageName] || 'Post');
-                dimensions = this.environmentTileData[this.environment]?.[finalImageName] ||
+                dimensions = this.environmentTileData[envToUse]?.[finalImageName] ||
                     this.tileData[finalImageName] ||
-                    this.environmentTileData[this.environment]?.[isBorder ? 'BFence' : isFence ? 'Fence' : 'Rope Fence'] ||
+                    this.environmentTileData[envToUse]?.[isBorder ? 'BFence' : isFence ? 'Fence' : 'Rope Fence'] ||
                     this.tileData[isBorder ? 'BFence' : isFence ? 'Fence' : 'Rope Fence'];
             }
             else if (isTrain) {

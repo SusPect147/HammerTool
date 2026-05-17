@@ -324,6 +324,7 @@ window.cp_translate = function (key) {
             return;
         }
         window.themeCanvasColorTransformer = (colorStr, isVortex = false) => {
+            if (!isVortex) return colorStr;
             if (typeof colorStr !== 'string') return colorStr;
             const match = colorStr.match(/rgba?\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+))?\s*\)/i);
             if (match) {
@@ -530,6 +531,22 @@ function translateDOM(lang) {
 export function initializeGlobalSettings() {
     const currentTheme = localStorage.getItem('cp_app_theme') || 'space';
     const currentLang = localStorage.getItem('cp_app_lang') || 'en';
+
+    // Sync logo according to active theme
+    const syncLogo = () => {
+        const logoLink = document.querySelector('.top-bar a.logo, a.logo');
+        if (logoLink) {
+            const isLightTheme = ['crystal', 'sunset', 'breeze'].includes(currentTheme);
+            const logoSrc = isLightTheme 
+                ? './Resources/Additional/Icons/compass-white-theme.webp' 
+                : './Resources/Additional/Icons/compass-black-theme.webp';
+            logoLink.innerHTML = `<img src="${logoSrc}" alt="Compass" class="logo-img-theme">`;
+        }
+    };
+    syncLogo();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', syncLogo);
+    }
 
     // 1. Set up initial theme
     if (currentTheme !== 'space') {
@@ -859,7 +876,10 @@ function injectSettingsUI(activeTheme, activeLang) {
     // Render Dark Themes
     visualThemesHTML += `<div class="theme-subheading">🌑 ${textDarkThemes}</div><div class="theme-grid">`;
     for (let code of darkThemes) {
-        const tName = dict[APP_THEMES[code]] || APP_THEMES[code];
+        let tName = dict[APP_THEMES[code]] || APP_THEMES[code];
+        if (activeTheme === code) {
+            tName = '● ' + tName;
+        }
         const c = themeConfigs[code] || { color: '#111', border: '#999', text: '#fff', glow: 'transparent' };
         const styleBlock = `--opt-bg: ${c.color}; --opt-text: ${c.text}; --opt-accent: ${c.border}; --opt-glow: ${c.glow};`;
         visualThemesHTML += `
@@ -875,7 +895,10 @@ function injectSettingsUI(activeTheme, activeLang) {
     // Render Light Themes
     visualThemesHTML += `<div class="theme-subheading">☀️ ${textLightThemes}</div><div class="theme-grid" style="margin-bottom: 0;">`;
     for (let code of lightThemes) {
-        const tName = dict[APP_THEMES[code]] || APP_THEMES[code];
+        let tName = dict[APP_THEMES[code]] || APP_THEMES[code];
+        if (activeTheme === code) {
+            tName = '● ' + tName;
+        }
         const c = themeConfigs[code] || { color: '#111', border: '#999', text: '#fff', glow: 'transparent' };
         const styleBlock = `--opt-bg: ${c.color}; --opt-text: ${c.text}; --opt-accent: ${c.border}; --opt-glow: ${c.glow};`;
         visualThemesHTML += `
@@ -901,8 +924,8 @@ function injectSettingsUI(activeTheme, activeLang) {
 
         <div class="settings-section-title">${textLanguage}</div>
         <div class="lang-buttons">
-            <button class="lang-btn ${activeLang === 'en' ? 'active' : ''}" data-lang="en">EN</button>
-            <button class="lang-btn ${activeLang === 'ru' ? 'active' : ''}" data-lang="ru">RU</button>
+            <button class="lang-btn ${activeLang === 'en' ? 'active' : ''}" data-lang="en">${activeLang === 'en' ? '● EN' : 'EN'}</button>
+            <button class="lang-btn ${activeLang === 'ru' ? 'active' : ''}" data-lang="ru">${activeLang === 'ru' ? '● RU' : 'RU'}</button>
             <button class="lang-btn" style="opacity:0.4;" disabled title="Soon">DE</button>
             <button class="lang-btn" style="opacity:0.4;" disabled title="Soon">FR</button>
         </div>

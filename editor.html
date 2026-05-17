@@ -185,11 +185,6 @@
                             <option style="color:#ff8ce6" value="Z_BrawlClub">Brawl Club | By: Dedmos & Hakku</option>
                         </select>
                     </div>
-                    <div class="opacity-control">
-                        <label>Opacity</label>
-                        <input type="range" id="panelOpacity" class="opacity-slider" min="0.2" max="1" step="0.05"
-                            value="0.8">
-                    </div>
                 </div>
             </section>
             <div class="center-panel">
@@ -199,10 +194,35 @@
                         <div class="tiles-grid">
                             <div id="tileSelector"></div>
                         </div>
+                        <div class="opacity-control" style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; align-items: stretch; gap: 0.25rem;">
+                            <label style="font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-bottom: 0.25rem; display: block; text-align: left;">Panel Opacity</label>
+                            <input type="range" id="panelOpacity" class="opacity-slider" min="0.2" max="1" step="0.05"
+                                value="0.8">
+                        </div>
                     </section>
                 </div>
                 <section class="map-wrapper">
-                    <!-- Zoom controls moved inside .map-editor for fixed positioning -->
+                    <!-- Zoom controls placed above (.map-editor) to stay fixed relative to the workspace wrapper -->
+                    <div class="zoom-controls-floating draggable-panel" data-panel="zoom">
+                        <div class="panel-drag-handle"></div>
+                        <button id="zoomInBtn" class="zoom-btn-floating" title="Zoom In">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </button>
+                        <button id="zoomOutBtn" class="zoom-btn-floating" title="Zoom Out">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Dedicated Scroll Navigation Gutter -->
+                    <div class="scroll-navigation-lane" title="Используйте эту зону для прокрутки страницы вверх/вниз / Use this lane to scroll the page up/down">
+                        <span class="scroll-lane-text">↕ For Scrolling Down / Up ↕</span>
+                    </div>
+
                     <div class="map-editor">
                         <div class="map-container">
                             <canvas draggable="false" id="mapCanvas"></canvas>
@@ -306,11 +326,9 @@
                     <div class="visibility-toggle"
                         style="display: flex; align-items: center; gap: 1rem; margin-right: 1.5rem; flex-wrap: wrap;">
                         <label style="color: #fff; font-size: 0.8rem; cursor: pointer; user-select: none; display: flex; align-items: center; gap: 0.4rem;">
-                            <input type="checkbox" id="isPublicToggle" checked style="cursor:pointer;"> 🌍 Public
+                            <input type="checkbox" id="isPublicToggle" style="cursor:pointer;"> 🌍 Public
                         </label>
-                        <label title="Show your custom theme to others in the gallery" style="color: rgba(255,255,255,0.7); font-size: 0.75rem; cursor: pointer; user-select: none; display: flex; align-items: center; gap: 0.4rem;">
-                            <input type="checkbox" id="showThemeInGalleryToggle" checked style="cursor:pointer;"> Show Theme in Gallery
-                        </label>
+
                         <label title="Include custom theme assets when downloading the map image" style="color: rgba(255,255,255,0.7); font-size: 0.75rem; cursor: pointer; user-select: none; display: flex; align-items: center; gap: 0.4rem;">
                             <input type="checkbox" id="showThemeInDownloadToggle" checked style="cursor:pointer;"> Include Theme in PNG
                         </label>

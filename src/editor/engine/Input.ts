@@ -33,7 +33,7 @@ export const InputMixin = {
         document.querySelectorAll('input[name="selectionMode"]').forEach(radio => {
             radio.addEventListener('change', (e) => {
                 this.selectionMode = e.target.value;
-                document.getElementById('selectedAreaToolsDiv').style.display = selectBtn.checked ? 'flex' : 'none';
+                document.getElementById('selectedAreaToolsDiv').style.display = 'none';
                 document.getElementById('lastDivider').style.display = selectBtn.checked ? 'block' : 'none';
 
                 if (this.selectionMode === 'select' && this.isErasing) {
@@ -76,7 +76,7 @@ export const InputMixin = {
         if (mirrorDiagonal) mirrorDiagonal.addEventListener('change', (e) => this.mirrorDiagonal = e.target.checked);
 
         // Theme and Export setting listeners
-        const handleThemeToggle = () => {
+        const handleThemeToggle = async () => {
             const gallery = showThemeInGalleryToggle?.checked ?? true;
             const download = showThemeInDownloadToggle?.checked ?? true;
             // If EITHER is enabled, we show the theme in the editor for feedback
@@ -88,8 +88,17 @@ export const InputMixin = {
             this.tileImages = {};
             this.tileImagePaths = {};
             this.goalImageCache = {};
-            this.loadTileImages();
-            this.loadEnvironmentBackgrounds();
+            this.preloadWaterTiles(); // Add water/ice/snow preloading!
+            
+            const goalPromises = (this.goalImages && this.goalImages.length > 0)
+                ? this.goalImages.map(goal => this.preloadGoalImage(goal.name, this.environment))
+                : [];
+            
+            await Promise.all([
+                this.loadTileImages(),
+                this.loadEnvironmentBackgrounds(),
+                ...goalPromises
+            ]);
             this.draw();
         };
 
@@ -102,11 +111,20 @@ export const InputMixin = {
         // if (hideZoom) hideZoom.addEventListener('change', () => this.toggleHideZoom()); // Removed
 
         // Map setting listeners
-        mapSizeSelect.addEventListener('change', (e) => this.setSize(e.target.value));
+        mapSizeSelect.addEventListener('change', (e) => {
+            this.setSize(e.target.value);
+            this.updateSelectOptionDots();
+        });
 
 
-        gamemodeSelect.addEventListener('change', async (e) => await this.setGamemode(e.target.value));
-        environmentSelect.addEventListener('change', async (e) => await this.setEnvironment(e.target.value));
+        gamemodeSelect.addEventListener('change', async (e) => {
+            await this.setGamemode(e.target.value);
+            this.updateSelectOptionDots();
+        });
+        environmentSelect.addEventListener('change', async (e) => {
+            await this.setEnvironment(e.target.value);
+            this.updateSelectOptionDots();
+        });
 
         // Undo/Redo buttons
         document.getElementById('undoBtn').addEventListener('click', () => this.undo());
@@ -389,6 +407,26 @@ export const InputMixin = {
         this.canvas.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
         this.canvas.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: false });
         this.canvas.addEventListener('touchcancel', this.handleTouchCancel.bind(this));
+
+        this.updateSelectOptionDots();
+    },
+
+    updateSelectOptionDots() {
+        const selectIds = ['mapSize', 'gamemode', 'environment'];
+        selectIds.forEach(id => {
+            const select = document.getElementById(id);
+            if (!select) return;
+            Array.from(select.options).forEach(opt => {
+                let text = opt.textContent || '';
+                text = text.replace(/^[●•]\s*/, '');
+                
+                if (opt.value === select.value) {
+                    opt.textContent = '● ' + text;
+                } else {
+                    opt.textContent = text;
+                }
+            });
+        });
     },
 
     handleRightClick(event) {

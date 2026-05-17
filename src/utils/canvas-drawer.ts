@@ -193,17 +193,41 @@ export async function drawStaticMapPreview(mapData, size = 'regular', gamemode =
   const cachedImages = sharedResources.tiles[environment][gamemode];
   renderer.tileImages = { ...cachedImages, ...renderer.tileImages };
 
-  // Skip Brawl Ball corner tiles
-  const isBrawlBall = gamemode === 'Brawl_Ball';
+  // Skip Brawl Ball/Hockey corner tiles
+  const isBrawl = gamemode === 'Brawl_Ball' || gamemode === 'Hockey';
   const isRegular = size === 'regular';
 
   // Load goal images
   renderer.goalImages = [];
-  if (isBrawlBall && isRegular) {
-    renderer.goalImages = [
-      { name: 'goalRed', x: renderer.mapWidth / 2 - 3.5, y: 0, w: 7, h: 3.5, offsetX: 0, offsetY: -20 },
-      { name: 'goalBlue', x: renderer.mapWidth / 2 - 3.5, y: renderer.mapHeight - 5, w: 7, h: 3.5, offsetX: 0, offsetY: -10 }
-    ];
+  if (isBrawl) {
+    if (isRegular) {
+      let red = { name: 'goalRed', x: renderer.mapWidth / 2 - 3.5, y: 0, w: 7, h: 3.5, offsetX: 0, offsetY: -20 };
+      let blue = { name: 'goalBlue', x: renderer.mapWidth / 2 - 3.5, y: renderer.mapHeight - 5, w: 7, h: 3.5, offsetX: 0, offsetY: -10 };
+
+      if (environment === 'Stadium' || environment === 'Hockey' || environment === 'Z_CasinoTheme' || environment === 'Coin_Factory') {
+        red.h = 4.5;
+        red.offsetY = -40;
+        blue.h = 4.5;
+        blue.offsetY = 20;
+      } else if (environment === 'Stunt_Show') {
+        red.w = 6;
+        red.h = 2;
+        red.offsetY = 15;
+        red.offsetX = 15;
+        blue.w = 6;
+        blue.h = 2;
+        blue.offsetY = 80;
+        blue.offsetX = 15;
+      }
+      renderer.goalImages = [red, blue];
+    } else if (size === 'showdown') {
+      const middleY = Math.floor(renderer.mapHeight / 2);
+      renderer.goalImages = [
+        { name: 'goal5v5Blue', x: 11, y: middleY - 8.18, w: 3, h: 15.69, offsetX: -10, offsetY: -8 },
+        { name: 'goal5v5Red',  x: renderer.mapWidth - 14, y: middleY - 8.18, w: 3, h: 15.69, offsetX:  10, offsetY: -8 }
+      ];
+    }
+    
     await Promise.all(
       renderer.goalImages.map(goal =>
         renderer.preloadGoalImage(goal.name, environment))
@@ -246,7 +270,7 @@ export async function drawStaticMapPreview(mapData, size = 'regular', gamemode =
   const ctx = canvas.getContext('2d');
   for (const goal of renderer.goalImages) {
     const img =
-      renderer.goalImageCache[`${goal.name}_${environment}`] ||
+      renderer.goalImageCache[`${goal.name}${environment}`] ||
       renderer.goalImageCache[goal.name];
     if (!img || !img.complete) continue;
 

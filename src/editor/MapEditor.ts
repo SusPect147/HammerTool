@@ -65,7 +65,7 @@ export class MapEditor {
         this.zoomLevel = 0.775;
         this.minZoom = 0.2;
         this.maxZoom = 3;
-        this.zoomStep = 0.1;
+        this.zoomStep = 0.05;
         this.delta = 1.75;
 
         this._drawPending = false;

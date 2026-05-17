@@ -501,6 +501,11 @@ async setSize(size, changing = true) {
                 this.mapHeight = newSize.height;
                 this.resetAllLayers();
 
+                const sizeSelect = document.getElementById('mapSize');
+                if (sizeSelect) {
+                    sizeSelect.value = size;
+                }
+
                 // вЂ”вЂ”вЂ” Showdown в†” other: adjust Objective tile + data sizes вЂ”вЂ”вЂ”
                 const isShowdown = size => size === this.mapSizes.showdown;
                 const isShowdownNow = isShowdown(newSize);
@@ -608,9 +613,14 @@ async setSize(size, changing = true) {
                 e.target.value = Object.entries(this.mapSizes)
                     .find(([k, v]) => v.width === this.mapWidth && v.height === this.mapHeight)[0];
             }
+            if (typeof this.updateSelectOptionDots === 'function') this.updateSelectOptionDots();
     },
 
 async setEnvironment(environment) {
+        const envSelect = document.getElementById('environment');
+        if (envSelect) {
+            envSelect.value = environment;
+        }
         // 0. Dynamic Theme Hydration: Preload unowned custom skins from database prior to rendering
         if (typeof environment === 'string' && environment.startsWith('CUSTOM_')) {
             const packId = environment.replace('CUSTOM_', '');
@@ -644,9 +654,14 @@ async setEnvironment(environment) {
         await this.setGamemode(this.gamemode, false);
         this.initializeTileSelector();
         this.draw();
+        if (typeof this.updateSelectOptionDots === 'function') this.updateSelectOptionDots();
     },
 
 async setGamemode(gamemode, apply = true) {
+        const gmSelect = document.getElementById('gamemode');
+        if (gmSelect) {
+            gmSelect.value = gamemode;
+        }
         const previousGamemode = this.gamemode;
         this.gamemode = gamemode;
         this.goalImages = [];
@@ -800,6 +815,7 @@ async setGamemode(gamemode, apply = true) {
         this.loadTileImages();
         this.draw();
         this.toggleMirroring();
+        if (typeof this.updateSelectOptionDots === 'function') this.updateSelectOptionDots();
     },
 
 rotateSelectedTiles() {
@@ -968,13 +984,16 @@ toggleCorrectMirroring() {
 
 toggleEraseMode(state = !this.isErasing) {
         this.isErasing = state;
-        if (this.isErasing && this.viewPanActive) {
-            this.togglePanningMode(false);
+        if (this.isErasing) {
+            if (this.viewPanActive) {
+                this.togglePanningMode(false);
+            }
         }
         const eraseBtn = document.getElementById('eraseBtn');
         if (eraseBtn) {
             eraseBtn.checked = this.isErasing;
             eraseBtn.parentElement.classList.toggle('active', this.isErasing);
+            eraseBtn.parentElement.classList.toggle('active-red', this.isErasing);
         }
         
         // Keep UI synchronized: clear active tile selection in sidebars when erasing, and restore when placing
@@ -1001,8 +1020,10 @@ toggleGuides(state = !this.showGuides) {
 toggleReplaceMode() {
         this.replaceMode = !this.replaceMode;
         
-        if (this.replaceMode && this.viewPanActive) {
-            this.togglePanningMode(false);
+        if (this.replaceMode) {
+            if (this.viewPanActive) {
+                this.togglePanningMode(false);
+            }
         }
         
         // Update UI
@@ -1054,7 +1075,7 @@ togglePanningMode(forceValue) {
         }
     },
 
-handleReplace(x, y) {
+    handleReplace(x, y) {
         // Get the topmost tile at the clicked coordinates
         const topmost = this.getTopmostTileAt(x, y);
         

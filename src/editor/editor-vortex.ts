@@ -189,12 +189,4 @@
     window.addEventListener('resize', resize);
     resize();
     draw();
-
-    // Panel opacity slider handler
-    const opacitySlider = document.getElementById('panelOpacity');
-    if (opacitySlider) {
-        opacitySlider.addEventListener('input', (e) => {
-            document.documentElement.style.setProperty('--panel-opacity', e.target.value);
-        });
-    }
 })();

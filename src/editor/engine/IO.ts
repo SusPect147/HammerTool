@@ -98,7 +98,7 @@ async saveMap() {
 
             // Robust author detection matching other site modules
             const author = user.user_metadata.full_name || user.user_metadata.display_name || user.user_metadata.name || 'Anonymous';
-            const isPublic = (document.getElementById('isPublicToggle') as HTMLInputElement)?.checked ?? true;
+            const isPublic = (document.getElementById('isPublicToggle') as HTMLInputElement)?.checked ?? false;
 
             let finalEnvironment = environment;
             const galleryToggle = document.getElementById('showThemeInGalleryToggle') as HTMLInputElement;
@@ -449,8 +449,16 @@ async exportMap() {
                 this.goalImageCache = {};
 
                 this.environment = targetEnv;
-                await this.loadTileImages();
-                await this.loadEnvironmentBackgrounds();
+                const goalPromises = (this.goalImages && this.goalImages.length > 0)
+                    ? this.goalImages.map(goal => this.preloadGoalImage(goal.name, this.environment))
+                    : [];
+
+                await Promise.all([
+                    this.loadTileImages(),
+                    this.loadEnvironmentBackgrounds(),
+                    ...goalPromises
+                ]);
+                this.preloadWaterTiles(); // Preload water, ice, and snow tiles!
             }
 
             const dataUrl = await this.createMapPNG();
@@ -461,8 +469,16 @@ async exportMap() {
                 this.goalImageCache = {};
 
                 this.environment = originalEnv;
-                await this.loadTileImages();
-                await this.loadEnvironmentBackgrounds();
+                const goalPromises = (this.goalImages && this.goalImages.length > 0)
+                    ? this.goalImages.map(goal => this.preloadGoalImage(goal.name, this.environment))
+                    : [];
+
+                await Promise.all([
+                    this.loadTileImages(),
+                    this.loadEnvironmentBackgrounds(),
+                    ...goalPromises
+                ]);
+                this.preloadWaterTiles(); // Preload water, ice, and snow tiles!
             }
 
             const link = document.createElement('a');

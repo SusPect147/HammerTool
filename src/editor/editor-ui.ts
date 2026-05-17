@@ -279,4 +279,26 @@
             }
         }, true);
     }
+
+    // =============================================================
+    // 5. PANEL OPACITY SLIDER CONTROLLER
+    // =============================================================
+    const opacitySlider = document.getElementById('panelOpacity');
+    if (opacitySlider) {
+        // Initialize from current slider value
+        document.documentElement.style.setProperty('--panel-opacity', opacitySlider.value);
+
+        opacitySlider.addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--panel-opacity', e.target.value);
+            document.body.classList.add('opacity-adjusting');
+        });
+
+        const removePreviewClass = () => {
+            document.body.classList.remove('opacity-adjusting');
+        };
+
+        opacitySlider.addEventListener('change', removePreviewClass);
+        opacitySlider.addEventListener('mouseup', removePreviewClass);
+        opacitySlider.addEventListener('touchend', removePreviewClass);
+    }
 })();

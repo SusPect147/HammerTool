@@ -1601,4 +1601,14 @@ html[data-theme="breeze"] {
     }
 }
 
+.logo-img-theme {
+    height: 30px !important;
+    width: auto !important;
+    object-fit: contain !important;
+    filter: none !important;
+    opacity: 1 !important;
+    display: block !important;
+    margin: 0 !important;
+}
+
 
