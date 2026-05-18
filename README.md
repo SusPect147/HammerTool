@@ -1,7 +1,6 @@
 <div align="center">
-  <img src="Resources/Additional/Icons/Compass.webp" alt="Compass Logo" width="120"/>
+  <img src="Resources/Additional/Icons/compass-black-theme.webp" alt="Compass Logo" width="120"/>
   
-  # Compass
   
   **A next-generation Interactive Map Editor & Skin Studio.**
   
